@@ -11,13 +11,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_username", columnList = "username"),
+        @Index(name = "idx_email", columnList = "email")
+})
 @EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter
 public class UserModel {
 
     @Id
+    @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @Column(length = 100, nullable = false)
@@ -32,7 +36,6 @@ public class UserModel {
     @Column(length = 300, nullable = false)
     private String password = "";
 
-    @JsonIgnore
     @Column(length = 500)
     private String refreshToken = "";
 

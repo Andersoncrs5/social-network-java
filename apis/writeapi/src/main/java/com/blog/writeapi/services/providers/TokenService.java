@@ -34,9 +34,9 @@ public class TokenService implements ITokenService {
 
     @Value("${spring.security.jwt.secret}")
     private String secret;
-    @Value("${spring.security.jwt.exp.token}")
+    @Value("${spring.security.exp.token}")
     private int expToken;
-    @Value("${spring.security.jwt.exp.refresh}")
+    @Value("${spring.security.exp.refresh}")
     private int expRefreshToken;
 
     @Override

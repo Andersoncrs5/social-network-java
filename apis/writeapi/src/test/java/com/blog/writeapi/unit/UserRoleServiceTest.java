@@ -114,5 +114,51 @@ public class UserRoleServiceTest {
         verifyNoMoreInteractions(repository);
     }
 
+    @Test
+    void shouldReturnUserRoleWhenSearchByRoleAndUser(){
+        when(repository.findByUserAndRole(user, role)).thenReturn(Optional.of(this.userRole));
+
+        Optional<UserRoleModel> optional = this.service.getByUserAndRole(user, role);
+
+        assertThat(optional.isEmpty()).isFalse();
+        assertThat(optional.get().getId()).isEqualTo(userRole.getId());
+
+        verify(repository, times(1)).findByUserAndRole(user, role);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldReturnNullWhenSearchByRoleAndUser(){
+        when(repository.findByUserAndRole(user, role)).thenReturn(Optional.empty());
+
+        Optional<UserRoleModel> optional = this.service.getByUserAndRole(user, role);
+
+        assertThat(optional.isEmpty()).isTrue();
+
+        verify(repository, times(1)).findByUserAndRole(user, role);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldReturnTrueWhenCheckExistsRoleInUser() {
+        when(repository.existsByUserAndRole(user, role)).thenReturn(true);
+
+        Boolean exists = this.service.existsByUserAndRole(user, role);
+
+        assertThat(exists).isTrue();
+
+        verify(repository, times(1)).existsByUserAndRole(user, role);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldRemoveRoleInUser() {
+        doNothing().when(repository).delete(this.userRole);
+
+        this.service.delete(userRole);
+
+        verify(repository, times(1)).delete(this.userRole);
+        verifyNoMoreInteractions(repository);
+    }
 
 }

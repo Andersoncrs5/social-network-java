@@ -25,6 +25,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -58,6 +59,7 @@ public class TokenService implements ITokenService {
                 .issueTime(Date.from(Instant.now()))
                 .expirationTime(Date.from(this.genExpirationDate()))
                 .claim("roles", roleNames)
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);

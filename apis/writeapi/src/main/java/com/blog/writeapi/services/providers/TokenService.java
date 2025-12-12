@@ -40,6 +40,32 @@ public class TokenService implements ITokenService {
     private int expRefreshToken;
 
     @Override
+    public String generateRefreshToken(UserModel user) {
+        if (secret.isBlank()) throw new RuntimeException();
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .claim("userId", user.getId())
+                .issueTime(Date.from(Instant.now()))
+                .expirationTime(Date.from(this.genExpirationDateRefreshToken()))
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+        SignedJWT signedJWT = new SignedJWT(header, jwtClaimsSet);
+
+        try {
+            signedJWT.sign(new MACSigner(secret.getBytes()));
+            return signedJWT.serialize();
+        } catch (KeyLengthException e) {
+            log.error("Error the assign refresh token! Error: {}", e.getMessage());
+            throw new RuntimeException(e);
+        } catch (JOSEException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao assinar o refresh token.");
+        }
+    }
+
+    @Override
     public String generateToken(UserModel user, List<RoleModel> roles) {
         if (secret.isBlank()) {
             log.error("Error! The secret is null! in class TokenService");

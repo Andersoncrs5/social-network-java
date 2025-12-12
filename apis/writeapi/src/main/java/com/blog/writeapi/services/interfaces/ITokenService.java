@@ -10,6 +10,7 @@ import java.util.Map;
 public interface ITokenService {
     String generateToken(UserModel user, List<RoleModel> roles);
     String validateToken(String token);
+    String generateRefreshToken(UserModel user);
     Map<String, Object> extractAllClaims(String token);
     String extractSubjectFromRequest(HttpServletRequest request);
     String extractUserIdFromRequest(HttpServletRequest request);

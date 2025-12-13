@@ -25,8 +25,4 @@ public class UserMapper {
         mapper.map(dto, target);
     }
 
-    public void merge(CreateUserDTO dto, UserModel target) {
-        mapper.map(dto, target);
-    }
-
 }

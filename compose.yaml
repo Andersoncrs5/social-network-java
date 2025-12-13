@@ -1,0 +1,48 @@
+services:
+
+  pd:
+    image: pingcap/pd:latest
+    container_name: pd
+    command:
+      - --name=pd1
+      - --client-urls=http://0.0.0.0:2379
+      - --peer-urls=http://0.0.0.0:2380
+      - --advertise-client-urls=http://pd:2379
+      - --advertise-peer-urls=http://pd:2380
+      - --initial-cluster=pd1=http://pd:2380
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    networks:
+      - blog_java_net
+
+  tikv:
+    image: pingcap/tikv:latest
+    container_name: tikv
+    command:
+      - --pd=pd:2379
+      - --addr=0.0.0.0:20160
+      - --advertise-addr=tikv:20160
+    ports:
+      - "20160:20160"
+    depends_on:
+      - pd
+    networks:
+      - blog_java_net
+
+  tidb-server:
+    image: pingcap/tidb:latest
+    container_name: tidb-server
+    command:
+      - --store=tikv
+      - --path=pd:2379
+    ports:
+      - "4000:4000"
+    depends_on:
+      - tikv
+    networks:
+      - blog_java_net
+
+networks:
+  blog_java_net:
+    driver: bridge

@@ -2,6 +2,7 @@ package com.blog.writeapi;
 
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.dtos.user.CreateUserDTO;
+import com.blog.writeapi.dtos.user.UserDTO;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.res.ResponseUserTest;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,9 +58,20 @@ public class HelperTest {
             assertThat(response.data().token()).isNotBlank();
             assertThat(response.data().refreshToken()).isNotBlank();
 
+            MvcResult resultGet = mockMvc.perform(get("/v1/user/me")
+                            .header("Authorization", "Bearer " + response.data().token()))
+                    .andExpect(status().isOk()).andReturn();
+
+            String json = resultGet.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<UserDTO>> typeRefGet = new TypeReference<>() {};
+
+            ResponseHttp<UserDTO> responseGet =
+                    objectMapper.readValue(json, typeRefGet);
+
             return new ResponseUserTest(
                     response.data(),
-                    dto
+                    dto,
+                    responseGet.data()
             );
         } catch (Exception e) {
             throw new RuntimeException(e);

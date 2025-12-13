@@ -100,5 +100,29 @@ public class UserServiceTest {
         verifyNoMoreInteractions(repository);
     }
 
+    @Test
+    void shouldReturnUserWhenGetByEmail() {
+        when(repository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        Optional<UserModel> optional = this.service.findByEmail(user.getEmail());
+
+        assertThat(optional.isPresent()).isTrue();
+        assertThat(optional.get().getId()).isEqualTo(user.getId());
+
+        verify(this.repository, times(1)).findByEmail(user.getEmail());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldReturnNullWhenGetByEmail() {
+        when(repository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        Optional<UserModel> optional = this.service.findByEmail(user.getEmail());
+
+        assertThat(optional.isEmpty()).isTrue();
+
+        verify(this.repository, times(1)).findByEmail(user.getEmail());
+        verifyNoMoreInteractions(repository);
+    }
 
 }

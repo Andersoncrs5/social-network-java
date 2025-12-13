@@ -27,12 +27,13 @@ public class RoleServiceTest {
 
     @InjectMocks private RoleService service;
 
-    RoleModel role = new RoleModel();
-
-    @BeforeEach
-    void setup() {
-
-    }
+    RoleModel role = new RoleModel().toBuilder()
+            .id(1998780200074176609L)
+            .name("USER_ROLE")
+            .isActive(true)
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
 
     @Test
     void shouldReturnRoleWhenFindRoleByName() {
@@ -163,5 +164,4 @@ public class RoleServiceTest {
         verifyNoMoreInteractions(repository);
         verifyNoMoreInteractions(generator);
     }
-
 }

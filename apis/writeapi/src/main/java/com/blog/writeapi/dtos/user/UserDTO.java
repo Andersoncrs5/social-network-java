@@ -7,7 +7,6 @@ public record UserDTO(
         String name,
         String username,
         String email,
-        LocalDateTime createdAt,
-        LocalDateTime loginBlockAt
+        LocalDateTime createdAt
 ) {
 }

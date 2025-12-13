@@ -10,8 +10,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -24,9 +22,5 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void merge(UpdateUserDTO dto, @MappingTarget UserModel target);
-
-    default String mapOptionalString(Optional<String> optional) {
-        return optional.isPresent() ? optional.orElse(null) : null;
-    }
 
 }

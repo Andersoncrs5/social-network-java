@@ -48,12 +48,7 @@ public class UserService implements IUserService {
 
     @Override
     public UserModel Create(CreateUserDTO dto) {
-        UserModel user = new UserModel();
-
-        user.setName(dto.name());
-        user.setUsername(dto.username());
-        user.setEmail(dto.email());
-        user.setPassword(dto.password());
+        UserModel user = mapper.toModel(dto);
 
         user.setId(snowflakeIdGenerator.nextId());
         user.setPassword(encoder.encode(user.getPassword()));

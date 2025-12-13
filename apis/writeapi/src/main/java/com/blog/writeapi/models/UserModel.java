@@ -17,6 +17,7 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter
+@ToString
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,7 +51,7 @@ public class UserModel {
     @Column
     private LocalDateTime loginBlockAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserRoleModel> roles;
 
 

@@ -63,7 +63,7 @@ public class SuperAdmInitializr implements CommandLineRunner {
     }
 
     public void fallbackCreateCategory(String[] args, Exception e) {
-        log.error("Todas as tentativas de criar categoria falharam: {}", e.getMessage());
+        log.error("All attempts to create a category have failed.: {}", e.getMessage());
     }
 
 }

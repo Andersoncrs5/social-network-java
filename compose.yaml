@@ -52,8 +52,11 @@ services:
     ports:
       - "6379:6379" 
     volumes:
-      - dragonflydata:/data
+      - dragonfly_data:/data
 
 networks:
   blog_java_net:
     driver: bridge
+
+volumes:
+    dragonfly_data: {}

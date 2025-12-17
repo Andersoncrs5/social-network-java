@@ -11,6 +11,7 @@ public interface ICategoryService {
     Boolean existsById(Long id);
     void delete(CategoryModel category);
     CategoryModel create(CreateCategoryDTO dto);
+    CategoryModel create(CreateCategoryDTO dto, CategoryModel categoryModel);
     Optional<CategoryModel> getByName(String name);
     Boolean existsByName(String name);
     Optional<CategoryModel> getBySlug(String slug);

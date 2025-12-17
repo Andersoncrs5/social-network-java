@@ -44,10 +44,24 @@ public class CategoryService implements ICategoryService {
     @Override
     public Boolean existsBySlug(String slug) { return repository.existsBySlug(slug); }
 
+    /**
+     * @deprecated Use {@link #create(CreateCategoryDTO, CategoryModel)} instead.
+     * This method will be removed in the upcoming version due to misconfiguration.
+     */
     @Override
+    @Deprecated()
     public CategoryModel create(CreateCategoryDTO dto) {
         CategoryModel category = this.mapper.toModel(dto);
         category.setId(generator.nextId());
+
+        return this.repository.save(category);
+    }
+
+    @Override
+    public CategoryModel create(CreateCategoryDTO dto, CategoryModel categoryModel) {
+        CategoryModel category = this.mapper.toModel(dto);
+        category.setId(generator.nextId());
+        category.setParent(categoryModel);
 
         return this.repository.save(category);
     }

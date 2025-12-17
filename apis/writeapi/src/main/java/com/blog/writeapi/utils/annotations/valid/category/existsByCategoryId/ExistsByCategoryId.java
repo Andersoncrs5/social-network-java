@@ -1,6 +1,5 @@
 package com.blog.writeapi.utils.annotations.valid.category.existsByCategoryId;
 
-import com.blog.writeapi.utils.annotations.valid.category.uniqueName.UniqueCategoryNameValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

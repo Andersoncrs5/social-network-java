@@ -1,6 +1,5 @@
 package com.blog.writeapi.dtos.category;
 
-import com.blog.writeapi.utils.annotations.valid.category.existsByCategoryId.ExistsByCategoryId;
 import com.blog.writeapi.utils.annotations.valid.category.uniqueName.UniqueCategoryName;
 import com.blog.writeapi.utils.annotations.valid.category.uniqueSlug.UniqueCategorySlug;
 import com.blog.writeapi.utils.annotations.valid.global.StringClear.StringClear;
@@ -36,7 +35,6 @@ public record CreateCategoryDTO(
         @PositiveOrZero(message = "Display order must be zero or a positive number.")
         Integer displayOrder,
 
-        @ExistsByCategoryId
         Long parentId
 ) {
 }

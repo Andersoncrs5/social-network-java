@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -47,26 +47,12 @@ public class CategoryControllerTest {
         this.repository.deleteAll();
     }
 
+    // CREATE ENDPOINT
     @Test
     void shouldCreateCategoryOnCategory() throws Exception {
         ResponseUserTest userData = helper.loginSuperAdm();
         CategoryDTO category = this.helper.createCategory(userData, null);
-        Random random = new Random();
-
-        char letter = (char) ('a' + random.nextInt(26));
-        char letter2 = (char) ('a' + random.nextInt(26));
-        char letter3 = (char) ('a' + random.nextInt(26));
-        char letter4 = (char) ('a' + random.nextInt(26));
-
-        CreateCategoryDTO dto = new CreateCategoryDTO(
-            "software engineer " + letter + letter2 + letter3 + letter4,
-                "",
-                "software-engineer-" + letter + letter2 + letter3 + letter4,
-                true,
-                true,
-                0,
-                category.id()
-        );
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
 
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -161,6 +147,267 @@ public class CategoryControllerTest {
                         ))
                 .andExpect(status().isForbidden());
 
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenTryCreateCategoryOnCategory() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CreateCategoryDTO dto = getCreateCategoryDTO(1L);
+
+        MvcResult result = this.mockMvc.perform(post(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+    }
+
+    // GET ENDPOINT
+    @Test
+    void shouldGetCategory() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + category.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+
+    }
+
+    @Test
+    void shouldReturnNullGetCategory() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    @Test
+    void shouldReturnBadRequestGetCategoryWhenPassZero() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + 0)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    @Test
+    void shouldReturnBadRequestGetCategoryWhenPassNumberNegative() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + -1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    // DELETE ENDPOINT
+    @Test
+    void shouldDeleteCategory() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + category.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data()).isNull();
+    }
+
+    @Test
+    void shouldReturnNullDeleteCategory() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    @Test
+    void shouldReturnBadRequestDeleteCategoryWhenPassZero() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + 0)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    @Test
+    void shouldReturnBadRequestDeleteCategoryWhenPassNumberNegative() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+        CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
+
+        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + -1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.data()).isNull();
+
+    }
+
+    private static CreateCategoryDTO getCreateCategoryDTO(long parentId) {
+        Random random = new Random();
+
+        char letter = (char) ('a' + random.nextInt(26));
+        char letter2 = (char) ('a' + random.nextInt(26));
+        char letter3 = (char) ('a' + random.nextInt(26));
+        char letter4 = (char) ('a' + random.nextInt(26));
+        char letter5 = (char) ('a' + random.nextInt(26));
+        char letter6 = (char) ('a' + random.nextInt(26));
+        char letter7 = (char) ('a' + random.nextInt(26));
+
+        return new CreateCategoryDTO(
+                "software engineer " + letter + letter2 + letter3 + letter4 + letter5 + letter6 + letter7,
+                "",
+                "software-engineer-" + letter + letter2 + letter3 + letter4 + letter5 + letter6 + letter7,
+                true,
+                true,
+                0,
+                parentId
+        );
     }
 
 }

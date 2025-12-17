@@ -16,6 +16,6 @@ public class ExistsByCategoryIdValidator implements ConstraintValidator<ExistsBy
     public boolean isValid(Long s, ConstraintValidatorContext constraintValidatorContext) {
         if (s == null || s <= 0) return true;
 
-        return !this.repository.existsById(s);
+        return this.repository.existsById(s);
     }
 }

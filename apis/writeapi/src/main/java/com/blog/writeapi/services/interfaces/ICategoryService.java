@@ -17,4 +17,5 @@ public interface ICategoryService {
     Optional<CategoryModel> getBySlug(String slug);
     Boolean existsBySlug(String slug);
     CategoryModel update(UpdateCategoryDTO dto, CategoryModel category);
+    CategoryModel update(UpdateCategoryDTO dto, CategoryModel category, CategoryModel parent);
 }

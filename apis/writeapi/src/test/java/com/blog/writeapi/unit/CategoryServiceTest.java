@@ -253,12 +253,15 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
 
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
+                1L,
                 "Inovação",
                 "Nova Descrição",
                 "inovacao-slug",
                 false,
                 false,
-                10
+                10,
+                null,
+                null
         );
 
         doAnswer(invocation -> {
@@ -289,7 +292,10 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
 
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
+                1L,
                 "Design UX/UI",
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -320,7 +326,10 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
                 null,
+                null,
                 "Descrição detalhada do tema",
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -350,7 +359,10 @@ public class CategoryServiceTest {
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
                 null,
                 null,
+                null,
                 "novo-slug-unico",
+                null,
+                null,
                 null,
                 null,
                 null
@@ -376,7 +388,7 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
 
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
-                null, null, null, false, null, null
+                null, null, null, null, false, null, null, null, null
         );
 
         doAnswer(invocation -> {
@@ -399,7 +411,7 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
 
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
-                null, null, null, null, null, 99
+                null, null, null, null, null, null, 99, null, null
         );
 
         doAnswer(invocation -> {
@@ -422,7 +434,7 @@ public class CategoryServiceTest {
         CategoryModel categoryToUpdate = category.toBuilder().build();
 
         UpdateCategoryDTO updateDTO = new UpdateCategoryDTO(
-                null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null
         );
 
         when(repository.save(eq(categoryToUpdate))).thenReturn(categoryToUpdate);

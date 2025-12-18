@@ -3,11 +3,10 @@ package com.blog.writeapi.integration;
 import com.blog.writeapi.HelperTest;
 import com.blog.writeapi.dtos.category.CategoryDTO;
 import com.blog.writeapi.dtos.category.CreateCategoryDTO;
-import com.blog.writeapi.dtos.user.UserDTO;
+import com.blog.writeapi.dtos.category.UpdateCategoryDTO;
 import com.blog.writeapi.repositories.CategoryRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -386,6 +385,349 @@ public class CategoryControllerTest {
         assertThat(response.status()).isEqualTo(false);
         assertThat(response.data()).isNull();
 
+    }
+
+    // UPDATE ENDPOINT
+    @Test
+    void shouldUpdateCategoryAllFields() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                category.name() + " update",
+                category.description() + " update",
+                category.slug() + "-update",
+                !category.isActive(),
+                !category.visible(),
+                1,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(dto.name());
+        assertThat(response.data().description()).isEqualTo(dto.description());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().isActive()).isEqualTo(dto.isActive());
+        assertThat(response.data().visible()).isEqualTo(dto.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(dto.displayOrder());
+    }
+
+    @Test
+    void shouldUpdateCategoryNoFields() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustName() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                category.name() + " update",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(dto.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustDescription() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                "desc update",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(dto.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustSlug() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                null,
+                "abd-xyz",
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustIsActive() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                null,
+                null,
+                !category.isActive(),
+                null,
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(dto.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustVisible() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                null,
+                null,
+                null,
+                !category.visible(),
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(dto.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(category.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldUpdateCategoryButUpdateJustDisplayOrder() throws Exception {
+        ResponseUserTest userData = helper.loginSuperAdm();
+        CategoryDTO category = this.helper.createCategory(userData, null);
+
+        UpdateCategoryDTO dto = new UpdateCategoryDTO(
+                category.id(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                99,
+                null,
+                null
+        );
+
+        MvcResult result = this.mockMvc.perform(patch(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CategoryDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CategoryDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isEqualTo(category.id());
+        assertThat(response.data().name()).isEqualTo(category.name());
+        assertThat(response.data().description()).isEqualTo(category.description());
+        assertThat(response.data().slug()).isEqualTo(category.slug());
+        assertThat(response.data().isActive()).isEqualTo(category.isActive());
+        assertThat(response.data().visible()).isEqualTo(category.visible());
+        assertThat(response.data().displayOrder()).isEqualTo(dto.displayOrder());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(category.createdAt().getSecond());
     }
 
     private static CreateCategoryDTO getCreateCategoryDTO(long parentId) {

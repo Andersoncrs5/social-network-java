@@ -123,7 +123,7 @@ public class CategoryController implements CategoryControllerDocs {
             HttpServletRequest request
     ) {
 
-        CategoryModel current = this.service.getById(dto.id()).orElse(null);
+        CategoryModel current = this.service.findByIdForUpdate(dto.id()).orElse(null);
         if (current == null) {
             return buildErrorResponse("Category to update not found");
         }

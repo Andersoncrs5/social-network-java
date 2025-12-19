@@ -21,7 +21,10 @@ public class GlobalExceptionHandler {
 
         String message = ex.getConstraintViolations()
                 .stream()
-                .map(ConstraintViolation::getMessage)
+                .map(violation -> {
+                    String property = violation.getPropertyPath().toString();
+                    return property + ": " + violation.getMessage();
+                })
                 .collect(Collectors.joining(" | "));
 
         ResponseHttp<Object> res = new ResponseHttp<>(

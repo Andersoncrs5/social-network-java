@@ -23,10 +23,10 @@ public class TagModel {
     @Id
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 70)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 60)
+    @Column(nullable = false, unique = true, length = 80)
     private String slug;
 
     @Column(length = 200)
@@ -50,7 +50,7 @@ public class TagModel {
     @Column(name = "last_used_at")
     private OffsetDateTime lastUsedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
     @Column(nullable = false)

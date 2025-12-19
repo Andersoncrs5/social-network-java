@@ -41,7 +41,7 @@ public class TagModel {
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem = false;
 
-    @Column(name = "posts_count", nullable = false)
+    @Column(name = "posts_count", nullable = false, columnDefinition = "BIGINT UNSIGNED DEFAULT 0")
     private Long postsCount = 0L;
 
     @Version

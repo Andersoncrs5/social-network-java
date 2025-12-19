@@ -8,9 +8,11 @@ import com.blog.writeapi.models.CategoryModel;
 import com.blog.writeapi.repositories.CategoryRepository;
 import com.blog.writeapi.services.interfaces.ICategoryService;
 import com.blog.writeapi.utils.mappers.CategoryMapper;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -25,6 +27,9 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public Optional<CategoryModel> getById(Long id) { return this.repository.findById(id); }
+
+    @Override
+    public Optional<CategoryModel> findByIdForUpdate(Long id) { return this.repository.findByIdForUpdate(id); }
 
     @Override
     public Boolean existsById(Long id) { return repository.existsById(id); }
@@ -67,6 +72,8 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
+    @Retry(name = "update-retry")
+    @Transactional
     public CategoryModel update(UpdateCategoryDTO dto, CategoryModel category) {
         mapper.merge(dto, category);
 
@@ -74,6 +81,8 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
+    @Retry(name = "update-retry")
+    @Transactional
     public CategoryModel update(UpdateCategoryDTO dto, CategoryModel category, CategoryModel parent) {
         mapper.merge(dto, category);
 

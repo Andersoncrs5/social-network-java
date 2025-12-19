@@ -9,6 +9,11 @@ resilience4j:
         waitDuration: 5s
         retryExceptions:
           - org.springframework.dao.DataAccessException
+      update-retry:
+        maxAttempts: 4
+        waitDuration: 5s
+        retryExceptions:
+          - org.springframework.dao.DataAccessException
 
 spring:
   datasource:

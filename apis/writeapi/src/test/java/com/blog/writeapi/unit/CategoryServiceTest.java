@@ -71,6 +71,31 @@ public class CategoryServiceTest {
     }
 
     @Test
+    void shouldGetCategoryByIdWithLock() {
+        when(repository.findByIdForUpdate(category.getId())).thenReturn(Optional.of(this.category));
+
+        Optional<CategoryModel> optional = this.service.findByIdForUpdate(category.getId());
+
+        assertThat(optional.isPresent()).isTrue();
+        assertThat(optional.get()).isEqualTo(category);
+
+        verify(repository, times(1)).findByIdForUpdate(category.getId());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldReturnNullWhenGetCategoryByIdWithLock() {
+        when(repository.findByIdForUpdate(category.getId())).thenReturn(Optional.empty());
+
+        Optional<CategoryModel> optional = this.service.findByIdForUpdate(category.getId());
+
+        assertThat(optional.isEmpty()).isTrue();
+
+        verify(repository, times(1)).findByIdForUpdate(category.getId());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
     void shouldDeleteCategory() {
         doNothing().when(repository).delete(this.category);
 

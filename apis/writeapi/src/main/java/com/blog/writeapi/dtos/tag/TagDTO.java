@@ -11,6 +11,7 @@ public record TagDTO(
         Boolean isVisible,
         Boolean isSystem,
         Long postsCount,
+        Long version,
         OffsetDateTime lastUsedAt,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt

@@ -10,6 +10,7 @@ public record CategoryDTO(
         Boolean isActive,
         Boolean visible,
         Integer displayOrder,
+        Long version,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

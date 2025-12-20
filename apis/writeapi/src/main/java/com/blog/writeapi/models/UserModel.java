@@ -1,12 +1,11 @@
 package com.blog.writeapi.models;
 
+import com.blog.writeapi.utils.bases.models.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -19,14 +18,10 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserModel {
-
-    @Id
-    @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
-    private Long id;
+public class UserModel extends BaseEntity {
 
     @Column(length = 100, nullable = false)
     private String name;
@@ -42,15 +37,6 @@ public class UserModel {
 
     @Column(length = 500)
     private String refreshToken = "";
-
-    @Version
-    private Long version;
-
-    @CreatedDate
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    private OffsetDateTime updatedAt;
 
     @Column
     private OffsetDateTime loginBlockAt;

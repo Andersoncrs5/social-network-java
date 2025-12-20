@@ -2,6 +2,9 @@ package com.blog.writeapi.models;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
 
@@ -18,6 +21,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode
+@EntityListeners(AuditingEntityListener.class)
 public class TagModel {
 
     @Id
@@ -50,9 +54,11 @@ public class TagModel {
     @Column(name = "last_used_at")
     private OffsetDateTime lastUsedAt;
 
+    @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
+    @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
 

@@ -7,6 +7,10 @@ import com.blog.writeapi.models.UserModel;
 import org.mapstruct.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 @Service
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -21,4 +25,11 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateUserDTO dto, @MappingTarget UserModel target);
 
+    default OffsetDateTime map(LocalDateTime dateTime) {
+        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
+    }
+
+    default LocalDateTime map(OffsetDateTime offsetDateTime) {
+        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
+    }
 }

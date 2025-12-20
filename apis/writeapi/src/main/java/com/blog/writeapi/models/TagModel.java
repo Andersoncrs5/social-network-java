@@ -45,7 +45,8 @@ public class TagModel {
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem = false;
 
-    @Column(name = "posts_count", nullable = false, columnDefinition = "BIGINT UNSIGNED DEFAULT 0")
+    @Builder.Default
+    @Column(name = "posts_count", columnDefinition = "BIGINT UNSIGNED")
     private Long postsCount = 0L;
 
     @Version

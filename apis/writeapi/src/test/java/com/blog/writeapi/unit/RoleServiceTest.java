@@ -4,15 +4,13 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.models.RoleModel;
 import com.blog.writeapi.repositories.RoleRepository;
 import com.blog.writeapi.services.providers.RoleService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.management.relation.Role;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,8 +29,8 @@ public class RoleServiceTest {
             .id(1998780200074176609L)
             .name("USER_ROLE")
             .isActive(true)
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
             .build();
 
     @Test

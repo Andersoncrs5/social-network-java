@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -46,13 +47,13 @@ public class UserModel {
     private Long version;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
 
     @Column
-    private LocalDateTime loginBlockAt;
+    private OffsetDateTime loginBlockAt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserRoleModel> roles;

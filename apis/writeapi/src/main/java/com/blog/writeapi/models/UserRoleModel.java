@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "user_roles", indexes = {
@@ -34,6 +35,6 @@ public class UserRoleModel {
     private RoleModel role;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
 }

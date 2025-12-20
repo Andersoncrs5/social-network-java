@@ -1,7 +1,6 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.user.CreateUserDTO;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.UserRepository;
 import com.blog.writeapi.services.providers.UserService;
@@ -24,7 +23,7 @@ public class UserServiceTest {
 
     @Mock private UserRepository repository;
     @Mock private Argon2PasswordEncoder encoder;
-    @Mock private Snowflake snowflakeIdGenerator;;
+    @Mock private Snowflake snowflakeIdGenerator;
     @Mock private Mapper mapper;
 
     @InjectMocks private UserService service;

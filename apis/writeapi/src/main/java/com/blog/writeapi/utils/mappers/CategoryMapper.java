@@ -6,6 +6,10 @@ import com.blog.writeapi.dtos.category.UpdateCategoryDTO;
 import com.blog.writeapi.models.CategoryModel;
 import org.mapstruct.*;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
@@ -20,4 +24,12 @@ public interface CategoryMapper {
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateCategoryDTO dto, @MappingTarget CategoryModel category);
+
+    default OffsetDateTime map(LocalDateTime dateTime) {
+        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
+    }
+
+    default LocalDateTime map(OffsetDateTime offsetDateTime) {
+        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
+    }
 }

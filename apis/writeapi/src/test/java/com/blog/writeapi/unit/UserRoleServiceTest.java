@@ -6,14 +6,13 @@ import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.models.UserRoleModel;
 import com.blog.writeapi.repositories.UserRoleRepository;
 import com.blog.writeapi.services.providers.UserRoleService;
-import com.blog.writeapi.services.providers.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,14 +36,14 @@ public class UserRoleServiceTest {
     RoleModel role = new RoleModel().toBuilder()
             .id(1998780200074136609L)
             .name("USER")
-            .createdAt(LocalDateTime.now())
+            .createdAt(OffsetDateTime.now())
             .build();
 
     UserRoleModel userRole = new UserRoleModel().toBuilder()
             .id(1998780200074676609L)
             .role(role)
             .user(user)
-            .createdAt(LocalDateTime.now())
+            .createdAt(OffsetDateTime.now())
             .build();
 
     @Test

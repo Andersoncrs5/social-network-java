@@ -16,6 +16,7 @@ public interface TagMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateTagDTO dto, @MappingTarget TagModel category);
 
 }

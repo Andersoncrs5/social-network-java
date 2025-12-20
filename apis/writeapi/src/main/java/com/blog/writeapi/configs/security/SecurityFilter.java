@@ -38,7 +38,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         try {
             String email = tokenService.validateToken(token);
 
-            if (email == null && email.isBlank()) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            if (email == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
             boolean exists = this.userRepository.existsByEmail(email);
 
@@ -53,7 +53,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("User '{}' authenticated successfully.", email);
+            log.info("User '{}' authenticated successfully.", email);
 
             filterChain.doFilter(request, response);
 

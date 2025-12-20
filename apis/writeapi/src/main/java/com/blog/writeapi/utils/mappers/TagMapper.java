@@ -15,9 +15,7 @@ public interface TagMapper {
 
     TagModel toModel(TagDTO dto);
 
-    @Mapping(target = "postsCount", constant = "0L")
-    @Mapping(target = "id", ignore = true)
-    TagDTO toDTO(TagModel category);
+    TagDTO toDTO(TagModel dto);
 
     TagModel toModel(CreateTagDTO dto);
 

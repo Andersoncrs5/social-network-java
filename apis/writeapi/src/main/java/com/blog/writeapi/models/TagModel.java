@@ -1,9 +1,9 @@
 package com.blog.writeapi.models;
 
+import com.blog.writeapi.utils.bases.models.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
@@ -19,14 +19,10 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
-@EqualsAndHashCode
+@SuperBuilder(toBuilder = true)
 @ToString
 @EntityListeners(AuditingEntityListener.class)
-public class TagModel {
-
-    @Id
-    private Long id;
+public class TagModel extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 70)
     private String name;
@@ -50,18 +46,6 @@ public class TagModel {
     @Column(name = "posts_count", columnDefinition = "BIGINT UNSIGNED")
     private Long postsCount = 0L;
 
-    @Version
-    private Long version;
-
     @Column(name = "last_used_at")
     private OffsetDateTime lastUsedAt;
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(nullable = false)
-    private OffsetDateTime updatedAt;
-
 }

@@ -21,15 +21,16 @@ public class ExistsTagBySlugValidator implements ConstraintValidator<ExistsTagBy
             return true;
         }
 
-        boolean exists = this.repository.existsBySlug(value);
+        boolean exists = repository.existsBySlug(value);
 
         if (!exists) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    context.getDefaultConstraintMessageTemplate().replace("{value}", value)
+                    context.getDefaultConstraintMessageTemplate()
             ).addConstraintViolation();
         }
 
         return exists;
     }
+
 }

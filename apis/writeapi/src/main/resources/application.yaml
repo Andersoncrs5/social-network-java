@@ -2,6 +2,48 @@ server:
   port: 8888
 
 resilience4j:
+  circuitbreaker:
+    instances:
+      tagUpdateCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        failureRateThreshold: 35
+        slowCallDurationThreshold: 1500ms
+        slowCallRateThreshold: 35
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 1
+
+      tagCreateCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        failureRateThreshold: 35
+        slowCallDurationThreshold: 1500ms
+        slowCallRateThreshold: 35
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 1
+
+      tagGetCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 2500ms
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+
+      tagDeleteCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 6
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 30
+        slowCallDurationThreshold: 1200ms
+        slowCallRateThreshold: 30
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 1
+
   retry:
     instances:
       super-adm-retry:

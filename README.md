@@ -2,14 +2,22 @@
 
 status : on Going 
 
-# Architecture
+## Architecture
 
 - cqrs
 - microservices
+- event sourcing
 
-# technologies :
+## technologies :
 
 - java - Spring - Write api
 - tidb
 - scylladb 
 - docker
+
+## best practices
+
+- design patterns (builder)
+- solid
+- DRY
+- resilience4j

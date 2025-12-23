@@ -1,5 +1,6 @@
 package com.blog.writeapi.configs.exception;
 
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolation;
@@ -23,6 +24,18 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ModelNotFoundException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleModelNotFoundException(ModelNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
     public ResponseEntity<@NonNull ResponseHttp<Void>> handleOptimisticLock(OptimisticLockingFailureException ex) {

@@ -3,6 +3,8 @@ package com.blog.writeapi;
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.dtos.category.CategoryDTO;
 import com.blog.writeapi.dtos.category.CreateCategoryDTO;
+import com.blog.writeapi.dtos.post.CreatePostDTO;
+import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.tag.CreateTagDTO;
 import com.blog.writeapi.dtos.tag.TagDTO;
 import com.blog.writeapi.dtos.user.CreateUserDTO;
@@ -34,24 +36,99 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public PostDTO createPost(ResponseUserTest userData) throws Exception {
+        String URL = "/v1/post";
+
+        CreatePostDTO dto = new CreatePostDTO(
+                "All five horizons revolved around her soul, as the Earth to the Sun",
+                "black-pearl-jem",
+                """
+                        Sheets of empty canvas, untouched sheets of clay
+                        Were laid spread out before me, as her body once did
+                        All five horizons revolved around her soul, as the Earth to the Sun
+                        Now the air I tasted and breathed has taken a turn
+                        Ooh, and all I taught her was everything
+                        Mmm, oh, I know she gave me all that she wore
+                        And now my bitter hands chafe beneath the clouds
+                        Of what was everything
+                        All the pictures had all been washed in black
+                        Tattooed everything
+                        I take a walk outside, I'm surrounded by some kids at play
+                        I can feel their laughter, so why do I sear?
+                        Mmm, oh, and twisted thoughts that spin 'round my head
+                        I'm spinnin', oh-oh, I'm spinnin'
+                        How quick the Sun can drop away
+                        Now my bitter hands cradle broken glass
+                        Of what was everything
+                        All the pictures have all been washed in black
+                        Tattooed everything
+                        All the love gone bad turned my world to black
+                        Tattooed all I see, all that I am
+                        All I'll be, yeah-yeah
+                        Oh-oh, oh-oh, ooh
+                        I know someday you'll have a beautiful life, I know you'll be a star
+                        In somebody else's sky, but why, why
+                        Why can't it be, oh, can't it be mine?
+                        Ooh, ah, yeah
+                        Ah, ooh-ooh
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (oh, oh-yeah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah)
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ah, yeah)
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah, yeah)
+                        Doo-doo-doo-doo, doo-doo-doo (yeah, ah)
+                        Doo-doo-doo-doo, doo-doo-doo (yeah-yeah-yeah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ooh-ooh)
+                        Ooh-ooh, ooh-ooh
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Ooh-ooh, ooh-ooh
+                        Ooh-ooh""",
+                5
+        );
+
+        MvcResult result = this.mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().title()).isEqualTo(dto.title());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().content()).isEqualTo(dto.content());
+        assertThat(response.data().readingTime()).isEqualTo(dto.readingTime());
+
+        assertThat(response.data().author().id()).isEqualTo(userData.userDTO().id());
+
+        return response.data();
+    }
+
     public TagDTO createTag(ResponseUserTest userData) throws Exception {
         String URL = "/v1/tag";
-        Random random = new Random();
-
-        char l = (char) ('a' + random.nextInt(26));
-        char l2 = (char) ('a' + random.nextInt(26));
-        char l3 = (char) ('a' + random.nextInt(26));
-        char l4 = (char) ('a' + random.nextInt(26));
-        char l5 = (char) ('a' + random.nextInt(26));
-        char l6 = (char) ('a' + random.nextInt(26));
-        char l7 = (char) ('a' + random.nextInt(26));
-        char l8 = (char) ('a' + random.nextInt(26));
-        char l9 = (char) ('a' + random.nextInt(26));
-        char l10 = (char) ('a' + random.nextInt(26));
+        String chars = this.generateChars();
 
         var dto = new CreateTagDTO(
-                "software engineer " + l + l2 + l3 + l4 + l5 + l6 + l7 + l8 + l9 + l10,
-                "software-engineer-" + l + l2 + l3 + l4 + l5 + l6 + l7 + l8 + l9 + l10,
+                "software engineer " + chars,
+                "software-engineer-" + chars,
                 "",
                 true,
                 true,
@@ -87,20 +164,12 @@ public class HelperTest {
 
     public CategoryDTO createCategory(ResponseUserTest userData, Long parentId) throws Exception {
         String URL = "/v1/category";
-
-        Random random = new Random();
-
-        char letter = (char) ('a' + random.nextInt(26));
-        char letter2 = (char) ('a' + random.nextInt(26));
-        char letter3 = (char) ('a' + random.nextInt(26));
-        char letter4 = (char) ('a' + random.nextInt(26));
-        char letter5 = (char) ('a' + random.nextInt(26));
-        char letter6 = (char) ('a' + random.nextInt(26));
+        String chars = this.generateChars();
 
         CreateCategoryDTO dto = new CreateCategoryDTO(
-                "software engineer " + letter + letter2 + letter3 + letter4 + letter5 + letter6,
+                "software engineer " + chars,
                 "",
-                "software-engineer-" + letter + letter2 + letter3 + letter4 + letter5 + letter6,
+                "software-engineer-" + chars,
                 true,
                 true,
                 0,
@@ -226,5 +295,18 @@ public class HelperTest {
             throw new RuntimeException(e);
         }
     }
+
+    public String generateChars() {
+        Random random = new Random();
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < 10; i++) {
+            char l = (char) ('a' + random.nextInt(26));
+            builder.append(l);
+        }
+
+        return builder.toString();
+    }
+
 
 }

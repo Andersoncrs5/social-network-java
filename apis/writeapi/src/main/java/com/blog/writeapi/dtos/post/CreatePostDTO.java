@@ -24,9 +24,6 @@ public record CreatePostDTO(
         @Size(min = 50, max = 3000)
         String content,
 
-        @NotNull
-        PostStatusEnum status,
-
         @Max(240)
         Integer readingTime
 ) {

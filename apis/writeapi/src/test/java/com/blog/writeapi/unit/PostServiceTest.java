@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.throwable;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -162,10 +161,7 @@ public class PostServiceTest {
                 this.post.getTitle(),
                 this.post.getSlug(),
                 this.post.getContent(),
-                this.post.getStatus(),
-                this.post.getReadingTime(),
-                this.post.getRankingScore(),
-                this.post.getIsFeatured()
+                this.post.getReadingTime()
         );
 
         when(repository.save(any())).thenReturn(this.post);

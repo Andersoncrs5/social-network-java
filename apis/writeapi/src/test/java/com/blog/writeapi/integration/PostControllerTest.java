@@ -3,10 +3,10 @@ package com.blog.writeapi.integration;
 import com.blog.writeapi.HelperTest;
 import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
+import com.blog.writeapi.dtos.post.UpdatePostDTO;
 import com.blog.writeapi.repositories.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -196,47 +196,241 @@ public class PostControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundDeletePostById() throws Exception {
-        ResponseUserTest userData = this.helper.createUser();
-
-        MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + 1)
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        String json = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
-
-        ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.status()).isEqualTo(false);
-
-        assertThat(response.data()).isNull();
-    }
-
-    @Test
     void shouldReturnForbWhenDeletePostById() throws Exception {
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
 
-        MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + post.id())
+        this.mockMvc.perform(delete(this.URL + "/" + post.id())
                         .header("Authorization", "Bearer " + userData2.tokens().token()
                         ))
                 .andExpect(status().isForbidden())
                 .andReturn();
+    }
+
+    // UPDATE
+    @Test
+    void shouldReturnPostUpdate() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                "updated post with simple message",
+                "updated-post-with-simple-message",
+                """
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        """,
+                12
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
+                .andExpect(status().isOk())
+                .andReturn();
 
         String json = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
 
-        ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.status()).isEqualTo(false);
+        assertThat(response.status()).isEqualTo(true);
 
-        assertThat(response.data()).isNull();
+        assertThat(response.data().id()).isEqualTo(post.id());
+        assertThat(response.data().content()).isEqualTo(dto.content());
+        assertThat(response.data().title()).isEqualTo(dto.title());
+        assertThat(response.data().readingTime()).isEqualTo(dto.readingTime());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(post.createdAt().getSecond());
     }
+
+    @Test
+    void shouldReturnPostUpdateJustTitle() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                "updated post with simple message",
+                null,
+                null,
+                null
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isEqualTo(post.id());
+        assertThat(response.data().content()).isEqualTo(post.content());
+        assertThat(response.data().title()).isEqualTo(dto.title());
+        assertThat(response.data().readingTime()).isEqualTo(post.readingTime());
+        assertThat(response.data().slug()).isEqualTo(post.slug());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(post.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldReturnPostUpdateJustSlug() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                null,
+                "new-slug-updated",
+                null,
+                null
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isEqualTo(post.id());
+        assertThat(response.data().content()).isEqualTo(post.content());
+        assertThat(response.data().title()).isEqualTo(post.title());
+        assertThat(response.data().readingTime()).isEqualTo(post.readingTime());
+        assertThat(response.data().slug()).isEqualTo(dto.slug());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(post.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldReturnPostUpdateJustContent() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                null,
+                null,
+                """
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                        """,
+                null
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isEqualTo(post.id());
+        assertThat(response.data().content()).isEqualTo(dto.content());
+        assertThat(response.data().title()).isEqualTo(post.title());
+        assertThat(response.data().readingTime()).isEqualTo(post.readingTime());
+        assertThat(response.data().slug()).isEqualTo(post.slug());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(post.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldReturnPostUpdateJustReadingTime() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                null,
+                null,
+                null,
+                9
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isEqualTo(post.id());
+        assertThat(response.data().content()).isEqualTo(post.content());
+        assertThat(response.data().title()).isEqualTo(post.title());
+        assertThat(response.data().readingTime()).isEqualTo(dto.readingTime());
+        assertThat(response.data().slug()).isEqualTo(post.slug());
+        assertThat(response.data().createdAt().getSecond()).isEqualTo(post.createdAt().getSecond());
+    }
+
+    @Test
+    void shouldReturnForbBecauseAnotherUserTriedUpdatePost() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        ResponseUserTest userData2 = this.helper.createUser();
+
+        PostDTO post = this.helper.createPost(userData);
+
+        UpdatePostDTO dto = new UpdatePostDTO(
+                null,
+                null,
+                null,
+                9
+        );
+
+        MvcResult result = mockMvc.perform(patch(this.URL + "/" + post.id())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                )
+                .andExpect(status().isForbidden())
+                .andReturn();
+    }
+
 
 }

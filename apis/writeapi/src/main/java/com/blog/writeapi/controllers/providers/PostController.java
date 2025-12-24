@@ -3,12 +3,14 @@ package com.blog.writeapi.controllers.providers;
 import com.blog.writeapi.controllers.docs.PostControllerDocs;
 import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
+import com.blog.writeapi.dtos.post.UpdatePostDTO;
 import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.services.interfaces.IPostService;
 import com.blog.writeapi.services.interfaces.ITokenService;
 import com.blog.writeapi.services.interfaces.IUserService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.post.isPostAuthor.IsPostAuthor;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
@@ -97,9 +99,8 @@ public class PostController implements PostControllerDocs {
     }
 
     @Override
+    @IsPostAuthor
     public ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
         Optional<PostModel> post = this.service.getById(id);
 
         if (post.isEmpty()) {
@@ -114,19 +115,6 @@ public class PostController implements PostControllerDocs {
                     ));
         }
 
-        if (!post.get().getAuthor().getId().equals(userId)) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "Only the author can delete this post",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
-        }
-
         this.service.delete(post.get());
 
         ResponseHttp<Object> res = new ResponseHttp<>(
@@ -139,6 +127,31 @@ public class PostController implements PostControllerDocs {
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @Override
+    @IsPostAuthor
+    public ResponseEntity<?> update(
+            @PathVariable @IsId Long id,
+            @Valid @RequestBody UpdatePostDTO dto,
+            HttpServletRequest request
+    ) {
+        PostModel post = this.service.getByIdSimple(id);
+
+        PostModel postUpdated = this.service.update(dto, post);
+
+        var postDto = this.mapper.toDTO(postUpdated);
+
+        ResponseHttp<PostDTO> res = new ResponseHttp<>(
+                postDto,
+                "Post updated with successfully",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.ok(res);
     }
 
 }

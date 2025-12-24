@@ -1,6 +1,7 @@
 package com.blog.writeapi.controllers.docs;
 
 import com.blog.writeapi.dtos.post.CreatePostDTO;
+import com.blog.writeapi.dtos.post.UpdatePostDTO;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.swagger.post.ResponsePostDTO;
@@ -71,4 +72,33 @@ public interface PostControllerDocs {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseHttp.class)))
     ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request);
+
+    @PatchMapping("/{id}")
+    @CircuitBreaker(name = "tagUpdateCB")
+    @Operation(
+            summary = "Update a post by ID",
+            description = "Updates a post from the database. Only the author of the post is allowed to perform this action.",
+            tags = {tag}
+    )
+    @ApiResponse(responseCode = "200",
+            description = "Post successfully updated",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponsePostDTO.class)))
+    @ApiResponse(responseCode = "404",
+            description = "Post not found with the provided ID",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseHttp.class)))
+    @ApiResponse(responseCode = "403",
+            description = "Forbidden: You are not the author of this post",
+            content = @Content(mediaType = "application/json"))
+    @ApiResponse(responseCode = "401",
+            description = "Unauthorized: Invalid or expired token",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseHttp.class)))
+    ResponseEntity<?> update(
+            @PathVariable @IsId Long id,
+            @Valid @RequestBody UpdatePostDTO dto,
+            HttpServletRequest request
+    );
+
 }

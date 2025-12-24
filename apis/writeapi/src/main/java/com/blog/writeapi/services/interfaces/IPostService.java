@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface IPostService {
     Optional<PostModel> getById(@IsId Long id);
-
+    PostModel getByIdSimple(@IsId Long id);
     Boolean existsById(@IsId Long id);
     Boolean existsBySlug(@NotBlank String slug);
     Optional<PostModel> getBySlug(String slug);

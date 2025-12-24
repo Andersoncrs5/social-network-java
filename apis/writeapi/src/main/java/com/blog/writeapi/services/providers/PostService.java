@@ -9,6 +9,7 @@ import com.blog.writeapi.models.enums.Post.PostStatusEnum;
 import com.blog.writeapi.repositories.PostRepository;
 import com.blog.writeapi.services.interfaces.IPostService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +33,10 @@ public class PostService implements IPostService {
     @Transactional(readOnly = true)
     public Optional<PostModel> getById(@IsId Long id) {
         return this.repository.findById(id);
+    }
+
+    public PostModel getByIdSimple(@IsId Long id) {
+        return this.repository.findById(id).orElseThrow(() -> new ModelNotFoundException("Post not found"));
     }
 
     @Override

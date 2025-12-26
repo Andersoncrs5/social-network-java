@@ -1,6 +1,7 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
 import com.blog.writeapi.models.CategoryModel;
 import com.blog.writeapi.models.PostCategoriesModel;
 import com.blog.writeapi.models.PostModel;
@@ -19,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,6 +97,44 @@ public class PostCategoriesServiceTest {
 
         verify(repository, times(1)).findById(this.postCategories.getId());
         verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldDeletePostCategory() {
+        doNothing().when(repository).delete(this.postCategories);
+
+        this.service.delete(this.postCategories);
+
+        verify(repository, times(1)).delete(this.postCategories);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldAddCategoryToPost() {
+        CreatePostCategoriesDTO dto = new CreatePostCategoriesDTO(
+                this.post.getId(),
+                this.category.getId(),
+                6,
+                true,
+                true
+        );
+
+        PostCategoriesModel mappedModel = new PostCategoriesModel();
+
+        when(mapper.toModel(dto)).thenReturn(mappedModel);
+        when(generator.nextId()).thenReturn(this.postCategories.getId());
+
+        when(repository.save(any(PostCategoriesModel.class))).thenReturn(this.postCategories);
+
+        PostCategoriesModel result = this.service.create(dto, post, category);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(this.postCategories.getId());
+        assertThat(result.getPost()).isEqualTo(this.post);
+
+        verify(mapper).toModel(dto);
+        verify(generator).nextId();
+        verify(repository).save(any(PostCategoriesModel.class));
     }
 
 

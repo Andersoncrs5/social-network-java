@@ -3,6 +3,7 @@ package com.blog.writeapi.controllers.providers;
 import com.blog.writeapi.controllers.docs.PostCategoriesControllerDocs;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
 import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
+import com.blog.writeapi.dtos.postCategories.UpdatePostCategoriesDTO;
 import com.blog.writeapi.models.CategoryModel;
 import com.blog.writeapi.models.PostCategoriesModel;
 import com.blog.writeapi.models.PostModel;
@@ -93,5 +94,49 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
+
+    @Override
+    public ResponseEntity<?> get(@PathVariable @IsId Long id, HttpServletRequest request) {
+        PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
+
+        PostCategoriesDTO dto = this.mapper.toDTO(postCategoriesModel);
+
+        ResponseHttp<PostCategoriesDTO> res = new ResponseHttp<>(
+                dto,
+                "Resource found with successfully",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @Override
+    @IsPostCategoryAuthor
+    public ResponseEntity<?> update(
+            @PathVariable @IsId Long id,
+            @Valid @RequestBody UpdatePostCategoriesDTO dto,
+            HttpServletRequest request
+    ) {
+        PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
+
+        PostCategoriesModel update = this.service.updatev2(dto, postCategoriesModel);
+
+        PostCategoriesDTO mapperDTO = this.mapper.toDTO(update);
+
+        ResponseHttp<PostCategoriesDTO> res = new ResponseHttp<>(
+                mapperDTO,
+                "Resource updated with successfully",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
 
 }

@@ -62,23 +62,29 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<@NonNull ResponseHttp<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
-        log.error("MethodArgumentNotValid Error: {}",  ex.getMessage());
+    public ResponseEntity<@NonNull ResponseHttp<Map<String, String>>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage()));
+
+        ex.getBindingResult().getGlobalErrors().forEach(error ->
+                errors.put("global", error.getDefaultMessage()));
+
+        boolean isConflict = ex.getBindingResult().getGlobalErrors().stream()
+                .anyMatch(error -> error.getCode() != null && error.getCode().contains("UniquePrimaryCategoryInPost"));
+
+        HttpStatus status = isConflict ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
+
+        return ResponseEntity.status(status).body(new ResponseHttp<>(
                 errors,
                 "Validation failed",
                 UUID.randomUUID().toString(),
-                errors.size(),
+                0,
                 false,
                 OffsetDateTime.now()
         ));
     }
-
 
     @ExceptionHandler(CallNotPermittedException.class)
     public ResponseEntity<@NonNull ResponseHttp<Object>> handleCircuitBreakerOpen(CallNotPermittedException ex) {

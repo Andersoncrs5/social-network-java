@@ -49,7 +49,10 @@ public class PostModel extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostCategoriesModel> categories;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PostTagModel> tags;
 
 }

@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "tags", indexes = {
@@ -48,4 +49,7 @@ public class TagModel extends BaseEntity {
 
     @Column(name = "last_used_at")
     private OffsetDateTime lastUsedAt;
+
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PostTagModel> tags;
 }

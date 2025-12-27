@@ -47,8 +47,8 @@ resilience4j:
   retry:
     instances:
       super-adm-retry:
-        maxAttempts: 5
-        waitDuration: 5s
+        maxAttempts: 7
+        waitDuration: 6s
         retryExceptions:
           - org.springframework.dao.DataAccessException
 

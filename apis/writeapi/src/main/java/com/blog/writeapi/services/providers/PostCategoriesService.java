@@ -31,6 +31,15 @@ public class PostCategoriesService implements IPostCategoriesService {
 
     @Override
     @Transactional(readOnly = true)
+    public Boolean existsByPostAndCategory(
+            @NotNull PostModel post,
+            @NotNull CategoryModel category
+    ){
+        return this.repository.existsByPostAndCategory(post, category);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean existsByPostIdAndPrimaryTrue(@IsId Long postId) {
         return this.repository.existsByPostIdAndPrimaryTrue(postId);
     }
@@ -41,17 +50,20 @@ public class PostCategoriesService implements IPostCategoriesService {
         return this.repository.findById(id);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public PostCategoriesModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(() -> new ModelNotFoundException("Category not found"));
     }
 
+    @Override
     @Transactional
     @Retry(name = "delete-retry")
     public void delete(@NotNull PostCategoriesModel model) {
         this.repository.delete(model);
     }
 
+    @Override
     @Transactional
     @Retry(name = "create-retry")
     public PostCategoriesModel create(
@@ -67,6 +79,7 @@ public class PostCategoriesService implements IPostCategoriesService {
         return this.repository.save(model);
     }
 
+    @Override
     @Transactional
     @Retry(name = "update-retry")
     public PostCategoriesModel update(

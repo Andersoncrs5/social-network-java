@@ -11,6 +11,10 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Optional;
 
 public interface IPostCategoriesService {
+    Boolean existsByPostAndCategory(
+            @NotNull PostModel post,
+            @NotNull CategoryModel category
+    );
     boolean existsByPostIdAndPrimaryTrue(@IsId Long postId);
     Optional<PostCategoriesModel> getById(@IsId Long id);
     PostCategoriesModel getByIdSimple(@IsId Long id);

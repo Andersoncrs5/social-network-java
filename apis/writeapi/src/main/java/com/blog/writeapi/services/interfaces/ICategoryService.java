@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface ICategoryService {
     Optional<CategoryModel> getById(Long id);
+    CategoryModel getByIdSimple(Long id);
     Boolean existsById(Long id);
     void delete(CategoryModel category);
     CategoryModel create(CreateCategoryDTO dto);

@@ -7,6 +7,7 @@ import com.blog.writeapi.dtos.category.UpdateCategoryDTO;
 import com.blog.writeapi.models.CategoryModel;
 import com.blog.writeapi.repositories.CategoryRepository;
 import com.blog.writeapi.services.interfaces.ICategoryService;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CategoryMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,12 @@ public class CategoryService implements ICategoryService {
     @Override
     @Transactional(readOnly = true)
     public Optional<CategoryModel> getById(Long id) { return this.repository.findById(id); }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CategoryModel getByIdSimple(Long id) {
+        return this.repository.findById(id).orElseThrow(() -> new ModelNotFoundException("Category not found"));
+    }
 
     @Override
     @Transactional(readOnly = true)

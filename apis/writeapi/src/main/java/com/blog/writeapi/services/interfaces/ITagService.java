@@ -7,6 +7,7 @@ import com.blog.writeapi.models.TagModel;
 import java.util.Optional;
 
 public interface ITagService {
+    TagModel getByIdSimple(Long id);
     Optional<TagModel> getById(Long id);
     Boolean existsById(Long id);
     Optional<TagModel> getByName(String name);

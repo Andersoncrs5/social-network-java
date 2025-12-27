@@ -6,6 +6,7 @@ import com.blog.writeapi.dtos.tag.UpdateTagDTO;
 import com.blog.writeapi.models.TagModel;
 import com.blog.writeapi.repositories.TagRepository;
 import com.blog.writeapi.services.interfaces.ITagService;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.TagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,14 @@ public class TagService implements ITagService {
     private final TagRepository repository;
     private final Snowflake generator;
     private final TagMapper mapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public TagModel getByIdSimple(Long id) {
+        return this.repository.findById(id).orElseThrow(
+                () -> new ModelNotFoundException("Tag not found")
+        );
+    }
 
     @Override
     @Transactional(readOnly = true)

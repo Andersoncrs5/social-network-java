@@ -7,6 +7,8 @@ import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
 import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
+import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
+import com.blog.writeapi.dtos.postTag.PostTagDTO;
 import com.blog.writeapi.dtos.tag.CreateTagDTO;
 import com.blog.writeapi.dtos.tag.TagDTO;
 import com.blog.writeapi.dtos.user.CreateUserDTO;
@@ -37,6 +39,41 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public PostTagDTO addTagToPost(ResponseUserTest userTest ,PostDTO postDTO, TagDTO tagDTO) throws Exception {
+        String URL = "/v1/post-tag";
+
+        CreatePostTagDTO dto = new CreatePostTagDTO(
+                postDTO.id(),
+                tagDTO.id(),
+                true,
+                true
+        );
+
+        MvcResult result = this.mockMvc.perform(post(URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userTest.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostTagDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostTagDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isNotNegative();
+        assertThat(response.data().post().id()).isEqualTo(postDTO.id());
+        assertThat(response.data().tag().id()).isEqualTo(tagDTO.id());
+        assertThat(response.data().active()).isEqualTo(dto.active());
+        assertThat(response.data().visible()).isEqualTo(dto.visible());
+
+        return response.data();
+    }
 
     public PostCategoriesDTO addCategoryToPost(ResponseUserTest userData, CategoryDTO categoryDTO, PostDTO postDTO) throws Exception {
         String URL = "/v1/post-category";

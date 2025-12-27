@@ -8,8 +8,12 @@ import jakarta.validation.constraints.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface PostCategoriesRepository extends JpaRepository<@NonNull PostCategoriesModel, @NonNull Long> {
     boolean existsByPostIdAndPrimaryTrue(@IsId Long value);
 
     Boolean existsByPostAndCategory(@NotNull PostModel post, @NotNull CategoryModel category);
+
+    Optional<PostCategoriesModel> findByPrimaryTrueAndPost(PostModel post);
 }

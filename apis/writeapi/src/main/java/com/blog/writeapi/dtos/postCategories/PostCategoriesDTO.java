@@ -7,8 +7,8 @@ import java.time.OffsetDateTime;
 
 public record PostCategoriesDTO(
         Long id,
-        PostDTO postDTO,
-        CategoryDTO categoryDTO,
+        PostDTO post,
+        CategoryDTO category,
         Integer displayOrder,
         boolean primary,
         boolean active,

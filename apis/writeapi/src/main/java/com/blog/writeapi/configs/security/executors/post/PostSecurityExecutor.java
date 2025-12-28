@@ -1,20 +1,23 @@
 package com.blog.writeapi.configs.security.executors.post;
 
 import com.blog.writeapi.services.interfaces.IPostService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.blog.writeapi.utils.annotations.valid.global.emailConstraint.EmailConstraint;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component("postSecurity")
+@RequiredArgsConstructor
 public class PostSecurityExecutor {
 
-    @Autowired
-    private IPostService postService;
+    private final IPostService postService;
 
-    public boolean isAuthor(Long postId, String email) {
+    public boolean isAuthor(@IsId Long postId, @EmailConstraint String email) {
         if (postId == null || email == null) return false;
 
-        return postService.getById(postId)
-                .map(post -> post.getAuthor().getEmail().equals(email))
-                .orElse(false);
+        return postService.getByIdSimple(postId)
+                .getAuthor()
+                .getEmail()
+                .equalsIgnoreCase(email);
     }
 }

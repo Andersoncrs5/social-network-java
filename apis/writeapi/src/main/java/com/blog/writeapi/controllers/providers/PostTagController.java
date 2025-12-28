@@ -1,24 +1,25 @@
 package com.blog.writeapi.controllers.providers;
 
 import com.blog.writeapi.controllers.docs.PostTagControllerDocs;
-import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
 import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
 import com.blog.writeapi.dtos.postTag.PostTagDTO;
+import com.blog.writeapi.dtos.postTag.UpdatePostTagDTO;
 import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.PostTagModel;
 import com.blog.writeapi.models.TagModel;
-import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.services.interfaces.*;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.postTag.isAuthorPostTag.IsAuthorPostTag;
 import com.blog.writeapi.utils.mappers.PostTagMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +39,6 @@ public class PostTagController implements PostTagControllerDocs {
     private final IPostService postService;
     private final ITagService tagService;
     private final ITokenService tokenService;
-    private final IUserService userService;
 
     @Override
     public ResponseEntity<?> create(
@@ -77,6 +77,53 @@ public class PostTagController implements PostTagControllerDocs {
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
+    @Override
+    @IsAuthorPostTag
+    public ResponseEntity<?> delete(
+            @PathVariable @IsId Long id,
+            HttpServletRequest request
+    ) {
+        PostTagModel model = this.service.getByIdSimple(id);
+
+        this.service.delete(model);
+
+        ResponseHttp<Object> res = new ResponseHttp<>(
+                null,
+                "Tag removed with successfully",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    @Override
+    @IsAuthorPostTag
+    public ResponseEntity<?> update(
+            @PathVariable @IsId Long id,
+            @Valid @RequestBody UpdatePostTagDTO dto,
+            HttpServletRequest request
+    ) {
+        PostTagModel postTag = this.service.getByIdSimple(id);
+
+        PostTagModel update = this.service.update(dto, postTag);
+
+        PostTagDTO mapperDTO = this.mapper.toDTO(update);
+
+        ResponseHttp<PostTagDTO> res = new ResponseHttp<>(
+                mapperDTO,
+                "Resource updated with successfully",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
 }

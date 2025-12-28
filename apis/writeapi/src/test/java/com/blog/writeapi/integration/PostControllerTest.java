@@ -156,7 +156,7 @@ public class PostControllerTest {
     void shouldReturnNotFoundWhenGetPostById() throws Exception {
         ResponseUserTest userData = this.helper.createUser();
 
-        MvcResult result = this.mockMvc.perform(get(this.URL + "/" + 1)
+        MvcResult result = this.mockMvc.perform(get(this.URL + "/" + 104657469563746526L)
                         .header("Authorization", "Bearer " + userData.tokens().token()
                         ))
                 .andExpect(status().isNotFound())

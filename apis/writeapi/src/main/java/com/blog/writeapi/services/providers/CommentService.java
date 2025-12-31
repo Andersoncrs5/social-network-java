@@ -6,6 +6,7 @@ import com.blog.writeapi.dtos.comment.UpdateCommentDTO;
 import com.blog.writeapi.models.CommentModel;
 import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.UserModel;
+import com.blog.writeapi.models.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.repositories.CommentRepository;
 import com.blog.writeapi.services.interfaces.ICommentService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
@@ -60,6 +61,22 @@ public class CommentService implements ICommentService {
 
         model.setAuthor(user);
         model.setPost(post);
+        model.setId(this.generator.nextId());
+
+        return repository.save(model);
+    }
+
+    @Override
+    @Transactional
+    @Retry(name = "create-retry")
+    public CommentModel create(CreateCommentDTO dto, PostModel post, UserModel user, CommentModel comment) {
+        CommentModel model = this.mapper.toModel(dto);
+
+        model.setAuthor(user);
+        model.setPost(post);
+        model.setParent(comment);
+        model.setStatus(CommentStatusEnum.APPROVED);
+
         model.setId(this.generator.nextId());
 
         return repository.save(model);

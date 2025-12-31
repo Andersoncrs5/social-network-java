@@ -3,6 +3,8 @@ package com.blog.writeapi;
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.dtos.category.CategoryDTO;
 import com.blog.writeapi.dtos.category.CreateCategoryDTO;
+import com.blog.writeapi.dtos.comment.CommentDTO;
+import com.blog.writeapi.dtos.comment.CreateCommentDTO;
 import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
@@ -39,6 +41,38 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public CommentDTO createComment(ResponseUserTest userData, PostDTO post, Long parentID) throws Exception {
+        CreateCommentDTO dto = new CreateCommentDTO(
+                "content",
+                post.id(),
+                parentID
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CommentDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CommentDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isNotNegative().isNotZero();
+        assertThat(response.data().parentId()).isNull();
+        assertThat(response.data().content()).isEqualTo(dto.content());
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+
+        return response.data();
+    }
 
     public PostTagDTO addTagToPost(ResponseUserTest userTest ,PostDTO postDTO, TagDTO tagDTO) throws Exception {
         String URL = "/v1/post-tag";

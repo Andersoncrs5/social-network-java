@@ -151,7 +151,7 @@ public class CategoryControllerTest {
     @Test
     void shouldReturnNotFoundWhenTryCreateCategoryOnCategory() throws Exception {
         ResponseUserTest userData = helper.loginSuperAdm();
-        CreateCategoryDTO dto = getCreateCategoryDTO(1L);
+        CreateCategoryDTO dto = getCreateCategoryDTO(3354353565425627256L);
 
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -210,7 +210,7 @@ public class CategoryControllerTest {
         CategoryDTO category = this.helper.createCategory(userData, null);
         CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
 
-        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + 1)
+        MvcResult result = this.mockMvc.perform(get(this.URL+"/" + (category.id() + 1))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData.tokens().token()
@@ -314,7 +314,7 @@ public class CategoryControllerTest {
         CategoryDTO category = this.helper.createCategory(userData, null);
         CreateCategoryDTO dto = getCreateCategoryDTO(category.id());
 
-        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + 1)
+        MvcResult result = this.mockMvc.perform(delete(this.URL+"/" + (category.id() + 1))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData.tokens().token()

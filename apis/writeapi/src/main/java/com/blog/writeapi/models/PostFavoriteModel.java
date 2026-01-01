@@ -2,10 +2,7 @@ package com.blog.writeapi.models;
 
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -24,6 +21,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class PostFavoriteModel extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)

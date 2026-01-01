@@ -4,12 +4,10 @@ import com.blog.writeapi.models.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -61,5 +59,10 @@ public class CommentModel extends BaseEntity {
 
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CommentFavoriteModel> favoritedBy = new ArrayList<>();
 
 }

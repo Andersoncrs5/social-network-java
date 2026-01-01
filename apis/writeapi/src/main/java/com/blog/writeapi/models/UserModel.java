@@ -57,4 +57,9 @@ public class UserModel extends BaseEntity {
     @Builder.Default
     private List<PostFavoriteModel> favorites = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CommentFavoriteModel> commentFavorites = new ArrayList<>();
+
 }

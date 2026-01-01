@@ -9,6 +9,7 @@ import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
 import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
+import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
 import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
 import com.blog.writeapi.dtos.postTag.PostTagDTO;
 import com.blog.writeapi.dtos.tag.CreateTagDTO;
@@ -41,6 +42,27 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public void addPostWithFavorite(ResponseUserTest userData, PostDTO post) throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/post-favorite/" + post.id())
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostFavoriteDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostFavoriteDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+
+    }
 
     public CommentDTO createComment(ResponseUserTest userData, PostDTO post, Long parentID) throws Exception {
         CreateCommentDTO dto = new CreateCommentDTO(

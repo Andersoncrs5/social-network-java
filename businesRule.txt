@@ -1,7 +1,6 @@
 attachments
 post_stats
 comment_stats
-post_tags
 post_likes
 comment_likes
 reactions
@@ -9,7 +8,6 @@ post_reactions
 comment_reactions
 post_favorites
 comment_favorites
-post_categories
 post_views
 followers
 notifications

@@ -24,6 +24,16 @@ resilience4j:
         waitDurationInOpenState: 20s
         permittedNumberOfCallsInHalfOpenState: 1
 
+      tagToggleCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 8
+        minimumNumberOfCalls: 4
+        failureRateThreshold: 35
+        slowCallDurationThreshold: 1500ms
+        slowCallRateThreshold: 35
+        waitDurationInOpenState: 20s
+        permittedNumberOfCallsInHalfOpenState: 1
+
       tagCreateCB:
         registerHealthIndicator: true
         slidingWindowSize: 8

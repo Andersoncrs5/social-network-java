@@ -35,6 +35,12 @@ public class ReactionService implements IReactionService {
 
     @Override
     @Transactional(readOnly = true)
+    public Boolean existsByEmojiUnicode(@NotBlank String uni) {
+        return this.repository.existsByEmojiUnicode(uni);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ReactionModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(
                 () -> new ModelNotFoundException("Reaction not found")

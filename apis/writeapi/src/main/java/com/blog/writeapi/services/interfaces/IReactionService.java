@@ -13,4 +13,5 @@ public interface IReactionService {
     void delete(ReactionModel reaction);
     ReactionModel create(CreateReactionDTO dto);
     ReactionModel update(UpdateReactionDTO dto, ReactionModel reaction);
+    Boolean existsByEmojiUnicode(@NotBlank String uni);
 }

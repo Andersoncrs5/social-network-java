@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReactionRepository extends JpaRepository<@NonNull ReactionModel, @NonNull Long> {
     Boolean existsByName(@NotBlank String name);
+    Boolean existsByEmojiUnicode(@NotBlank String uni);
+
 }

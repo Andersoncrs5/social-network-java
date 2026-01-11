@@ -83,6 +83,32 @@ public class ReactionServiceTest {
     }
 
     @Test
+    @DisplayName("Test if return true when exec METHOD: EmojiUnicode")
+    public void shouldExistsReactionByEmojiUnicodeReturnTrue() {
+        when(repository.existsByEmojiUnicode(this.reaction.getEmojiUnicode())).thenReturn(true);
+
+        Boolean exists = this.service.existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+
+        assertThat(exists).isTrue();
+
+        verify(repository, times(1)).existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("Test if return false when exec METHOD: existsByEmojiUnicode")
+    public void shouldExistsReactionByEmojiUnicodeReturnFalse() {
+        when(repository.existsByEmojiUnicode(this.reaction.getEmojiUnicode())).thenReturn(false);
+
+        Boolean exists = this.service.existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+
+        assertThat(exists).isFalse();
+
+        verify(repository, times(1)).existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
     @DisplayName("Test if return true when exec METHOD: existsById")
     public void shouldExistsReactionByIdReturnTrue() {
         when(repository.existsById(this.reaction.getId())).thenReturn(true);

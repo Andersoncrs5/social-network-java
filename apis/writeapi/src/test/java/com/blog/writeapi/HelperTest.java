@@ -13,11 +13,14 @@ import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
 import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
 import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
 import com.blog.writeapi.dtos.postTag.PostTagDTO;
+import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
+import com.blog.writeapi.dtos.reaction.ReactionDTO;
 import com.blog.writeapi.dtos.tag.CreateTagDTO;
 import com.blog.writeapi.dtos.tag.TagDTO;
 import com.blog.writeapi.dtos.user.CreateUserDTO;
 import com.blog.writeapi.dtos.user.LoginUserDTO;
 import com.blog.writeapi.dtos.user.UserDTO;
+import com.blog.writeapi.models.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.res.ResponseUserTest;
@@ -43,6 +46,44 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public ReactionDTO createReaction(ResponseUserTest userData) throws Exception {
+        CreateReactionDTO dto = new CreateReactionDTO(
+                "emoji" + generateChars(),
+                null,
+                generateRandomUnicode(),
+                1L,
+                true,
+                true,
+                ReactionTypeEnum.EMOTION
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/reaction").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<ReactionDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<ReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isNotNegative().isNotZero();
+        assertThat(response.data().name()).isEqualTo(dto.name());
+        assertThat(response.data().emojiUrl()).isEqualTo(dto.emojiUrl());
+        assertThat(response.data().emojiUnicode()).isEqualTo(dto.emojiUnicode());
+        assertThat(response.data().displayOrder()).isEqualTo(dto.displayOrder());
+        assertThat(response.data().active()).isEqualTo(dto.active());
+        assertThat(response.data().visible()).isEqualTo(dto.visible());
+        assertThat(response.data().type()).isEqualTo(dto.type());
+
+        return response.data();
+    }
 
     public CommentFavoriteDTO addCommentWithFavorite(ResponseUserTest userData, PostDTO post, CommentDTO comment) throws Exception {
         String URL = "/v1/comment-favorite";
@@ -451,7 +492,7 @@ public class HelperTest {
         }
     }
 
-    public String generateChars() {
+    public static String generateChars() {
         Random random = new Random();
         StringBuilder builder = new StringBuilder();
 
@@ -463,5 +504,14 @@ public class HelperTest {
         return builder.toString();
     }
 
+    public static String generateRandomUnicode() {
+        Random random = new Random();
+
+        int start = 0x1F600;
+        int end = 0x1F64F;
+
+        int randomUnicode = start + random.nextInt(end - start + 1);
+        return "U+" + Integer.toHexString(randomUnicode).toUpperCase();
+    }
 
 }

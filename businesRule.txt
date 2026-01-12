@@ -1,13 +1,8 @@
 attachments
 post_stats
 comment_stats
-post_likes
 comment_likes
-reactions
-post_reactions
 comment_reactions
-post_favorites
-comment_favorites
 post_views
 followers
 notifications
@@ -22,7 +17,9 @@ reading_lists
 mentions
 
 #maybe
+support
 post_versions
+feedback of system
 pinned_posts
 profiles
 blocks

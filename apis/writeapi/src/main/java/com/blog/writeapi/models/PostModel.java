@@ -15,7 +15,8 @@ import java.util.List;
 @Table(name = "posts", indexes = {
         @Index(name = "idx_post_slug", columnList = "slug"),
         @Index(name = "idx_post_status", columnList = "status"),
-        @Index(name = "idx_post_author", columnList = "author_id")
+        @Index(name = "idx_post_author", columnList = "author_id"),
+        @Index(name = "idx_post_is_featured", columnList = "is_featured")
 })
 @EntityListeners(AuditingEntityListener.class)
 @Getter
@@ -68,5 +69,9 @@ public class PostModel extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVoteModel> votes;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReactionModel> reactions;
 
 }

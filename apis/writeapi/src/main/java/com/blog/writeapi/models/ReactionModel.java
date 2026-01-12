@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @Entity
 @Table(
         name = "reactions",
@@ -46,5 +48,8 @@ public class ReactionModel extends BaseEntity {
 
     @Column(name = "is_visible", nullable = false)
     private boolean visible;
+
+    @OneToMany(mappedBy = "reaction")
+    private List<PostReactionModel> reactionUsages;
 
 }

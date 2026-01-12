@@ -13,6 +13,8 @@ import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
 import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
 import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
 import com.blog.writeapi.dtos.postTag.PostTagDTO;
+import com.blog.writeapi.dtos.postVote.PostVoteDTO;
+import com.blog.writeapi.dtos.postVote.TogglePostVoteDTO;
 import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
 import com.blog.writeapi.dtos.reaction.ReactionDTO;
 import com.blog.writeapi.dtos.tag.CreateTagDTO;
@@ -21,6 +23,7 @@ import com.blog.writeapi.dtos.user.CreateUserDTO;
 import com.blog.writeapi.dtos.user.LoginUserDTO;
 import com.blog.writeapi.dtos.user.UserDTO;
 import com.blog.writeapi.models.enums.reaction.ReactionTypeEnum;
+import com.blog.writeapi.models.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.res.ResponseUserTest;
@@ -46,6 +49,39 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public PostVoteDTO addedPostVote(
+            ResponseUserTest userData,
+            PostDTO post,
+            VoteTypeEnum type
+    ) throws Exception {
+        TogglePostVoteDTO dto = new TogglePostVoteDTO(
+                post.id(),
+                type
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/post-vote")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostVoteDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostVoteDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isNotZero().isNotNegative();
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+        assertThat(response.data().type()).isEqualTo(dto.type());
+
+        return response.data();
+    }
 
     public ReactionDTO createReaction(ResponseUserTest userData) throws Exception {
         CreateReactionDTO dto = new CreateReactionDTO(

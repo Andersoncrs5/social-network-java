@@ -65,4 +65,8 @@ public class PostModel extends BaseEntity {
     @Builder.Default
     private List<PostFavoriteModel> favoritedBy = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostVoteModel> votes;
+
 }

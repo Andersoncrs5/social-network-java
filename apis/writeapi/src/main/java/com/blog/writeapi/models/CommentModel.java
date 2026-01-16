@@ -65,4 +65,9 @@ public class CommentModel extends BaseEntity {
     @Builder.Default
     private List<CommentFavoriteModel> favoritedBy = new ArrayList<>();
 
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentVoteModel> votes = new ArrayList<>();
+
 }

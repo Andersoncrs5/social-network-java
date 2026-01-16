@@ -6,6 +6,8 @@ import com.blog.writeapi.dtos.category.CreateCategoryDTO;
 import com.blog.writeapi.dtos.comment.CommentDTO;
 import com.blog.writeapi.dtos.comment.CreateCommentDTO;
 import com.blog.writeapi.dtos.commentFavorite.CommentFavoriteDTO;
+import com.blog.writeapi.dtos.commentVote.CommentVoteDTO;
+import com.blog.writeapi.dtos.commentVote.ToggleCommentVoteDTO;
 import com.blog.writeapi.dtos.post.CreatePostDTO;
 import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
@@ -49,6 +51,39 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public CommentVoteDTO addCommentVoteInComment(
+            ResponseUserTest userData,
+            CommentDTO commentDTO,
+            VoteTypeEnum type
+    ) throws Exception {
+        ToggleCommentVoteDTO dto = new ToggleCommentVoteDTO(
+                commentDTO.id(),
+                type
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/comment-vote")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CommentVoteDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<CommentVoteDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isNotZero().isNotNegative();
+        assertThat(response.data().comment().id()).isEqualTo(commentDTO.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+        assertThat(response.data().type()).isEqualTo(dto.type());
+
+        return response.data();
+    }
 
     public PostVoteDTO addedPostVote(
             ResponseUserTest userData,

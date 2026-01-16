@@ -52,4 +52,7 @@ public class ReactionModel extends BaseEntity {
     @OneToMany(mappedBy = "reaction")
     private List<PostReactionModel> reactionUsages;
 
+    @OneToMany(mappedBy = "reaction")
+    private List<CommentReactionModel> commentUsage;
+
 }

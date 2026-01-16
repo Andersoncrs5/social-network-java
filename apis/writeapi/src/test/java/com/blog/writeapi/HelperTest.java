@@ -13,6 +13,8 @@ import com.blog.writeapi.dtos.post.PostDTO;
 import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
 import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
 import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
+import com.blog.writeapi.dtos.postReaction.CreatePostReactionDTO;
+import com.blog.writeapi.dtos.postReaction.PostReactionDTO;
 import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
 import com.blog.writeapi.dtos.postTag.PostTagDTO;
 import com.blog.writeapi.dtos.postVote.PostVoteDTO;
@@ -51,6 +53,40 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public PostReactionDTO toggleReactionToPost(
+            ResponseUserTest userData2,
+            PostDTO post,
+            ReactionDTO reactionDTO
+    ) throws Exception {
+
+        CreatePostReactionDTO dto = new CreatePostReactionDTO(
+                post.id(),
+                reactionDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/post-reaction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                )
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isNotNegative().isNotZero();
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userData2.userDTO().id());
+        assertThat(response.data().reaction().id()).isEqualTo(reactionDTO.id());
+
+        return response.data();
+    }
 
     public CommentVoteDTO addCommentVoteInComment(
             ResponseUserTest userData,

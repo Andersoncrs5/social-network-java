@@ -6,6 +6,8 @@ import com.blog.writeapi.dtos.category.CreateCategoryDTO;
 import com.blog.writeapi.dtos.comment.CommentDTO;
 import com.blog.writeapi.dtos.comment.CreateCommentDTO;
 import com.blog.writeapi.dtos.commentFavorite.CommentFavoriteDTO;
+import com.blog.writeapi.dtos.commentReaction.CommentReactionDTO;
+import com.blog.writeapi.dtos.commentReaction.CreateCommentReactionDTO;
 import com.blog.writeapi.dtos.commentVote.CommentVoteDTO;
 import com.blog.writeapi.dtos.commentVote.ToggleCommentVoteDTO;
 import com.blog.writeapi.dtos.post.CreatePostDTO;
@@ -53,6 +55,37 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public CommentReactionDTO toggleReactionToComment(
+            ResponseUserTest userData2,
+            CommentDTO comment,
+            ReactionDTO reactionDTO
+    ) throws Exception {
+        CreateCommentReactionDTO dto = new CreateCommentReactionDTO(
+                comment.id(),
+                reactionDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/comment-reaction")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                )
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CommentReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().comment().id()).isEqualTo(comment.id());
+        assertThat(response.data().reaction().id()).isEqualTo(reactionDTO.id());
+        assertThat(response.data().user().id()).isEqualTo(userData2.userDTO().id());
+
+        return response.data();
+    }
 
     public PostReactionDTO toggleReactionToPost(
             ResponseUserTest userData2,

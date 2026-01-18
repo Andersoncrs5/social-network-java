@@ -1,8 +1,6 @@
 attachments
 post_stats
 comment_stats
-comment_likes
-comment_reactions
 post_views
 followers
 notifications

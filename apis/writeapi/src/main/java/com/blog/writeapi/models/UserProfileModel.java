@@ -25,10 +25,10 @@ import java.util.Set;
 public class UserProfileModel extends BaseEntity {
 
     @Column(length = 800)
-    private String bio;
+    private String bio = "no bio";
 
     @Column(length = 500)
-    private String avatarUrl;
+    private String avatarUrl = "";
 
     @ElementCollection
     @CollectionTable(
@@ -41,7 +41,7 @@ public class UserProfileModel extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", length = 20, nullable = false)
-    private ProfileVisibilityEnum visibility;
+    private ProfileVisibilityEnum visibility = ProfileVisibilityEnum.PUBLIC;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)

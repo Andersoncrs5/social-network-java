@@ -8,6 +8,7 @@ import com.blog.writeapi.models.ReactionModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.PostReactionRepository;
 import com.blog.writeapi.services.interfaces.IPostReactionService;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,11 @@ public class PostReactionService implements IPostReactionService {
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public PostReactionModel create(PostModel post, ReactionModel reaction, UserModel user) {
+    public PostReactionModel create(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized ReactionModel reaction,
+            @IsModelInitialized UserModel user
+    ) {
         PostReactionModel postReaction = new PostReactionModel().toBuilder()
                 .post(post)
                 .reaction(reaction)
@@ -40,27 +45,33 @@ public class PostReactionService implements IPostReactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PostReactionModel> findByPostAndUser(PostModel post, UserModel user) {
+    public Optional<PostReactionModel> findByPostAndUser(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user
+    ) {
         return this.repository.findByPostAndUser(post, user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByPostAndUser(PostModel post, UserModel user) {
+    public Boolean existsByPostAndUser(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user
+    ) {
         return this.repository.existsByPostAndUser(post, user);
     }
 
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(PostReactionModel model) {
+    public void delete(@IsModelInitialized PostReactionModel model) {
         this.repository.delete(model);
     }
 
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public PostReactionModel updateSimple(PostReactionModel model) {
+    public PostReactionModel updateSimple(@IsModelInitialized PostReactionModel model) {
         return repository.save(model);
     }
 

@@ -7,6 +7,7 @@ import com.blog.writeapi.models.PostVoteModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.PostVoteRepository;
 import com.blog.writeapi.services.interfaces.IPostVoteService;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,21 +28,21 @@ public class PostVoteService implements IPostVoteService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PostVoteModel> findByUserAndPost(UserModel user, PostModel post) {
+    public Optional<PostVoteModel> findByUserAndPost(@IsModelInitialized UserModel user, @IsModelInitialized PostModel post) {
         return this.repository.findByUserAndPost(user, post);
     }
 
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(PostVoteModel vote) {
+    public void delete(@IsModelInitialized PostVoteModel vote) {
         this.repository.delete(vote);
     }
 
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public PostVoteModel create(TogglePostVoteDTO dto, UserModel user, PostModel post) {
+    public PostVoteModel create(TogglePostVoteDTO dto, @IsModelInitialized UserModel user, @IsModelInitialized PostModel post) {
         PostVoteModel vote = new PostVoteModel().toBuilder()
                 .id(this.generator.nextId())
                 .type(dto.type())
@@ -55,7 +56,7 @@ public class PostVoteService implements IPostVoteService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public PostVoteModel updateSimple(PostVoteModel vote) {
+    public PostVoteModel updateSimple(@IsModelInitialized PostVoteModel vote) {
         return this.repository.save(vote);
     }
 

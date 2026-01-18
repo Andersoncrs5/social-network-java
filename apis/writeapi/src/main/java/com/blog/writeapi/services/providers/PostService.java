@@ -9,6 +9,8 @@ import com.blog.writeapi.models.enums.Post.PostStatusEnum;
 import com.blog.writeapi.repositories.PostRepository;
 import com.blog.writeapi.services.interfaces.IPostService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.global.slugConstraint.SlugConstraint;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -47,27 +49,27 @@ public class PostService implements IPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsBySlug(String slug) {
+    public Boolean existsBySlug(@SlugConstraint String slug) {
         return this.repository.existsBySlug(slug);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PostModel> getBySlug(String slug) {
+    public Optional<PostModel> getBySlug(@SlugConstraint String slug) {
         return this.repository.findBySlug(slug);
     }
 
     @Override
     @Retry(name = "delete-retry")
     @Transactional
-    public void delete(@NotNull PostModel post) {
+    public void delete(@IsModelInitialized PostModel post) {
         this.repository.delete(post);
     }
 
     @Override
     @Retry(name = "create-retry")
     @Transactional
-    public PostModel create(@NotNull CreatePostDTO dto, @NotNull UserModel user) {
+    public PostModel create(@NotNull CreatePostDTO dto, @IsModelInitialized UserModel user) {
         PostModel post = this.mapper.toModel(dto);
 
         post.setId(generator.nextId());
@@ -80,7 +82,7 @@ public class PostService implements IPostService {
     @Override
     @Retry(name = "update-retry")
     @Transactional
-    public PostModel update(@NotNull UpdatePostDTO dto, @NotNull PostModel post) {
+    public PostModel update(@NotNull UpdatePostDTO dto, @IsModelInitialized PostModel post) {
         this.mapper.merge(dto, post);
 
         return repository.save(post);

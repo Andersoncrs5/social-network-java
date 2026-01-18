@@ -4,14 +4,15 @@ import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
 import com.blog.writeapi.dtos.reaction.UpdateReactionDTO;
 import com.blog.writeapi.models.ReactionModel;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import jakarta.validation.constraints.NotBlank;
 
 public interface IReactionService {
     ReactionModel getByIdSimple(@IsId Long id);
     Boolean existsByName(@NotBlank String name);
     Boolean existsById(@IsId Long id);
-    void delete(ReactionModel reaction);
+    void delete(@IsModelInitialized ReactionModel reaction);
     ReactionModel create(CreateReactionDTO dto);
-    ReactionModel update(UpdateReactionDTO dto, ReactionModel reaction);
+    ReactionModel update(UpdateReactionDTO dto, @IsModelInitialized ReactionModel reaction);
     Boolean existsByEmojiUnicode(@NotBlank String uni);
 }

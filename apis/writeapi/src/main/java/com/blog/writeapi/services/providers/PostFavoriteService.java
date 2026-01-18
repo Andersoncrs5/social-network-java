@@ -7,6 +7,7 @@ import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.PostFavoriteRepository;
 import com.blog.writeapi.services.interfaces.IPostFavoriteService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -36,27 +37,27 @@ public class PostFavoriteService implements IPostFavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByPostAndUser(PostModel post, UserModel user) {
+    public Boolean existsByPostAndUser(@IsModelInitialized PostModel post, @IsModelInitialized UserModel user) {
         return this.repository.existsByPostAndUser(post, user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PostFavoriteModel> getByPostAndUser(PostModel post, UserModel user) {
+    public Optional<PostFavoriteModel> getByPostAndUser(@IsModelInitialized PostModel post, @IsModelInitialized UserModel user) {
         return this.repository.findByPostAndUser(post, user);
     }
 
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(PostFavoriteModel model) {
+    public void delete(@IsModelInitialized PostFavoriteModel model) {
         this.repository.delete(model);
     }
 
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public PostFavoriteModel create(PostModel post, UserModel user) {
+    public PostFavoriteModel create(@IsModelInitialized PostModel post, @IsModelInitialized UserModel user) {
         PostFavoriteModel favor = new PostFavoriteModel().toBuilder()
                 .id(generator.nextId())
                 .post(post)

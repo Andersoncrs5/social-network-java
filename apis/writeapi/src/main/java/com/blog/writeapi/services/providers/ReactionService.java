@@ -7,6 +7,7 @@ import com.blog.writeapi.models.ReactionModel;
 import com.blog.writeapi.repositories.ReactionRepository;
 import com.blog.writeapi.services.interfaces.IReactionService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.ReactionMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -56,7 +57,7 @@ public class ReactionService implements IReactionService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(ReactionModel reaction) {
+    public void delete(@IsModelInitialized ReactionModel reaction) {
         this.repository.delete(reaction);
     }
 
@@ -74,7 +75,7 @@ public class ReactionService implements IReactionService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public ReactionModel update(UpdateReactionDTO dto, ReactionModel reaction) {
+    public ReactionModel update(UpdateReactionDTO dto, @IsModelInitialized ReactionModel reaction) {
         this.mapper.merge(dto, reaction);
 
         return this.repository.save(reaction);

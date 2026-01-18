@@ -49,10 +49,10 @@ public class ReactionModel extends BaseEntity {
     @Column(name = "is_visible", nullable = false)
     private boolean visible;
 
-    @OneToMany(mappedBy = "reaction")
+    @OneToMany(mappedBy = "reaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReactionModel> reactionUsages;
 
-    @OneToMany(mappedBy = "reaction")
+    @OneToMany(mappedBy = "reaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReactionModel> commentUsage;
 
 }

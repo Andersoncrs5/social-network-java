@@ -73,7 +73,7 @@ resilience4j:
           - org.springframework.dao.DataAccessException
 
       create-retry:
-        maxAttempts: 4
+        maxAttempts: 3
         waitDuration: 4s
         retryExceptions:
           - org.springframework.dao.DataAccessException
@@ -85,7 +85,7 @@ resilience4j:
           - org.springframework.dao.DataAccessException
 
       update-retry:
-        maxAttempts: 5
+        maxAttempts: 2
         waitDuration: 5s
         retryExceptions:
           - org.springframework.dao.DataAccessException

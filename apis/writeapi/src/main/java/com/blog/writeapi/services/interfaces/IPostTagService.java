@@ -6,6 +6,7 @@ import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.PostTagModel;
 import com.blog.writeapi.models.TagModel;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Optional;
@@ -13,15 +14,15 @@ import java.util.Optional;
 public interface IPostTagService {
     PostTagModel getByIdSimple(@IsId Long id);
     Optional<PostTagModel> getById(@IsId Long id);
-    void delete(@NotNull PostTagModel model);
+    void delete(@IsModelInitialized PostTagModel model);
     PostTagModel create(
             @NotNull CreatePostTagDTO dto,
-            @NotNull PostModel post,
-            @NotNull TagModel tag
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized TagModel tag
     );
     PostTagModel update(
             @NotNull UpdatePostTagDTO dto,
-            @NotNull PostTagModel model
+            @IsModelInitialized PostTagModel model
     );
     Boolean existsByPostAndTag(
             @IsId Long postId,

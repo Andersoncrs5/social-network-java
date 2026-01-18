@@ -6,6 +6,9 @@ import com.blog.writeapi.dtos.tag.UpdateTagDTO;
 import com.blog.writeapi.models.TagModel;
 import com.blog.writeapi.repositories.TagRepository;
 import com.blog.writeapi.services.interfaces.ITagService;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.global.slugConstraint.SlugConstraint;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.TagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -27,7 +30,7 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional(readOnly = true)
-    public TagModel getByIdSimple(Long id) {
+    public TagModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(
                 () -> new ModelNotFoundException("Tag not found")
         );
@@ -35,11 +38,11 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<TagModel> getById(Long id) { return this.repository.findById(id); }
+    public Optional<TagModel> getById(@IsId Long id) { return this.repository.findById(id); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsById(Long id) { return this.repository.existsById(id); }
+    public Boolean existsById(@IsId Long id) { return this.repository.existsById(id); }
 
     @Override
     @Transactional(readOnly = true)
@@ -51,15 +54,15 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<TagModel> getBySlug(String slug) { return this.repository.findBySlug(slug); }
+    public Optional<TagModel> getBySlug(@SlugConstraint String slug) { return this.repository.findBySlug(slug); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsBySlug(String slug) { return this.repository.existsBySlug(slug); }
+    public Boolean existsBySlug(@SlugConstraint String slug) { return this.repository.existsBySlug(slug); }
 
     @Override
     @Transactional
-    public void delete(TagModel tag) { this.repository.delete(tag); }
+    public void delete(@IsModelInitialized TagModel tag) { this.repository.delete(tag); }
 
     @Override
     @Transactional
@@ -75,7 +78,7 @@ public class TagService implements ITagService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public TagModel update(UpdateTagDTO dto, TagModel tag) {
+    public TagModel update(UpdateTagDTO dto, @IsModelInitialized TagModel tag) {
         mapper.merge(dto, tag);
 
         return this.repository.save(tag);

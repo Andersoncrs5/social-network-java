@@ -6,6 +6,7 @@ import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.models.UserProfileModel;
 import com.blog.writeapi.repositories.UserProfileRepository;
 import com.blog.writeapi.services.interfaces.IUserProfileService;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.mappers.UserProfileMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -28,25 +29,25 @@ public class UserProfileService implements IUserProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByUser(UserModel user) {
+    public Boolean existsByUser(@IsModelInitialized UserModel user) {
         return this.repository.existsByUser(user);
     }
 
     @Override
     @Transactional
-    public Optional<UserProfileModel> getByUser(UserModel user) {
+    public Optional<UserProfileModel> getByUser(@IsModelInitialized UserModel user) {
         return this.repository.findByUser(user);
     }
 
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(UserProfileModel profile) { this.repository.delete(profile); }
+    public void delete(@IsModelInitialized UserProfileModel profile) { this.repository.delete(profile); }
 
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public UserProfileModel create(UserModel user) {
+    public UserProfileModel create(@IsModelInitialized UserModel user) {
         UserProfileModel profile = new UserProfileModel().toBuilder()
                 .id(generator.nextId())
                 .user(user)
@@ -58,7 +59,7 @@ public class UserProfileService implements IUserProfileService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public UserProfileModel update(UserProfileModel model, UpdateUserProfileDTO dto) {
+    public UserProfileModel update(@IsModelInitialized UserProfileModel model, UpdateUserProfileDTO dto) {
         this.mapper.merge(dto, model);
 
         return this.repository.save(model);

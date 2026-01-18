@@ -9,6 +9,7 @@ import com.blog.writeapi.models.TagModel;
 import com.blog.writeapi.repositories.PostTagRepository;
 import com.blog.writeapi.services.interfaces.IPostTagService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostTagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -53,7 +54,7 @@ public class PostTagService implements IPostTagService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(@NotNull PostTagModel model) {
+    public void delete(@IsModelInitialized PostTagModel model) {
         this.repository.delete(model);
     }
 
@@ -62,8 +63,8 @@ public class PostTagService implements IPostTagService {
     @Retry(name = "create-retry")
     public PostTagModel create(
             @NotNull CreatePostTagDTO dto,
-            @NotNull PostModel post,
-            @NotNull TagModel tag
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized  TagModel tag
             ) {
         PostTagModel model = this.mapper.toModel(dto);
 
@@ -79,7 +80,7 @@ public class PostTagService implements IPostTagService {
     @Retry(name = "update-retry")
     public PostTagModel update(
             @NotNull UpdatePostTagDTO dto,
-            @NotNull PostTagModel model
+            @IsModelInitialized  PostTagModel model
             ) {
         this.mapper.merge(dto, model);
 

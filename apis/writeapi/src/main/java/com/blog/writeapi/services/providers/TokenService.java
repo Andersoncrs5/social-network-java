@@ -3,6 +3,7 @@ package com.blog.writeapi.services.providers;
 import com.blog.writeapi.models.RoleModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.services.interfaces.ITokenService;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -40,7 +41,7 @@ public class TokenService implements ITokenService {
     private int expRefreshToken;
 
     @Override
-    public String generateRefreshToken(UserModel user) {
+    public String generateRefreshToken(@IsModelInitialized UserModel user) {
         if (secret.isBlank()) throw new RuntimeException();
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -66,7 +67,7 @@ public class TokenService implements ITokenService {
     }
 
     @Override
-    public String generateToken(UserModel user, List<RoleModel> roles) {
+    public String generateToken(@IsModelInitialized UserModel user, List<RoleModel> roles) {
         if (secret.isBlank()) {
             log.error("Error! The secret is null! in class TokenService");
             throw new RuntimeException();

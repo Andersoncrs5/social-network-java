@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.models.RoleModel;
 import com.blog.writeapi.repositories.RoleRepository;
 import com.blog.writeapi.services.interfaces.IRoleService;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,13 +29,13 @@ public class RoleService implements IRoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<RoleModel> findById(Long id) {
+    public Optional<RoleModel> findById(@IsId Long id) {
         return this.repository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsById(Long id) {
+    public Boolean existsById(@IsId Long id) {
         return this.repository.existsById(id);
     }
 
@@ -45,13 +47,13 @@ public class RoleService implements IRoleService {
 
     @Override
     @Transactional
-    public void delete(RoleModel role) {
+    public void delete(@IsModelInitialized RoleModel role) {
         this.repository.delete(role);
     }
 
     @Override
     @Transactional
-    public RoleModel create(RoleModel role) {
+    public RoleModel create(@IsModelInitialized RoleModel role) {
         role.setId(snowflakeIdGenerator.nextId());
         role.setName(role.getName().toUpperCase());
 

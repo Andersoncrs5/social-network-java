@@ -6,6 +6,8 @@ import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.models.UserRoleModel;
 import com.blog.writeapi.repositories.UserRoleRepository;
 import com.blog.writeapi.services.interfaces.IUserRoleService;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class UserRoleService implements IUserRoleService {
 
     @Override
     @Transactional
-    public UserRoleModel create(UserModel user, RoleModel role) {
+    public UserRoleModel create(@IsModelInitialized UserModel user, @IsModelInitialized RoleModel role) {
         UserRoleModel userRoleModel = new UserRoleModel().toBuilder()
                 .id(generator.nextId())
                 .user(user)
@@ -34,37 +36,37 @@ public class UserRoleService implements IUserRoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserRoleModel> getById(Long id) {
+    public Optional<UserRoleModel> getById(@IsId Long id) {
         return this.repository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsById(Long id) {
+    public Boolean existsById(@IsId Long id) {
         return this.repository.existsById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserRoleModel> getByUserAndRole(UserModel user, RoleModel role) {
+    public Optional<UserRoleModel> getByUserAndRole(@IsModelInitialized UserModel user, @IsModelInitialized RoleModel role) {
         return this.repository.findByUserAndRole(user, role);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByUserAndRole(UserModel user, RoleModel role) {
+    public Boolean existsByUserAndRole(@IsModelInitialized UserModel user, @IsModelInitialized RoleModel role) {
         return this.repository.existsByUserAndRole(user, role);
     }
 
     @Override
     @Transactional
-    public void delete(UserRoleModel user){
+    public void delete(@IsModelInitialized UserRoleModel user){
         this.repository.delete(user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserRoleModel> getAllByUser(UserModel user){
+    public List<UserRoleModel> getAllByUser(@IsModelInitialized UserModel user){
         return this.repository.findAllByUser(user);
     }
 }

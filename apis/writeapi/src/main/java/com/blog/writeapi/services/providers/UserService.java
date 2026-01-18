@@ -6,6 +6,8 @@ import com.blog.writeapi.dtos.user.UpdateUserDTO;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.UserRepository;
 import com.blog.writeapi.services.interfaces.IUserService;
+import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserModel GetByIdSimple(Long id){
+    public UserModel GetByIdSimple(@IsId Long id){
         return this.repository.findById(id).orElseThrow(
                 () -> new ModelNotFoundException("User not found")
         );
@@ -42,25 +44,25 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserModel> GetById(Long id) {
+    public Optional<UserModel> GetById(@IsId Long id) {
         return repository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean ExistsById(Long id) {
+    public Boolean ExistsById(@IsId Long id) {
         return repository.existsById(id);
     }
 
     @Override
     @Transactional
-    public void Delete(UserModel user) {
+    public void Delete(@IsModelInitialized UserModel user) {
         repository.delete(user);
     }
 
     @Override
     @Transactional
-    public UserModel Update(UpdateUserDTO dto, UserModel user) {
+    public UserModel Update(UpdateUserDTO dto, @IsModelInitialized UserModel user) {
         mapper.merge(dto, user);
 
         if (dto.password() != null && !dto.password().isBlank())
@@ -86,6 +88,6 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional
-    public UserModel UpdateSimple(UserModel user) { return this.repository.save(user); }
+    public UserModel UpdateSimple(@IsModelInitialized UserModel user) { return this.repository.save(user); }
 
 }

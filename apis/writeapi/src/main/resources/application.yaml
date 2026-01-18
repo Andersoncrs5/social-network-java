@@ -91,6 +91,10 @@ resilience4j:
           - org.springframework.dao.DataAccessException
 
 spring:
+  threads:
+    virtual:
+      enabled: true
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:4000/blog_db?allowPublicKeyRetrieval=true&useSSL=false

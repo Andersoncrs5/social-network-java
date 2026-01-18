@@ -10,6 +10,7 @@ import com.blog.writeapi.models.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.repositories.CommentRepository;
 import com.blog.writeapi.services.interfaces.ICommentService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -49,14 +50,18 @@ public class CommentService implements ICommentService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(@NotNull CommentModel comment) {
+    public void delete(@IsModelInitialized CommentModel comment) {
         this.repository.delete(comment);
     }
 
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public CommentModel create(CreateCommentDTO dto, PostModel post, UserModel user) {
+    public CommentModel create(
+            CreateCommentDTO dto,
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user
+    ) {
         CommentModel model = this.mapper.toModel(dto);
 
         model.setAuthor(user);
@@ -69,7 +74,12 @@ public class CommentService implements ICommentService {
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public CommentModel create(CreateCommentDTO dto, PostModel post, UserModel user, CommentModel comment) {
+    public CommentModel create(
+            CreateCommentDTO dto,
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user,
+            CommentModel comment
+    ) {
         CommentModel model = this.mapper.toModel(dto);
 
         model.setAuthor(user);
@@ -85,7 +95,10 @@ public class CommentService implements ICommentService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public CommentModel update(UpdateCommentDTO dto, CommentModel comment) {
+    public CommentModel update(
+            UpdateCommentDTO dto,
+            @IsModelInitialized CommentModel comment
+    ) {
         this.mapper.merge(dto, comment);
 
         return this.repository.save(comment);

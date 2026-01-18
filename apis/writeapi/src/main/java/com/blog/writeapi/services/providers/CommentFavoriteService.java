@@ -7,6 +7,7 @@ import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.CommentFavoriteRepository;
 import com.blog.writeapi.services.interfaces.ICommentFavoriteService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,10 @@ public class CommentFavoriteService implements ICommentFavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public CommentFavoriteModel getByCommentIdAndUserId(CommentModel comment, UserModel user) {
+    public CommentFavoriteModel getByCommentIdAndUserId(
+            @IsModelInitialized CommentModel comment,
+            @IsModelInitialized UserModel user
+    ) {
         return this.repository.findByCommentAndUser(comment, user).orElseThrow(
                 () -> new ModelNotFoundException("Comment marked with favorite was not found")
         );
@@ -42,7 +46,10 @@ public class CommentFavoriteService implements ICommentFavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CommentFavoriteModel> findByCommentIdAndUserId(CommentModel comment, UserModel user) {
+    public Optional<CommentFavoriteModel> findByCommentIdAndUserId(
+            @IsModelInitialized CommentModel comment,
+            @IsModelInitialized UserModel user
+    ) {
         return this.repository.findByCommentAndUser(comment, user);
     }
 
@@ -50,7 +57,10 @@ public class CommentFavoriteService implements ICommentFavoriteService {
     @Override
     @Transactional
     @Retry(name = "create-retry")
-    public CommentFavoriteModel add(UserModel user, CommentModel comment) {
+    public CommentFavoriteModel add(
+            @IsModelInitialized UserModel user,
+            @IsModelInitialized CommentModel comment
+    ) {
         CommentFavoriteModel favor = new CommentFavoriteModel().toBuilder()
                 .id(generator.nextId())
                 .user(user)
@@ -63,7 +73,7 @@ public class CommentFavoriteService implements ICommentFavoriteService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void remove(CommentFavoriteModel model) {
+    public void remove(@IsModelInitialized CommentFavoriteModel model) {
         this.repository.delete(model);
     }
 

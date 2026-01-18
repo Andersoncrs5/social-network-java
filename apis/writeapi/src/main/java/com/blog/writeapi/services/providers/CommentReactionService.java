@@ -7,6 +7,7 @@ import com.blog.writeapi.models.ReactionModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.CommentReactionRepository;
 import com.blog.writeapi.services.interfaces.ICommentReactionService;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +28,20 @@ public class CommentReactionService implements ICommentReactionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CommentReactionModel> findByUserAndComment(UserModel user, CommentModel comment) {
+    public Optional<CommentReactionModel> findByUserAndComment(
+            @IsModelInitialized UserModel user,
+            @IsModelInitialized CommentModel comment
+    ) {
         return this.repository.findByUserAndComment(user, comment);
     }
 
     @Override
     @Retry(name = "create-retry")
-    public CommentReactionModel create(CommentModel comment, ReactionModel reaction, UserModel user) {
+    public CommentReactionModel create(
+            @IsModelInitialized CommentModel comment,
+            @IsModelInitialized ReactionModel reaction,
+            @IsModelInitialized UserModel user
+    ) {
         CommentReactionModel model = new CommentReactionModel().toBuilder()
                 .comment(comment)
                 .reaction(reaction)
@@ -47,14 +55,14 @@ public class CommentReactionService implements ICommentReactionService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(CommentReactionModel model) {
+    public void delete(@IsModelInitialized CommentReactionModel model) {
         this.repository.delete(model);
     }
 
     @Override
     @Transactional
     @Retry(name = "update-retry")
-    public CommentReactionModel updateSimple(CommentReactionModel model) {
+    public CommentReactionModel updateSimple(@IsModelInitialized CommentReactionModel model) {
         return repository.save(model);
     }
 

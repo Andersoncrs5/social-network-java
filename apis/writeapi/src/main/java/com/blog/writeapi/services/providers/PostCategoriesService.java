@@ -9,6 +9,7 @@ import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.repositories.PostCategoriesRepository;
 import com.blog.writeapi.services.interfaces.IPostCategoriesService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostCategoriesMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -32,8 +33,8 @@ public class PostCategoriesService implements IPostCategoriesService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsByPostAndCategory(
-            @NotNull PostModel post,
-            @NotNull CategoryModel category
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized CategoryModel category
     ){
         return this.repository.existsByPostAndCategory(post, category);
     }
@@ -59,7 +60,7 @@ public class PostCategoriesService implements IPostCategoriesService {
     @Override
     @Transactional
     @Retry(name = "delete-retry")
-    public void delete(@NotNull PostCategoriesModel model) {
+    public void delete(@IsModelInitialized PostCategoriesModel model) {
         this.repository.delete(model);
     }
 
@@ -68,8 +69,9 @@ public class PostCategoriesService implements IPostCategoriesService {
     @Retry(name = "create-retry")
     public PostCategoriesModel create(
             @NotNull CreatePostCategoriesDTO dto,
-            @NotNull PostModel post,
-            @NotNull CategoryModel category) {
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized CategoryModel category
+    ) {
         PostCategoriesModel model = this.mapper.toModel(dto);
 
         model.setId(generator.nextId());
@@ -85,7 +87,7 @@ public class PostCategoriesService implements IPostCategoriesService {
     @Deprecated
     public PostCategoriesModel update(
             @NotNull UpdatePostCategoriesDTO dto,
-            @NotNull PostCategoriesModel model
+            @IsModelInitialized PostCategoriesModel model
             ) {
 
         this.mapper.merge(dto, model);
@@ -98,7 +100,7 @@ public class PostCategoriesService implements IPostCategoriesService {
     @Retry(name = "update-retry")
     public PostCategoriesModel updatev2(
             @NotNull UpdatePostCategoriesDTO dto,
-            @NotNull PostCategoriesModel model
+            @IsModelInitialized PostCategoriesModel model
             ) {
         if (dto.primary() != null && dto.primary() && !model.isPrimary()) {
             repository.findByPrimaryTrueAndPost(model.getPost())

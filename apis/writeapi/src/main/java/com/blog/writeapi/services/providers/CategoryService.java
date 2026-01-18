@@ -9,6 +9,7 @@ import com.blog.writeapi.repositories.CategoryRepository;
 import com.blog.writeapi.services.interfaces.ICategoryService;
 import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.valid.global.slug.Slug;
+import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CategoryMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -47,7 +48,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Transactional
-    public void delete(@NotNull CategoryModel category) { this.repository.delete(category); }
+    public void delete(@IsModelInitialized CategoryModel category) { this.repository.delete(category); }
 
     @Override
     @Transactional(readOnly = true)
@@ -92,7 +93,7 @@ public class CategoryService implements ICategoryService {
     @Override
     @Retry(name = "update-retry")
     @Transactional
-    public CategoryModel update(UpdateCategoryDTO dto, CategoryModel category) {
+    public CategoryModel update(UpdateCategoryDTO dto, @IsModelInitialized CategoryModel category) {
         mapper.merge(dto, category);
 
         return this.repository.save(category);
@@ -101,7 +102,7 @@ public class CategoryService implements ICategoryService {
     @Override
     @Retry(name = "update-retry")
     @Transactional
-    public CategoryModel update(UpdateCategoryDTO dto, CategoryModel category, CategoryModel parent) {
+    public CategoryModel update(UpdateCategoryDTO dto, @IsModelInitialized CategoryModel category, CategoryModel parent) {
         mapper.merge(dto, category);
 
         if (Boolean.TRUE.equals(dto.isRoot())) {

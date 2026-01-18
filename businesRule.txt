@@ -19,7 +19,6 @@ support
 post_versions
 feedback of system
 pinned_posts
-profiles
 blocks
 user_settings
 recommendations

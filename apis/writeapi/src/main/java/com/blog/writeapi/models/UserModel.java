@@ -31,6 +31,9 @@ public class UserModel extends BaseEntity {
     @Column(length = 100, unique = true, nullable = false)
     private String username;
 
+    @Column(length = 600)
+    private String bannerUrl;
+
     @Column(length = 150, unique = true, nullable = false)
     private String email;
 
@@ -77,4 +80,7 @@ public class UserModel extends BaseEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReactionModel> commentReactions;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserProfileModel profile;
 }

@@ -13,7 +13,6 @@ import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelIniti
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CategoryMapper;
 import io.github.resilience4j.retry.annotation.Retry;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,11 +51,11 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CategoryModel> getByName(String name) { return this.repository.findByName(name); }
+    public Optional<CategoryModel> getByName(String name) { return this.repository.findByNameIgnoreCase(name); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByName(String name) { return repository.existsByName(name); }
+    public Boolean existsByName(String name) { return repository.existsByNameIgnoreCase(name); }
 
     @Override
     @Transactional(readOnly = true)

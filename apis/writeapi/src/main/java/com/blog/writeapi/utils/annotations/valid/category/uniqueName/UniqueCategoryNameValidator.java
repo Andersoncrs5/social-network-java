@@ -16,6 +16,6 @@ public class UniqueCategoryNameValidator implements ConstraintValidator<UniqueCa
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if (s == null || s.isBlank()) return true;
 
-        return !this.repository.existsByName(s);
+        return !this.repository.existsByNameIgnoreCase(s);
     }
 }

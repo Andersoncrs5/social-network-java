@@ -82,25 +82,25 @@ public class CategoryServiceTest {
 
     @Test
     void shouldReturnTrueWhenExecMethodExistsByName() {
-        when(repository.existsByName("")).thenReturn(true);
+        when(repository.existsByNameIgnoreCase("")).thenReturn(true);
 
         Boolean exists = this.service.existsByName("");
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByName("");
+        verify(repository, times(1)).existsByNameIgnoreCase("");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenExecMethodExistsByName() {
-        when(repository.existsByName("")).thenReturn(false);
+        when(repository.existsByNameIgnoreCase("")).thenReturn(false);
 
         Boolean exists = this.service.existsByName("");
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByName("");
+        verify(repository, times(1)).existsByNameIgnoreCase("");
         verifyNoMoreInteractions(repository);
     }
 
@@ -130,26 +130,26 @@ public class CategoryServiceTest {
 
     @Test
     void shouldGetCategoryByName() {
-        when(repository.findByName(category.getName())).thenReturn(Optional.of(this.category));
+        when(repository.findByNameIgnoreCase(category.getName())).thenReturn(Optional.of(this.category));
 
         Optional<CategoryModel> optional = this.service.getByName(category.getName());
 
         assertThat(optional.isPresent()).isTrue();
         assertThat(optional.get()).isEqualTo(category);
 
-        verify(repository, times(1)).findByName(category.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(category.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetCategoryByName() {
-        when(repository.findByName(category.getName())).thenReturn(Optional.empty());
+        when(repository.findByNameIgnoreCase(category.getName())).thenReturn(Optional.empty());
 
         Optional<CategoryModel> optional = this.service.getByName(category.getName());
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findByName(category.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(category.getName());
         verifyNoMoreInteractions(repository);
     }
 

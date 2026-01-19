@@ -18,7 +18,7 @@ public class UniqueTagByNameValidator implements ConstraintValidator<UniqueTagBy
             return true;
         }
 
-        boolean exists = this.repository.existsByName(value);
+        boolean exists = this.repository.existsByNameIgnoreCase(value);
 
         if (exists) {
             context.disableDefaultConstraintViolation();

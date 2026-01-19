@@ -96,99 +96,99 @@ public class TagServiceTest {
 
     @Test
     void shouldGetTagByName() {
-        when(repository.findByName(this.tag.getName())).thenReturn(Optional.of(this.tag));
+        when(repository.findByNameIgnoreCase(this.tag.getName())).thenReturn(Optional.of(this.tag));
 
         Optional<TagModel> optional = this.service.getByName(this.tag.getName());
 
         assertThat(optional.isEmpty()).isFalse();
         assertThat(optional.get()).isEqualTo(this.tag);
 
-        verify(repository, times(1)).findByName(this.tag.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(this.tag.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetTagByName() {
-        when(repository.findByName(this.tag.getName())).thenReturn(Optional.empty());
+        when(repository.findByNameIgnoreCase(this.tag.getName())).thenReturn(Optional.empty());
 
         Optional<TagModel> optional = this.service.getByName(this.tag.getName());
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findByName(this.tag.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(this.tag.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnTrueWhenCheckExistsTagByName() {
-        when(repository.existsByName(this.tag.getName())).thenReturn(true);
+        when(repository.existsByNameIgnoreCase(this.tag.getName())).thenReturn(true);
 
         Boolean exists = this.service.existsByName(this.tag.getName());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByName(this.tag.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(this.tag.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenCheckExistsTagByName() {
-        when(repository.existsByName(this.tag.getName())).thenReturn(false);
+        when(repository.existsByNameIgnoreCase(this.tag.getName())).thenReturn(false);
 
         Boolean exists = this.service.existsByName(this.tag.getName());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByName(this.tag.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(this.tag.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldGetTagBySlug() {
-        when(repository.findBySlug(this.tag.getSlug())).thenReturn(Optional.of(this.tag));
+        when(repository.findBySlugIgnoreCase(this.tag.getSlug())).thenReturn(Optional.of(this.tag));
 
         Optional<TagModel> optional = this.service.getBySlug(this.tag.getSlug());
 
         assertThat(optional.isEmpty()).isFalse();
         assertThat(optional.get()).isEqualTo(this.tag);
 
-        verify(repository, times(1)).findBySlug(this.tag.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(this.tag.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetTagBySlug() {
-        when(repository.findBySlug(this.tag.getSlug())).thenReturn(Optional.empty());
+        when(repository.findBySlugIgnoreCase(this.tag.getSlug())).thenReturn(Optional.empty());
 
         Optional<TagModel> optional = this.service.getBySlug(this.tag.getSlug());
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findBySlug(this.tag.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(this.tag.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnTrueWhenCheckExistsTagBySlug() {
-        when(repository.existsBySlug(this.tag.getSlug())).thenReturn(true);
+        when(repository.existsBySlugIgnoreCase(this.tag.getSlug())).thenReturn(true);
 
         Boolean exists = this.service.existsBySlug(this.tag.getSlug());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsBySlug(this.tag.getSlug());
+        verify(repository, times(1)).existsBySlugIgnoreCase(this.tag.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenCheckExistsTagBySlug() {
-        when(repository.existsBySlug(this.tag.getSlug())).thenReturn(false);
+        when(repository.existsBySlugIgnoreCase(this.tag.getSlug())).thenReturn(false);
 
         Boolean exists = this.service.existsBySlug(this.tag.getSlug());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsBySlug(this.tag.getSlug());
+        verify(repository, times(1)).existsBySlugIgnoreCase(this.tag.getSlug());
         verifyNoMoreInteractions(repository);
     }
 

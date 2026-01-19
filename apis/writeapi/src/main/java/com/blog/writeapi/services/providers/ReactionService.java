@@ -37,7 +37,7 @@ public class ReactionService implements IReactionService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsByEmojiUnicode(@NotBlank String uni) {
-        return this.repository.existsByEmojiUnicode(uni);
+        return this.repository.existsByEmojiUnicodeIgnoreCase(uni);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ReactionService implements IReactionService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsByName(@NotBlank String name) {
-        return this.repository.existsByName(name);
+        return this.repository.existsByNameIgnoreCase(name);
     }
 
     @Override

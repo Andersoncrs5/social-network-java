@@ -1,7 +1,6 @@
 package com.blog.writeapi.utils.annotations.valid.tag.existsTagBySlug;
 
 import com.blog.writeapi.repositories.TagRepository;
-import com.blog.writeapi.utils.annotations.valid.tag.existsTagById.ExistsTagById;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class ExistsTagBySlugValidator implements ConstraintValidator<ExistsTagBy
             return true;
         }
 
-        boolean exists = repository.existsBySlug(value);
+        boolean exists = repository.existsBySlugIgnoreCase(value);
 
         if (!exists) {
             context.disableDefaultConstraintViolation();

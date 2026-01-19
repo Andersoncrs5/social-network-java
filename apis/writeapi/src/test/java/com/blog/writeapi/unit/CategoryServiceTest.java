@@ -155,50 +155,50 @@ public class CategoryServiceTest {
 
     @Test
     void shouldGetCategoryBySlug() {
-        when(repository.findBySlug(category.getSlug())).thenReturn(Optional.of(this.category));
+        when(repository.findBySlugIgnoreCase(category.getSlug())).thenReturn(Optional.of(this.category));
 
         Optional<CategoryModel> optional = this.service.getBySlug(category.getSlug());
 
         assertThat(optional.isPresent()).isTrue();
         assertThat(optional.get()).isEqualTo(category);
 
-        verify(repository, times(1)).findBySlug(category.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(category.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetCategoryBySlug() {
-        when(repository.findBySlug(category.getSlug())).thenReturn(Optional.empty());
+        when(repository.findBySlugIgnoreCase(category.getSlug())).thenReturn(Optional.empty());
 
         Optional<CategoryModel> optional = this.service.getBySlug(category.getSlug());
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findBySlug(category.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(category.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnTrueWhenExecMethodExistsBySlug() {
-        when(repository.existsBySlug("")).thenReturn(true);
+        when(repository.existsBySlugIgnoreCase("")).thenReturn(true);
 
         Boolean exists = this.service.existsBySlug("");
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsBySlug("");
+        verify(repository, times(1)).existsBySlugIgnoreCase("");
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenExecMethodExistsBySlug() {
-        when(repository.existsBySlug("")).thenReturn(false);
+        when(repository.existsBySlugIgnoreCase("")).thenReturn(false);
 
         Boolean exists = this.service.existsBySlug("");
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsBySlug("");
+        verify(repository, times(1)).existsBySlugIgnoreCase("");
         verifyNoMoreInteractions(repository);
     }
 

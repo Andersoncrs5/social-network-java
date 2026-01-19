@@ -31,7 +31,7 @@ public class SuperAdmInitializr implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String email = "system.domain@gmail.com";
 
-        UserModel superAdm = repository.findByEmail(email)
+        UserModel superAdm = repository.findByEmailIgnoreCase(email)
                 .orElseGet(() -> {
                     UserModel newUser = new UserModel().toBuilder()
                             .name("System")

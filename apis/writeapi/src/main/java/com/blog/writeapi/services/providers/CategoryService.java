@@ -59,11 +59,11 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CategoryModel> getBySlug(@Slug String slug) { return this.repository.findBySlug(slug); }
+    public Optional<CategoryModel> getBySlug(@Slug String slug) { return this.repository.findBySlugIgnoreCase(slug); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsBySlug(@Slug String slug) { return repository.existsBySlug(slug); }
+    public Boolean existsBySlug(@Slug String slug) { return repository.existsBySlugIgnoreCase(slug); }
 
     /**
      * @deprecated Use {@link #create(CreateCategoryDTO, CategoryModel)} instead.

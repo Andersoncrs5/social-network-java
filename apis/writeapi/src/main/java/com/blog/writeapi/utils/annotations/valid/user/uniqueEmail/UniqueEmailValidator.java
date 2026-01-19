@@ -15,6 +15,6 @@ public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, St
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if (s.isBlank()) return false;
 
-        return !this.repository.existsByEmail(s);
+        return !this.repository.existsByEmailIgnoreCase(s);
     }
 }

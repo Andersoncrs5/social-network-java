@@ -16,7 +16,7 @@ public class ExistsTagByNameValidator implements ConstraintValidator<ExistsTagBy
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) { return true; }
 
-        boolean exists = this.repository.existsBySlug(value);
+        boolean exists = this.repository.existsBySlugIgnoreCase(value);
 
         if (!exists) {
             context.disableDefaultConstraintViolation();

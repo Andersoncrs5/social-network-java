@@ -24,7 +24,7 @@ public class RoleService implements IRoleService {
     @Override
     @Transactional(readOnly = true)
     public Optional<RoleModel> findByName(String name) {
-        return this.repository.findByName(name);
+        return this.repository.findByNameIgnoreCase(name);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class RoleService implements IRoleService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsByName(String name) {
-        return this.repository.existsByName(name);
+        return this.repository.existsByNameIgnoreCase(name);
     }
 
     @Override

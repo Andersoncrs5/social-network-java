@@ -39,7 +39,7 @@ public class UserService implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsByUsername(String username) {
-        return this.repository.existsByUsername(username);
+        return this.repository.existsByUsernameIgnoreCase(username);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class UserService implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UserModel> findByEmail(String email) { return repository.findByEmail(email); }
+    public Optional<UserModel> findByEmail(String email) { return repository.findByEmailIgnoreCase(email); }
 
     @Override
     @Transactional

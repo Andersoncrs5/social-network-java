@@ -50,13 +50,13 @@ public class PostService implements IPostService {
     @Override
     @Transactional(readOnly = true)
     public Boolean existsBySlug(@SlugConstraint String slug) {
-        return this.repository.existsBySlug(slug);
+        return this.repository.existsBySlugIgnoreCase(slug);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<PostModel> getBySlug(@SlugConstraint String slug) {
-        return this.repository.findBySlug(slug);
+        return this.repository.findBySlugIgnoreCase(slug);
     }
 
     @Override

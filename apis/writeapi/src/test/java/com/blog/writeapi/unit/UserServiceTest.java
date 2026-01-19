@@ -100,50 +100,50 @@ public class UserServiceTest {
 
     @Test
     void shouldReturnUserWhenGetByEmail() {
-        when(repository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        when(repository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.of(user));
 
         Optional<UserModel> optional = this.service.findByEmail(user.getEmail());
 
         assertThat(optional.isPresent()).isTrue();
         assertThat(optional.get().getId()).isEqualTo(user.getId());
 
-        verify(this.repository, times(1)).findByEmail(user.getEmail());
+        verify(this.repository, times(1)).findByEmailIgnoreCase(user.getEmail());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetByEmail() {
-        when(repository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+        when(repository.findByEmailIgnoreCase(user.getEmail())).thenReturn(Optional.empty());
 
         Optional<UserModel> optional = this.service.findByEmail(user.getEmail());
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(this.repository, times(1)).findByEmail(user.getEmail());
+        verify(this.repository, times(1)).findByEmailIgnoreCase(user.getEmail());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnTrueWhenExistsByUsername() {
-        when(repository.existsByUsername(user.getUsername())).thenReturn(true);
+        when(repository.existsByUsernameIgnoreCase(user.getUsername())).thenReturn(true);
 
         Boolean exists = this.service.existsByUsername(user.getUsername());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByUsername(user.getUsername());
+        verify(repository, times(1)).existsByUsernameIgnoreCase(user.getUsername());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenExistsByUsername() {
-        when(repository.existsByUsername(user.getUsername())).thenReturn(false);
+        when(repository.existsByUsernameIgnoreCase(user.getUsername())).thenReturn(false);
 
         Boolean exists = this.service.existsByUsername(user.getUsername());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByUsername(user.getUsername());
+        verify(repository, times(1)).existsByUsernameIgnoreCase(user.getUsername());
         verifyNoMoreInteractions(repository);
     }
 

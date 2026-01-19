@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
@@ -59,52 +58,52 @@ public class ReactionServiceTest {
     @Test
     @DisplayName("Test if return true when exec METHOD: existsByName")
     public void shouldExistsReactionByNameReturnTrue() {
-        when(repository.existsByName(this.reaction.getName())).thenReturn(true);
+        when(repository.existsByNameIgnoreCase(this.reaction.getName())).thenReturn(true);
 
         Boolean exists = this.service.existsByName(this.reaction.getName());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByName(this.reaction.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(this.reaction.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     @DisplayName("Test if return false when exec METHOD: existsByName")
     public void shouldExistsReactionByNameReturnFalse() {
-        when(repository.existsByName(this.reaction.getName())).thenReturn(false);
+        when(repository.existsByNameIgnoreCase(this.reaction.getName())).thenReturn(false);
 
         Boolean exists = this.service.existsByName(this.reaction.getName());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByName(this.reaction.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(this.reaction.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     @DisplayName("Test if return true when exec METHOD: EmojiUnicode")
     public void shouldExistsReactionByEmojiUnicodeReturnTrue() {
-        when(repository.existsByEmojiUnicode(this.reaction.getEmojiUnicode())).thenReturn(true);
+        when(repository.existsByEmojiUnicodeIgnoreCase(this.reaction.getEmojiUnicode())).thenReturn(true);
 
         Boolean exists = this.service.existsByEmojiUnicode(this.reaction.getEmojiUnicode());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+        verify(repository, times(1)).existsByEmojiUnicodeIgnoreCase(this.reaction.getEmojiUnicode());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     @DisplayName("Test if return false when exec METHOD: existsByEmojiUnicode")
     public void shouldExistsReactionByEmojiUnicodeReturnFalse() {
-        when(repository.existsByEmojiUnicode(this.reaction.getEmojiUnicode())).thenReturn(false);
+        when(repository.existsByEmojiUnicodeIgnoreCase(this.reaction.getEmojiUnicode())).thenReturn(false);
 
         Boolean exists = this.service.existsByEmojiUnicode(this.reaction.getEmojiUnicode());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByEmojiUnicode(this.reaction.getEmojiUnicode());
+        verify(repository, times(1)).existsByEmojiUnicodeIgnoreCase(this.reaction.getEmojiUnicode());
         verifyNoMoreInteractions(repository);
     }
 

@@ -16,6 +16,6 @@ public class UniqueCategorySlugValidator implements ConstraintValidator<UniqueCa
     public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
         if (s == null || s.isBlank()) return true;
 
-        return !this.repository.existsBySlug(s);
+        return !this.repository.existsBySlugIgnoreCase(s);
     }
 }

@@ -40,7 +40,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             if (email == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
-            boolean exists = this.userRepository.existsByEmail(email);
+            boolean exists = this.userRepository.existsByEmailIgnoreCase(email);
 
             if (!exists) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 

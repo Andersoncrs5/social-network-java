@@ -35,49 +35,49 @@ public class RoleServiceTest {
 
     @Test
     void shouldReturnRoleWhenFindRoleByName() {
-        when(repository.findByName(role.getName())).thenReturn(Optional.of(role));
+        when(repository.findByNameIgnoreCase(role.getName())).thenReturn(Optional.of(role));
 
         Optional<RoleModel> name = this.service.findByName(role.getName());
 
         assertThat(name.isPresent()).isTrue();
 
-        verify(repository, times(1)).findByName(role.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(role.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenFindRoleByName() {
-        when(repository.findByName(role.getName())).thenReturn(Optional.empty());
+        when(repository.findByNameIgnoreCase(role.getName())).thenReturn(Optional.empty());
 
         Optional<RoleModel> name = this.service.findByName(role.getName());
 
         assertThat(name.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findByName(role.getName());
+        verify(repository, times(1)).findByNameIgnoreCase(role.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnTrueWhenExistsRoleByName() {
-        when(repository.existsByName(role.getName())).thenReturn(true);
+        when(repository.existsByNameIgnoreCase(role.getName())).thenReturn(true);
 
         Boolean exists = this.service.existsByName(role.getName());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsByName(role.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(role.getName());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenExistsRoleByName() {
-        when(repository.existsByName(role.getName())).thenReturn(false);
+        when(repository.existsByNameIgnoreCase(role.getName())).thenReturn(false);
 
         Boolean exists = this.service.existsByName(role.getName());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsByName(role.getName());
+        verify(repository, times(1)).existsByNameIgnoreCase(role.getName());
         verifyNoMoreInteractions(repository);
     }
 

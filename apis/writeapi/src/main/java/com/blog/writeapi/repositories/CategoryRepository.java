@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface CategoryRepository extends JpaRepository<@NonNull CategoryModel, @NonNull Long> {
     Boolean existsByNameIgnoreCase(@NotNull String name);
     Optional<CategoryModel> findByNameIgnoreCase(@NotNull String name);
-    Optional<CategoryModel> findBySlug(@SlugConstraint String slug);
-    Boolean existsBySlug(@SlugConstraint String slug);
+    Optional<CategoryModel> findBySlugIgnoreCase(@SlugConstraint String slug);
+    Boolean existsBySlugIgnoreCase(@SlugConstraint String slug);
 }

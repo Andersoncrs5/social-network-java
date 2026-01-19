@@ -46,19 +46,19 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<TagModel> getByName(String name) { return this.repository.findByName(name); }
+    public Optional<TagModel> getByName(String name) { return this.repository.findByNameIgnoreCase(name); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsByName(String name) { return this.repository.existsByName(name); }
+    public Boolean existsByName(String name) { return this.repository.existsByNameIgnoreCase(name); }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<TagModel> getBySlug(@SlugConstraint String slug) { return this.repository.findBySlug(slug); }
+    public Optional<TagModel> getBySlug(@SlugConstraint String slug) { return this.repository.findBySlugIgnoreCase(slug); }
 
     @Override
     @Transactional(readOnly = true)
-    public Boolean existsBySlug(@SlugConstraint String slug) { return this.repository.existsBySlug(slug); }
+    public Boolean existsBySlug(@SlugConstraint String slug) { return this.repository.existsBySlugIgnoreCase(slug); }
 
     @Override
     @Transactional

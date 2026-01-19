@@ -98,50 +98,50 @@ public class PostServiceTest {
 
     @Test
     void shouldReturnTrueWhenExistsBySlug() {
-        when(repository.existsBySlug(this.post.getSlug())).thenReturn(true);
+        when(repository.existsBySlugIgnoreCase(this.post.getSlug())).thenReturn(true);
 
         Boolean exists = this.service.existsBySlug(this.post.getSlug());
 
         assertThat(exists).isTrue();
 
-        verify(repository, times(1)).existsBySlug(this.post.getSlug());
+        verify(repository, times(1)).existsBySlugIgnoreCase(this.post.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnFalseWhenExistsBySlug() {
-        when(repository.existsBySlug(this.post.getSlug())).thenReturn(false);
+        when(repository.existsBySlugIgnoreCase(this.post.getSlug())).thenReturn(false);
 
         Boolean exists = this.service.existsBySlug(this.post.getSlug());
 
         assertThat(exists).isFalse();
 
-        verify(repository, times(1)).existsBySlug(this.post.getSlug());
+        verify(repository, times(1)).existsBySlugIgnoreCase(this.post.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnPostWheFindBySlug() {
-        when(repository.findBySlug(this.post.getSlug())).thenReturn(Optional.of(this.post));
+        when(repository.findBySlugIgnoreCase(this.post.getSlug())).thenReturn(Optional.of(this.post));
 
         Optional<PostModel> optional = this.service.getBySlug(this.post.getSlug());
 
         assertThat(optional.isPresent()).isTrue();
         assertThat(optional.get().getSlug()).isEqualTo(this.post.getSlug());
 
-        verify(repository, times(1)).findBySlug(this.post.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(this.post.getSlug());
         verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWheFindBySlug() {
-        when(repository.findBySlug(this.post.getSlug())).thenReturn(Optional.empty());
+        when(repository.findBySlugIgnoreCase(this.post.getSlug())).thenReturn(Optional.empty());
 
         Optional<PostModel> optional = this.service.getBySlug(this.post.getSlug());
 
         assertThat(optional.isPresent()).isFalse();
 
-        verify(repository, times(1)).findBySlug(this.post.getSlug());
+        verify(repository, times(1)).findBySlugIgnoreCase(this.post.getSlug());
         verifyNoMoreInteractions(repository);
     }
 

@@ -11,9 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface TagRepository extends JpaRepository<@NonNull TagModel, @NonNull Long> {
-    Optional<TagModel> findByName(@NotBlank String name);
-    Boolean existsByName(@NotBlank String name);
+    Optional<TagModel> findByNameIgnoreCase(@NotBlank String name);
+    Boolean existsByNameIgnoreCase(@NotBlank String name);
 
-    Optional<TagModel> findBySlug(@SlugConstraint String slug);
-    Boolean existsBySlug(@SlugConstraint String slug);
+    Optional<TagModel> findBySlugIgnoreCase(@SlugConstraint String slug);
+    Boolean existsBySlugIgnoreCase(@SlugConstraint String slug);
 }

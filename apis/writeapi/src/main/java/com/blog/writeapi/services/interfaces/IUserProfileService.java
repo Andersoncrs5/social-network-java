@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface IUserProfileService {
     Boolean existsByUser(@IsModelInitialized UserModel user);
     Optional<UserProfileModel> getByUser(@IsModelInitialized UserModel user);
+    UserProfileModel getByUserSimple(@IsModelInitialized UserModel user);
     void delete(@IsModelInitialized UserProfileModel profile);
     UserProfileModel create(@IsModelInitialized UserModel user);
     UserProfileModel update(@IsModelInitialized UserProfileModel model, UpdateUserProfileDTO dto);

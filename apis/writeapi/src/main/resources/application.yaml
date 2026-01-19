@@ -91,6 +91,17 @@ resilience4j:
           - org.springframework.dao.DataAccessException
 
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: http://localhost:4566
+        region: us-east-1
+      credentials:
+        access-key: test
+        secret-key: test
+      region:
+        static: us-east-1
+
   threads:
     virtual:
       enabled: true

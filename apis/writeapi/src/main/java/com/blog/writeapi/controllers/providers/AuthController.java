@@ -6,16 +6,12 @@ import com.blog.writeapi.dtos.user.LoginUserDTO;
 import com.blog.writeapi.models.RoleModel;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.models.UserRoleModel;
-import com.blog.writeapi.services.interfaces.IRoleService;
-import com.blog.writeapi.services.interfaces.ITokenService;
-import com.blog.writeapi.services.interfaces.IUserRoleService;
-import com.blog.writeapi.services.interfaces.IUserService;
+import com.blog.writeapi.services.interfaces.*;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -36,6 +32,7 @@ public class AuthController implements AuthControllerDocs {
     private final IUserRoleService userRoleService;
     private final ITokenService tokenService;
     private final Argon2PasswordEncoder encoder;
+    private final IUserProfileService iUserProfileService;
 
     @Override
     public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, HttpServletRequest request) {
@@ -89,7 +86,8 @@ public class AuthController implements AuthControllerDocs {
 
         user.setRefreshToken(refreshToken);
 
-        this.userService.UpdateSimple(user);
+        UserModel updated = this.userService.UpdateSimple(user);
+        this.iUserProfileService.create(updated);
 
         ResponseTokens tokens = new ResponseTokens(
                 token,

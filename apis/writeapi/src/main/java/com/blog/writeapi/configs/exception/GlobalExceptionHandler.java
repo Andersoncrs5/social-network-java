@@ -2,6 +2,7 @@ package com.blog.writeapi.configs.exception;
 
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.res.ResponseHttp;
+import io.awspring.cloud.s3.S3Exception;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -24,6 +27,56 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleRuntimeException(ModelNotFoundException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleS3Exception(S3Exception ex) {
+        log.error("S3 Error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseHttp<>(
+                null,
+                "Storage service error: " + ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(NoSuchBucketException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleNoSuchBucketException(NoSuchBucketException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
+                null,
+                "Storage bucket not found.",
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(NoSuchKeyException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleNoSuchKeyException(NoSuchKeyException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
+                null,
+                "The requested file does not exist in our storage.",
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
 
     @ExceptionHandler(ModelNotFoundException.class)
     public ResponseEntity<@NonNull ResponseHttp<Void>> handleModelNotFoundException(ModelNotFoundException ex) {

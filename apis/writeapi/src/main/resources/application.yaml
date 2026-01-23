@@ -90,6 +90,9 @@ resilience4j:
         retryExceptions:
           - org.springframework.dao.DataAccessException
 
+s3:
+  bucketAttachments: attachments
+
 spring:
   cloud:
     aws:

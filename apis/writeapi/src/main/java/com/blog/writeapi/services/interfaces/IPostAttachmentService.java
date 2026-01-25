@@ -13,7 +13,11 @@ import java.util.Optional;
 public interface IPostAttachmentService {
     PostAttachmentModel getByIdSimple(@IsId Long id);
     Boolean delete(@IsModelInitialized PostAttachmentModel model);
-    Optional<PostAttachmentModel> create(CreatePostAttachmentDTO dto, @IsModelInitialized UserModel user, @IsModelInitialized PostModel post);
-    PostAttachmentModel updateMetadata(Long id, UpdatePostAttachmentDTO dto);
+    Optional<PostAttachmentModel> create(
+            CreatePostAttachmentDTO dto,
+            @IsModelInitialized UserModel user,
+            @IsModelInitialized PostModel post
+    );
+    PostAttachmentModel updateMetadata(@IsId Long id, UpdatePostAttachmentDTO dto);
     void deleteAllByPost(@IsModelInitialized PostModel post);
 }

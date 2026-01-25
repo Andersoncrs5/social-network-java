@@ -27,4 +27,8 @@ public abstract class AttachmentBaseModel extends BaseEntity {
 
     private Long fileSize;
 
+    private Boolean isPublic;
+
+    private Boolean isVisible;
+
 }

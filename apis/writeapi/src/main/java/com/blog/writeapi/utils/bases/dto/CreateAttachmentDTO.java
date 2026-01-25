@@ -13,6 +13,7 @@ public class CreateAttachmentDTO {
     private String contentType;
     private Long fileSize;
     private Boolean isPublic;
+    private Boolean isVisible;
 
     @Schema(description = "File to be uploaded", type = "string", format = "binary")
     @NotBlank

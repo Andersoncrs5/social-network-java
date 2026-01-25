@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -181,6 +182,27 @@ public class PostAttachmentServiceTest {
         verify(repository).save(any(PostAttachmentModel.class));
 
         verifyNoMoreInteractions(mapper, storageService, repository);
+    }
+
+    @Test
+    void shouldDeleteAllByPost() {
+        List<PostAttachmentModel> list = List.of(attachment);
+
+        when(repository.findAllByPost(post)).thenReturn(list);
+        doNothing().when(this.storageService).deleteMultiObject(anyString(), anyList());
+        doNothing().when(this.repository).deleteAllInBatch(list);
+
+        this.service.deleteAllByPost(post);
+
+        verifyNoMoreInteractions(repository, storageService);
+
+        verify(repository, times(1)).deleteAllInBatch(list);
+        verify(storageService, times(1)).deleteMultiObject(anyString(), anyList());
+
+        InOrder order = inOrder(repository, storageService);
+
+        order.verify(storageService).deleteMultiObject(anyString(), anyList());
+        order.verify(repository).deleteAllInBatch(list);
     }
 
 }

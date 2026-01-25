@@ -1,12 +1,16 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.dtos.postAttachment.CreatePostAttachmentDTO;
 import com.blog.writeapi.models.PostAttachmentModel;
+import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.UserModel;
+import com.blog.writeapi.models.enums.Post.PostStatusEnum;
 import com.blog.writeapi.repositories.PostAttachmentRepository;
 import com.blog.writeapi.services.providers.PostAttachmentService;
 import com.blog.writeapi.services.providers.StorageService;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.mappers.PostAttachmentMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +31,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class PostAttachmentServiceTest {
 
+    @Mock
+    private PostAttachmentMapper mapper;
     @Mock
     private PostAttachmentRepository repository;
     @Mock
@@ -58,6 +64,19 @@ public class PostAttachmentServiceTest {
             .version(1L)
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
+            .build();
+
+
+    PostModel post = new PostModel().toBuilder()
+            .id(1998780203274176609L)
+            .title("anyTittle")
+            .slug("any-title")
+            .content("any Content")
+            .status(PostStatusEnum.PUBLISHED)
+            .readingTime(5)
+            .rankingScore(0.0)
+            .isFeatured(false)
+            .author(user)
             .build();
 
     @BeforeEach
@@ -134,6 +153,34 @@ public class PostAttachmentServiceTest {
         verify(storageService, times(1))
                 .deleteObject(eq("test-bucket"), eq(this.attachment.getStorageKey()), any());
 
+    }
+
+    @Test
+    void shouldCreateNewAttachment() {
+        when(mapper.toModel(any(CreatePostAttachmentDTO.class))).thenReturn(this.attachment);
+        when(generator.nextId()).thenReturn(this.attachment.getId());
+        when(storageService.putObject(
+                eq("test-bucket"),
+                anyString(),
+                any(),
+                any(),
+                eq(user)
+        )).thenReturn(true);
+
+        when(repository.save(any(PostAttachmentModel.class))).thenReturn(this.attachment);
+
+        CreatePostAttachmentDTO dto = new CreatePostAttachmentDTO();
+        dto.setIsPublic(true);
+
+        Optional<PostAttachmentModel> result = this.service.create(dto, user, post);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(this.attachment.getId());
+
+        verify(storageService).putObject(eq("test-bucket"), anyString(), any(), any(), eq(user));
+        verify(repository).save(any(PostAttachmentModel.class));
+
+        verifyNoMoreInteractions(mapper, storageService, repository);
     }
 
 }

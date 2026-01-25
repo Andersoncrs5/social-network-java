@@ -15,4 +15,5 @@ public interface IPostAttachmentService {
     Boolean delete(@IsModelInitialized PostAttachmentModel model);
     Optional<PostAttachmentModel> create(CreatePostAttachmentDTO dto, @IsModelInitialized UserModel user, @IsModelInitialized PostModel post);
     PostAttachmentModel updateMetadata(Long id, UpdatePostAttachmentDTO dto);
+    void deleteAllByPost(@IsModelInitialized PostModel post);
 }

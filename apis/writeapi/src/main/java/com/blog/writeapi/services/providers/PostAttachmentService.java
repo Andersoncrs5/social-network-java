@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,6 +80,15 @@ public class PostAttachmentService implements IPostAttachmentService {
         }
 
         return repository.save(model);
+    }
+
+    @Transactional
+    public void deleteAllByPost(@IsModelInitialized PostModel post) {
+        List<PostAttachmentModel> attachments = repository.findAllByPost(post);
+        List<String> keys = attachments.stream().map(PostAttachmentModel::getStorageKey).toList();
+
+        this.storageService.deleteMultiObject(BUCKET, keys);
+        this.repository.deleteAllInBatch(attachments);
     }
 
 }

@@ -4,6 +4,16 @@ server:
 resilience4j:
   circuitbreaker:
     instances:
+      tag-upload-file-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 40
+        slowCallDurationThreshold: 1800ms
+        slowCallRateThreshold: 45
+        waitDurationInOpenState: 15s
+        permittedNumberOfCallsInHalfOpenState: 2
+
       tag-toggle-cb:
         registerHealthIndicator: true
         slidingWindowSize: 10

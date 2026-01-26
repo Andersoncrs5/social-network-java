@@ -104,6 +104,7 @@ spring:
         secret-key: test
       region:
         static: us-east-1
+      path-style: true
 
   threads:
     virtual:

@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class CreateAttachmentDTO {
     private String fileName;
     private String contentType;
-    private Long fileSize;
     private Boolean isPublic;
     private Boolean isVisible;
 

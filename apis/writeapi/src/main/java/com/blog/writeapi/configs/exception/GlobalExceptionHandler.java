@@ -1,6 +1,7 @@
 package com.blog.writeapi.configs.exception;
 
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolation;
@@ -28,10 +29,9 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<@NonNull ResponseHttp<Void>> handleRuntimeException(ModelNotFoundException ex) {
-        log.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseHttp<>(
+    @ExceptionHandler(ResourceOwnerMismatchException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleResourceOwnerMismatchException(ResourceOwnerMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
                 null,
                 ex.getMessage(),
                 UUID.randomUUID().toString(),

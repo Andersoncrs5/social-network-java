@@ -17,4 +17,6 @@ public class AttachmentDTO extends BaseDTO {
     private String fileName;
     private String contentType;
     private Long fileSize;
+    private Boolean isPublic;
+    private Boolean isVisible;
 }

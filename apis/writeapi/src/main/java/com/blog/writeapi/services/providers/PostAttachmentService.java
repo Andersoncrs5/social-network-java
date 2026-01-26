@@ -67,6 +67,7 @@ public class PostAttachmentService implements IPostAttachmentService {
         model.setId(generator.nextId());
         model.setUploader(user);
         model.setPost(post);
+        model.setFileSize(dto.getFile().getSize());
 
         return Optional.of(repository.save(model));
     }

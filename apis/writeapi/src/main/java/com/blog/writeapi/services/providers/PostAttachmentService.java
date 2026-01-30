@@ -54,7 +54,7 @@ public class PostAttachmentService implements IPostAttachmentService {
 
     public Optional<PostAttachmentModel> create(CreatePostAttachmentDTO dto, @IsModelInitialized UserModel user, @IsModelInitialized PostModel post) {
         PostAttachmentModel model = this.mapper.toModel(dto);
-        model.setStorageKey(UUID.randomUUID() + UUID.randomUUID().toString());
+        model.setStorageKey(UUID.randomUUID().toString());
 
         ObjectCannedACL acl = dto.getIsPublic() ? ObjectCannedACL.PUBLIC_READ :  ObjectCannedACL.PRIVATE;
 
@@ -73,9 +73,7 @@ public class PostAttachmentService implements IPostAttachmentService {
     }
 
     @Transactional
-    public PostAttachmentModel updateMetadata(@IsId Long id, UpdatePostAttachmentDTO dto) {
-        PostAttachmentModel model = getByIdSimple(id);
-
+    public PostAttachmentModel updateMetadata(@IsModelInitialized PostAttachmentModel model, UpdatePostAttachmentDTO dto) {
         this.mapper.merge(dto, model);
 
         return repository.save(model);

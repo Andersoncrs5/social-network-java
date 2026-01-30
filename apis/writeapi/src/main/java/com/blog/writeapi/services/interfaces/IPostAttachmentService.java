@@ -18,6 +18,6 @@ public interface IPostAttachmentService {
             @IsModelInitialized UserModel user,
             @IsModelInitialized PostModel post
     );
-    PostAttachmentModel updateMetadata(@IsId Long id, UpdatePostAttachmentDTO dto);
+    PostAttachmentModel updateMetadata(@IsModelInitialized PostAttachmentModel model, UpdatePostAttachmentDTO dto);
     void deleteAllByPost(@IsModelInitialized PostModel post);
 }

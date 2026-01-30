@@ -73,4 +73,7 @@ public class CommentModel extends BaseEntity {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReactionModel> reactions;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentAttachmentModel> attachments;
+
 }

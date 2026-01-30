@@ -83,4 +83,8 @@ public class UserModel extends BaseEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfileModel profile;
+
+    @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentAttachmentModel> attachments;
+
 }

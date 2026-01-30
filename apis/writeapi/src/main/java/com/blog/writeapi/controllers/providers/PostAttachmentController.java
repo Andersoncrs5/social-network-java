@@ -2,6 +2,7 @@ package com.blog.writeapi.controllers.providers;
 
 import com.blog.writeapi.controllers.docs.PostAttachmentControllerDocs;
 import com.blog.writeapi.dtos.postAttachment.CreatePostAttachmentDTO;
+import com.blog.writeapi.dtos.postAttachment.UpdatePostAttachmentDTO;
 import com.blog.writeapi.models.PostAttachmentModel;
 import com.blog.writeapi.models.PostModel;
 import com.blog.writeapi.models.UserModel;
@@ -106,6 +107,31 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
                 true,
                 OffsetDateTime.now()
         ), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<?> update(
+            @PathVariable @IsId Long id,
+            @RequestBody UpdatePostAttachmentDTO dto,
+            HttpServletRequest request
+    ) {
+        Long userId = this.tokenService.extractUserIdFromRequest(request);
+        PostAttachmentModel attachment = this.service.getByIdSimple(id);
+
+        if (!Objects.equals(attachment.getUploader().getId(), userId)) {
+            throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
+        }
+
+        PostAttachmentModel updated = this.service.updateMetadata(attachment, dto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
+                mapper.toDTO(updated),
+                "Attachment updated!",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        ));
     }
 
 }

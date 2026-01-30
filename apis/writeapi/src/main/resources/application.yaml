@@ -4,6 +4,16 @@ server:
 resilience4j:
   circuitbreaker:
     instances:
+      tag-upload-file-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 40
+        slowCallDurationThreshold: 1800ms
+        slowCallRateThreshold: 45
+        waitDurationInOpenState: 15s
+        permittedNumberOfCallsInHalfOpenState: 2
+
       tag-toggle-cb:
         registerHealthIndicator: true
         slidingWindowSize: 10
@@ -90,7 +100,15 @@ resilience4j:
         retryExceptions:
           - org.springframework.dao.DataAccessException
 
+s3:
+  bucketAttachments: attachments
+
 spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   cloud:
     aws:
       s3:
@@ -101,6 +119,7 @@ spring:
         secret-key: test
       region:
         static: us-east-1
+      path-style: true
 
   threads:
     virtual:

@@ -1,8 +1,8 @@
 package com.blog.writeapi.configs.exception;
 
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.res.ResponseHttp;
-import io.awspring.cloud.s3.S3Exception;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -15,8 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -28,10 +30,21 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<@NonNull ResponseHttp<Void>> handleRuntimeException(ModelNotFoundException ex) {
-        log.error(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseHttp<>(
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ResponseHttp<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(new ResponseHttp<>(
+                null,
+                "File is too large! Maximum limit is 10MB.",
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(ResourceOwnerMismatchException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleResourceOwnerMismatchException(ResourceOwnerMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
                 null,
                 ex.getMessage(),
                 UUID.randomUUID().toString(),

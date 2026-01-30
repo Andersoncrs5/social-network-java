@@ -4,7 +4,6 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.models.UserModel;
 import com.blog.writeapi.repositories.UserRepository;
 import com.blog.writeapi.services.providers.UserService;
-import com.github.dozermapper.core.Mapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +23,6 @@ public class UserServiceTest {
     @Mock private UserRepository repository;
     @Mock private Argon2PasswordEncoder encoder;
     @Mock private Snowflake snowflakeIdGenerator;
-    @Mock private Mapper mapper;
 
     @InjectMocks private UserService service;
 

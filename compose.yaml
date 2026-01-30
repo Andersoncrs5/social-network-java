@@ -7,8 +7,10 @@ services:
       - SERVICES=s3
       - DEFAULT_REGION=us-east-1
       - DEBUG=1
+      - PERSISTENCE=1
     volumes:
-      - "./localstack:/var/lib/localstack"
+      - "./localstack_data:/lib/localstack"
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh"
 
   pd:
     image: pingcap/pd:latest
@@ -70,3 +72,4 @@ networks:
 
 volumes:
     dragonfly_data: {}
+    localstack_data: {}

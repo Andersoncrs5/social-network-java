@@ -81,18 +81,15 @@ public class StorageService implements IStorageService {
             @NotBlank String key,
             String versionID
     ) {
-        DeleteObjectRequest.Builder builder = DeleteObjectRequest.builder()
+        DeleteObjectRequest request = DeleteObjectRequest.builder()
                 .bucket(bucketName)
-                .key(key);
-
-        if (versionID != null && !versionID.isBlank())
-            builder.versionId(versionID);
-
-        DeleteObjectRequest request = builder.build();
+                .key(key)
+                .versionId((versionID != null && !versionID.isBlank()) ? versionID : null)
+                .build();
 
         DeleteObjectResponse response = client.deleteObject(request);
 
-        return response.deleteMarker();
+        return response.sdkHttpResponse().isSuccessful();
     }
 
     public void deleteMultiObject(

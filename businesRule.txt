@@ -1,4 +1,3 @@
-attachments
 post_stats
 comment_stats
 post_views

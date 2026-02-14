@@ -87,4 +87,7 @@ public class UserModel extends BaseEntity {
     @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentAttachmentModel> attachments;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategoryPreferenceModel> userCategoryPreferences;
+
 }

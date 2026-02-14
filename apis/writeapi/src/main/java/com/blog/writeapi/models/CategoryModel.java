@@ -52,4 +52,7 @@ public class CategoryModel extends BaseEntity {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostCategoriesModel> posts;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategoryPreferenceModel> userCategoryPreferences;
+
 }

@@ -28,6 +28,8 @@ import com.blog.writeapi.dtos.tag.TagDTO;
 import com.blog.writeapi.dtos.user.CreateUserDTO;
 import com.blog.writeapi.dtos.user.LoginUserDTO;
 import com.blog.writeapi.dtos.user.UserDTO;
+import com.blog.writeapi.dtos.userCategoryPreference.UserCategoryPreferenceDTO;
+import com.blog.writeapi.dtos.userTagPreference.UserTagPreferenceDTO;
 import com.blog.writeapi.models.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.models.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
@@ -55,6 +57,55 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public UserTagPreferenceDTO addTagInPreferenceUser(
+            ResponseUserTest userData,
+            TagDTO tag
+    ) throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/user-tag-preference/" + tag.id() + "/toggle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + userData.tokens().token()
+                )).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UserTagPreferenceDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<UserTagPreferenceDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isNotZero().isPositive().isNotNull();
+        assertThat(response.data().tag().id()).isEqualTo(tag.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+
+        return response.data();
+    }
+
+    public UserCategoryPreferenceDTO addCategoryInPreferenceUser(
+            ResponseUserTest userData,
+            CategoryDTO category
+    ) throws Exception {
+        MvcResult result = this.mockMvc.perform(post("/v1/user-category-preference/" + category.id() + "/toggle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + userData.tokens().token()
+                )).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UserCategoryPreferenceDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<UserCategoryPreferenceDTO> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.data().id()).isNotZero().isPositive().isNotNull();
+        assertThat(response.data().category().id()).isEqualTo(category.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+
+        return response.data();
+    }
 
     public CommentReactionDTO toggleReactionToComment(
             ResponseUserTest userData2,

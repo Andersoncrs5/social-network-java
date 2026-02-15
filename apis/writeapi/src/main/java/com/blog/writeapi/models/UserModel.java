@@ -90,4 +90,7 @@ public class UserModel extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategoryPreferenceModel> userCategoryPreferences;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagPreferenceModel> userTagPreferences;
+
 }

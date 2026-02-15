@@ -54,4 +54,7 @@ public class TagModel extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostTagModel> tags;
+
+    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagPreferenceModel> userTagPreferences;
 }

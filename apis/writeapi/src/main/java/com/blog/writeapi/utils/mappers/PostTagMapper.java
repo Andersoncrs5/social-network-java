@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
-import com.blog.writeapi.dtos.postTag.PostTagDTO;
-import com.blog.writeapi.dtos.postTag.UpdatePostTagDTO;
-import com.blog.writeapi.models.PostTagModel;
+import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
+import com.blog.writeapi.modules.postTag.dtos.PostTagDTO;
+import com.blog.writeapi.modules.postTag.dtos.UpdatePostTagDTO;
+import com.blog.writeapi.modules.postTag.models.PostTagModel;
 import org.mapstruct.*;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

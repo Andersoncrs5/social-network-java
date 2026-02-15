@@ -1,10 +1,10 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.post.PostDTO;
-import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
-import com.blog.writeapi.repositories.PostFavoriteRepository;
-import com.blog.writeapi.repositories.PostRepository;
+import com.blog.writeapi.modules.post.dtos.PostDTO;
+import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
+import com.blog.writeapi.modules.postFavorite.repository.PostFavoriteRepository;
+import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

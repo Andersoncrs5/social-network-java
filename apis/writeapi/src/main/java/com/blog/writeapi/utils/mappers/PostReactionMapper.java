@@ -1,7 +1,7 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.postReaction.PostReactionDTO;
-import com.blog.writeapi.models.PostReactionModel;
+import com.blog.writeapi.modules.postReaction.dtos.PostReactionDTO;
+import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
 import org.mapstruct.Mapper;
 
 import org.mapstruct.Mapping;

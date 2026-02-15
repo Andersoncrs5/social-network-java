@@ -2,9 +2,9 @@ package com.blog.writeapi.integration;
 
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.user.CreateUserDTO;
-import com.blog.writeapi.dtos.user.LoginUserDTO;
-import com.blog.writeapi.repositories.UserRepository;
+import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
+import com.blog.writeapi.modules.user.dtos.LoginUserDTO;
+import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.res.ResponseUserTest;

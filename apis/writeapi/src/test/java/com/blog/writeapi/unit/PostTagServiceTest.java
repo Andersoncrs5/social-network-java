@@ -1,14 +1,14 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.postTag.CreatePostTagDTO;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.PostTagModel;
-import com.blog.writeapi.models.TagModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.repositories.PostTagRepository;
-import com.blog.writeapi.services.providers.PostTagService;
+import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postTag.models.PostTagModel;
+import com.blog.writeapi.modules.tag.models.TagModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.modules.postTag.repository.PostTagRepository;
+import com.blog.writeapi.modules.postTag.service.providers.PostTagService;
 import com.blog.writeapi.utils.mappers.PostTagMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,0 +1,18 @@
+package com.blog.writeapi.modules.user.repository;
+
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.annotations.validations.global.emailConstraint.EmailConstraint;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<@NonNull UserModel, @NonNull Long> {
+    Optional<UserModel> findByEmailIgnoreCase(@EmailConstraint String email);
+
+    boolean existsByEmailIgnoreCase(@EmailConstraint String email);
+
+    boolean existsByUsernameIgnoreCase(String username);
+}

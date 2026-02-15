@@ -1,13 +1,13 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.comment.CommentDTO;
-import com.blog.writeapi.dtos.comment.CreateCommentDTO;
-import com.blog.writeapi.dtos.comment.UpdateCommentDTO;
-import com.blog.writeapi.dtos.post.PostDTO;
-import com.blog.writeapi.repositories.CommentRepository;
-import com.blog.writeapi.repositories.PostCategoriesRepository;
-import com.blog.writeapi.repositories.PostRepository;
+import com.blog.writeapi.modules.comment.dtos.CommentDTO;
+import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
+import com.blog.writeapi.modules.comment.dtos.UpdateCommentDTO;
+import com.blog.writeapi.modules.post.dtos.PostDTO;
+import com.blog.writeapi.modules.comment.repository.CommentRepository;
+import com.blog.writeapi.modules.postCategory.repository.PostCategoriesRepository;
+import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

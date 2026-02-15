@@ -1,11 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.TagModel;
-import com.blog.writeapi.models.UserTagPreferenceModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.repositories.UserTagPreferenceRepository;
-import com.blog.writeapi.services.providers.UserTagPreferenceService;
+import com.blog.writeapi.modules.tag.models.TagModel;
+import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userTagPreference.repository.UserTagPreferenceRepository;
+import com.blog.writeapi.modules.userTagPreference.service.providers.UserTagPreferenceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

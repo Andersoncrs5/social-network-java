@@ -1,14 +1,14 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
-import com.blog.writeapi.models.CategoryModel;
-import com.blog.writeapi.models.PostCategoriesModel;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.repositories.PostCategoriesRepository;
-import com.blog.writeapi.services.providers.PostCategoriesService;
+import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
+import com.blog.writeapi.modules.category.models.CategoryModel;
+import com.blog.writeapi.modules.postCategory.models.PostCategoriesModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.modules.postCategory.repository.PostCategoriesRepository;
+import com.blog.writeapi.modules.postCategory.service.providers.PostCategoriesService;
 import com.blog.writeapi.utils.mappers.PostCategoriesMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

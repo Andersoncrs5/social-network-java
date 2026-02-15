@@ -1,7 +1,7 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.commentVote.CommentVoteDTO;
-import com.blog.writeapi.models.CommentVoteModel;
+import com.blog.writeapi.modules.commentVote.dtos.CommentVoteDTO;
+import com.blog.writeapi.modules.commentVote.models.CommentVoteModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 

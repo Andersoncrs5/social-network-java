@@ -1,13 +1,13 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.commentAttachment.CreateCommentAttachmentDTO;
-import com.blog.writeapi.models.CommentAttachmentModel;
-import com.blog.writeapi.models.CommentModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.repositories.CommentAttachmentRepository;
-import com.blog.writeapi.services.providers.CommentAttachmentService;
-import com.blog.writeapi.services.providers.StorageService;
+import com.blog.writeapi.modules.commentAttachment.dtos.CreateCommentAttachmentDTO;
+import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
+import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.commentAttachment.repository.CommentAttachmentRepository;
+import com.blog.writeapi.modules.commentAttachment.service.providers.CommentAttachmentService;
+import com.blog.writeapi.utils.services.providers.StorageService;
 import com.blog.writeapi.utils.mappers.CommentAttachmentMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

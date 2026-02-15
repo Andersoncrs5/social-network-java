@@ -1,11 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.CategoryModel;
-import com.blog.writeapi.models.UserCategoryPreferenceModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.repositories.UserCategoryPreferenceRepository;
-import com.blog.writeapi.services.providers.UserCategoryPreferenceService;
+import com.blog.writeapi.modules.category.models.CategoryModel;
+import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userCategoryPreference.repository.UserCategoryPreferenceRepository;
+import com.blog.writeapi.modules.userCategoryPreference.service.providers.UserCategoryPreferenceService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

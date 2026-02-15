@@ -1,11 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.RoleModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.UserRoleModel;
-import com.blog.writeapi.repositories.UserRoleRepository;
-import com.blog.writeapi.services.providers.UserRoleService;
+import com.blog.writeapi.modules.role.models.RoleModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userRole.models.UserRoleModel;
+import com.blog.writeapi.modules.userRole.repository.UserRoleRepository;
+import com.blog.writeapi.modules.userRole.service.providers.UserRoleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

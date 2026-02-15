@@ -1,11 +1,11 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
-import com.blog.writeapi.dtos.reaction.ReactionDTO;
-import com.blog.writeapi.dtos.reaction.UpdateReactionDTO;
-import com.blog.writeapi.models.enums.reaction.ReactionTypeEnum;
-import com.blog.writeapi.repositories.ReactionRepository;
+import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
+import com.blog.writeapi.modules.reaction.dtos.ReactionDTO;
+import com.blog.writeapi.modules.reaction.dtos.UpdateReactionDTO;
+import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
+import com.blog.writeapi.modules.reaction.repository.ReactionRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

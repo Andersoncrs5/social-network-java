@@ -1,14 +1,14 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.CommentFavoriteModel;
-import com.blog.writeapi.models.CommentModel;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.models.enums.comment.CommentStatusEnum;
-import com.blog.writeapi.repositories.CommentFavoriteRepository;
-import com.blog.writeapi.services.providers.CommentFavoriteService;
+import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
+import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
+import com.blog.writeapi.modules.commentFavorite.repository.CommentFavoriteRepository;
+import com.blog.writeapi.modules.commentFavorite.service.providers.CommentFavoriteService;
 import com.blog.writeapi.utils.mappers.CommentFavoriteMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

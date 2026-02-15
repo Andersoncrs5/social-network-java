@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.tag.TagDTO;
-import com.blog.writeapi.dtos.tag.CreateTagDTO;
-import com.blog.writeapi.dtos.tag.UpdateTagDTO;
-import com.blog.writeapi.models.TagModel;
+import com.blog.writeapi.modules.tag.dtos.TagDTO;
+import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
+import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
+import com.blog.writeapi.modules.tag.models.TagModel;
 import org.mapstruct.*;
 
 import java.time.LocalDateTime;

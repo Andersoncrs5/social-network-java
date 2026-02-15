@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
-import com.blog.writeapi.dtos.reaction.ReactionDTO;
-import com.blog.writeapi.dtos.reaction.UpdateReactionDTO;
-import com.blog.writeapi.models.ReactionModel;
+import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
+import com.blog.writeapi.modules.reaction.dtos.ReactionDTO;
+import com.blog.writeapi.modules.reaction.dtos.UpdateReactionDTO;
+import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import org.mapstruct.*;
 
 import java.time.LocalDateTime;

@@ -1,7 +1,7 @@
 package com.blog.writeapi.configs.startup;
 
-import com.blog.writeapi.models.RoleModel;
-import com.blog.writeapi.services.providers.RoleService;
+import com.blog.writeapi.modules.role.models.RoleModel;
+import com.blog.writeapi.modules.role.service.providers.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

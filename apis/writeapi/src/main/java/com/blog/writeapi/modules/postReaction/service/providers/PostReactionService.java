@@ -1,0 +1,77 @@
+package com.blog.writeapi.modules.postReaction.service.providers;
+
+import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
+import com.blog.writeapi.modules.reaction.models.ReactionModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.postReaction.repository.PostReactionRepository;
+import com.blog.writeapi.modules.postReaction.service.docs.IPostReactionService;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
+
+@Service
+@Validated
+@RequiredArgsConstructor
+public class PostReactionService implements IPostReactionService {
+
+    private final PostReactionRepository repository;
+    private final Snowflake generator;
+
+    @Override
+    @Transactional
+    @Retry(name = "create-retry")
+    public PostReactionModel create(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized ReactionModel reaction,
+            @IsModelInitialized UserModel user
+    ) {
+        PostReactionModel postReaction = new PostReactionModel().toBuilder()
+                .post(post)
+                .reaction(reaction)
+                .user(user)
+                .id(this.generator.nextId())
+                .build();
+
+        return this.repository.save(postReaction);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PostReactionModel> findByPostAndUser(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user
+    ) {
+        return this.repository.findByPostAndUser(post, user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Boolean existsByPostAndUser(
+            @IsModelInitialized PostModel post,
+            @IsModelInitialized UserModel user
+    ) {
+        return this.repository.existsByPostAndUser(post, user);
+    }
+
+    @Override
+    @Transactional
+    @Retry(name = "delete-retry")
+    public void delete(@IsModelInitialized PostReactionModel model) {
+        this.repository.delete(model);
+    }
+
+    @Override
+    @Transactional
+    @Retry(name = "update-retry")
+    public PostReactionModel updateSimple(@IsModelInitialized PostReactionModel model) {
+        return repository.save(model);
+    }
+
+}

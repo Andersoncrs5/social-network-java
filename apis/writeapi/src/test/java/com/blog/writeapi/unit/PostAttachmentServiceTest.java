@@ -1,14 +1,14 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.postAttachment.CreatePostAttachmentDTO;
-import com.blog.writeapi.models.PostAttachmentModel;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.repositories.PostAttachmentRepository;
-import com.blog.writeapi.services.providers.PostAttachmentService;
-import com.blog.writeapi.services.providers.StorageService;
+import com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO;
+import com.blog.writeapi.modules.postAttachment.models.PostAttachmentModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.modules.postAttachment.repository.PostAttachmentRepository;
+import com.blog.writeapi.modules.postAttachment.service.providers.PostAttachmentService;
+import com.blog.writeapi.utils.services.providers.StorageService;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostAttachmentMapper;
 import org.junit.jupiter.api.BeforeEach;

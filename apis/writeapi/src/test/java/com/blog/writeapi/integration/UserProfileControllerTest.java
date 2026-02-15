@@ -1,10 +1,10 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.userProfile.UpdateUserProfileDTO;
-import com.blog.writeapi.dtos.userProfile.UserProfileDTO;
-import com.blog.writeapi.models.enums.profile.ProfileVisibilityEnum;
-import com.blog.writeapi.repositories.UserRepository;
+import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
+import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
+import com.blog.writeapi.utils.enums.profile.ProfileVisibilityEnum;
+import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

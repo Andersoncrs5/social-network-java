@@ -1,10 +1,10 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.reaction.CreateReactionDTO;
-import com.blog.writeapi.models.ReactionModel;
-import com.blog.writeapi.repositories.ReactionRepository;
-import com.blog.writeapi.services.providers.ReactionService;
+import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
+import com.blog.writeapi.modules.reaction.models.ReactionModel;
+import com.blog.writeapi.modules.reaction.repository.ReactionRepository;
+import com.blog.writeapi.modules.reaction.service.providers.ReactionService;
 import com.blog.writeapi.utils.mappers.ReactionMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package com.blog.writeapi.unit;
 
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.services.providers.StorageService;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.services.providers.StorageService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

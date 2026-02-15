@@ -1,10 +1,10 @@
 package com.blog.writeapi.configs.startup;
 
-import com.blog.writeapi.models.RoleModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.repositories.UserRepository;
-import com.blog.writeapi.services.providers.RoleService;
-import com.blog.writeapi.services.providers.UserRoleService;
+import com.blog.writeapi.modules.role.models.RoleModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.user.repository.UserRepository;
+import com.blog.writeapi.modules.role.service.providers.RoleService;
+import com.blog.writeapi.modules.userRole.service.providers.UserRoleService;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

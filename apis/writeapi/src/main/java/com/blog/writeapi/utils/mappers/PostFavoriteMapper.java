@@ -1,7 +1,7 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.postFavorite.PostFavoriteDTO;
-import com.blog.writeapi.models.PostFavoriteModel;
+import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
+import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 

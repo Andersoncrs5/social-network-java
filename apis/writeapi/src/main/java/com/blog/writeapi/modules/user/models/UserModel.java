@@ -1,0 +1,109 @@
+package com.blog.writeapi.modules.user.models;
+
+import com.blog.writeapi.modules.userRole.models.UserRoleModel;
+import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
+import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
+import com.blog.writeapi.modules.commentReaction.models.CommentReactionModel;
+import com.blog.writeapi.modules.commentVote.models.CommentVoteModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
+import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
+import com.blog.writeapi.modules.postVote.models.PostVoteModel;
+import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
+import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
+import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
+import com.blog.writeapi.utils.bases.models.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "users", indexes = {
+        @Index(name = "idx_username", columnList = "username"),
+        @Index(name = "idx_email", columnList = "email")
+})
+@EntityListeners(AuditingEntityListener.class)
+@Setter
+@Getter
+@ToString
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserModel extends BaseEntity {
+
+    @Column(length = 100, nullable = false)
+    private String name;
+
+    @Column(length = 100, unique = true, nullable = false)
+    private String username;
+
+    @Column(length = 600)
+    private String bannerUrl;
+
+    @Column(length = 150, unique = true, nullable = false)
+    private String email;
+
+    @Column(length = 300, nullable = false)
+    private String password = "";
+
+    @Column(length = 500)
+    private String refreshToken = "";
+
+    @Column
+    private OffsetDateTime loginBlockAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<UserRoleModel> roles;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostModel> posts;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CommentModel> comments;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PostFavoriteModel> favorites = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CommentFavoriteModel> commentFavorites = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostVoteModel> postVotes = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReactionModel> postReactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentVoteModel> commentVotes;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentReactionModel> commentReactions;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserProfileModel profile;
+
+    @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentAttachmentModel> attachments;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategoryPreferenceModel> userCategoryPreferences;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagPreferenceModel> userTagPreferences;
+
+}

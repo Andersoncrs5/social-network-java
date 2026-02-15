@@ -1,7 +1,7 @@
 package com.blog.writeapi.configs.security.executors.postTag;
 
-import com.blog.writeapi.services.interfaces.IPostTagService;
-import com.blog.writeapi.utils.annotations.valid.global.isId.IsId;
+import com.blog.writeapi.modules.postTag.service.docs.IPostTagService;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;

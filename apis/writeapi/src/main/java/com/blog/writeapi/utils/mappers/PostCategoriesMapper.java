@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
-import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
-import com.blog.writeapi.dtos.postCategories.UpdatePostCategoriesDTO;
-import com.blog.writeapi.models.PostCategoriesModel;
+import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.dtos.UpdatePostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.models.PostCategoriesModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 

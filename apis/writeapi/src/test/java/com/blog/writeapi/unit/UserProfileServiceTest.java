@@ -1,12 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.UserProfileModel;
-import com.blog.writeapi.models.enums.profile.ProfileVisibilityEnum;
-import com.blog.writeapi.repositories.UserProfileRepository;
-import com.blog.writeapi.services.providers.UserProfileService;
-import org.junit.jupiter.api.Order;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
+import com.blog.writeapi.utils.enums.profile.ProfileVisibilityEnum;
+import com.blog.writeapi.modules.userProfile.repository.UserProfileRepository;
+import com.blog.writeapi.modules.userProfile.service.providers.UserProfileService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -14,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;

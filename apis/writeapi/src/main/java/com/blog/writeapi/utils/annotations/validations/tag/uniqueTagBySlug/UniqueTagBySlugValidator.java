@@ -1,0 +1,33 @@
+package com.blog.writeapi.utils.annotations.validations.tag.uniqueTagBySlug;
+
+import com.blog.writeapi.modules.tag.repository.TagRepository;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class UniqueTagBySlugValidator implements ConstraintValidator<UniqueTagBySlug, String> {
+
+    private final TagRepository repository;
+
+    @Override
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return true;
+        }
+
+        boolean exists = this.repository.existsBySlugIgnoreCase(value);
+
+        if (exists) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(
+                    context.getDefaultConstraintMessageTemplate().replace("{value}", value)
+            ).addConstraintViolation();
+        }
+
+        return !exists;
+    }
+
+}

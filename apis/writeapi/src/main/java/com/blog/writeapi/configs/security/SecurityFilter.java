@@ -1,7 +1,7 @@
 package com.blog.writeapi.configs.security;
 
-import com.blog.writeapi.repositories.UserRepository;
-import com.blog.writeapi.services.interfaces.ITokenService;
+import com.blog.writeapi.modules.user.repository.UserRepository;
+import com.blog.writeapi.utils.services.interfaces.ITokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

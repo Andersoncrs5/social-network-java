@@ -1,17 +1,15 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.comment.CreateCommentDTO;
-import com.blog.writeapi.models.CommentModel;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.models.enums.comment.CommentStatusEnum;
-import com.blog.writeapi.repositories.CommentRepository;
-import com.blog.writeapi.services.interfaces.ICommentService;
-import com.blog.writeapi.services.providers.CommentService;
+import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
+import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
+import com.blog.writeapi.modules.comment.repository.CommentRepository;
+import com.blog.writeapi.modules.comment.service.providers.CommentService;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
-import com.blog.writeapi.utils.mappers.CategoryMapper;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

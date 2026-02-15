@@ -1,15 +1,14 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.comment.CommentDTO;
-import com.blog.writeapi.dtos.commentAttachment.CommentAttachmentDTO;
-import com.blog.writeapi.dtos.commentAttachment.CreateCommentAttachmentDTO;
-import com.blog.writeapi.dtos.commentAttachment.UpdateCommentAttachmentDTO;
-import com.blog.writeapi.dtos.post.PostDTO;
-import com.blog.writeapi.repositories.CommentAttachmentRepository;
-import com.blog.writeapi.repositories.CommentRepository;
-import com.blog.writeapi.repositories.PostAttachmentRepository;
-import com.blog.writeapi.repositories.PostRepository;
+import com.blog.writeapi.modules.comment.dtos.CommentDTO;
+import com.blog.writeapi.modules.commentAttachment.dtos.CommentAttachmentDTO;
+import com.blog.writeapi.modules.commentAttachment.dtos.UpdateCommentAttachmentDTO;
+import com.blog.writeapi.modules.post.dtos.PostDTO;
+import com.blog.writeapi.modules.commentAttachment.repository.CommentAttachmentRepository;
+import com.blog.writeapi.modules.comment.repository.CommentRepository;
+import com.blog.writeapi.modules.postAttachment.repository.PostAttachmentRepository;
+import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

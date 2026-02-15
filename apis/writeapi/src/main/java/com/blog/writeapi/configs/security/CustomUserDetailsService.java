@@ -1,9 +1,9 @@
 package com.blog.writeapi.configs.security;
 
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.UserRoleModel;
-import com.blog.writeapi.repositories.UserRepository;
-import com.blog.writeapi.repositories.UserRoleRepository;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userRole.models.UserRoleModel;
+import com.blog.writeapi.modules.user.repository.UserRepository;
+import com.blog.writeapi.modules.userRole.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

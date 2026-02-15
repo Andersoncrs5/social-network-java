@@ -1,13 +1,13 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.PostReactionModel;
-import com.blog.writeapi.models.ReactionModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.repositories.PostReactionRepository;
-import com.blog.writeapi.services.providers.PostReactionService;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
+import com.blog.writeapi.modules.reaction.models.ReactionModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.modules.postReaction.repository.PostReactionRepository;
+import com.blog.writeapi.modules.postReaction.service.providers.PostReactionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

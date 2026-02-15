@@ -1,8 +1,8 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.userCategoryPreference.UserCategoryPreferenceDTO;
-import com.blog.writeapi.models.UserCategoryPreferenceModel;
-import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
+import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 

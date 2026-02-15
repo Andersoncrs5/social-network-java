@@ -1,12 +1,12 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.PostFavoriteModel;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.repositories.PostFavoriteRepository;
-import com.blog.writeapi.services.providers.PostFavoriteService;
+import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.modules.postFavorite.repository.PostFavoriteRepository;
+import com.blog.writeapi.modules.postFavorite.service.providers.PostFavoriteService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;

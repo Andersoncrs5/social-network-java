@@ -1,11 +1,10 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.user.UpdateUserDTO;
-import com.blog.writeapi.dtos.user.UserDTO;
-import com.blog.writeapi.repositories.UserRepository;
+import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
+import com.blog.writeapi.modules.user.dtos.UserDTO;
+import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
-import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

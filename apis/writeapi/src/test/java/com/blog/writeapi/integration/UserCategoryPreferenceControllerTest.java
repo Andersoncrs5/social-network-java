@@ -1,9 +1,9 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.category.CategoryDTO;
-import com.blog.writeapi.dtos.userCategoryPreference.UserCategoryPreferenceDTO;
-import com.blog.writeapi.repositories.CategoryRepository;
+import com.blog.writeapi.modules.category.dtos.CategoryDTO;
+import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
+import com.blog.writeapi.modules.category.repository.CategoryRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

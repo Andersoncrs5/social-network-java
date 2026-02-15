@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.user.CreateUserDTO;
-import com.blog.writeapi.dtos.user.UpdateUserDTO;
-import com.blog.writeapi.dtos.user.UserDTO;
-import com.blog.writeapi.models.UserModel;
+import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
+import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
+import com.blog.writeapi.modules.user.dtos.UserDTO;
+import com.blog.writeapi.modules.user.models.UserModel;
 import org.mapstruct.*;
 import org.springframework.stereotype.Service;
 

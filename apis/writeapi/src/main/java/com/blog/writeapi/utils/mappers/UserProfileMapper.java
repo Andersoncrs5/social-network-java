@@ -1,10 +1,8 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.tag.UpdateTagDTO;
-import com.blog.writeapi.dtos.userProfile.UpdateUserProfileDTO;
-import com.blog.writeapi.dtos.userProfile.UserProfileDTO;
-import com.blog.writeapi.models.TagModel;
-import com.blog.writeapi.models.UserProfileModel;
+import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
+import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
+import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 

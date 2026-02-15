@@ -1,11 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.category.CreateCategoryDTO;
-import com.blog.writeapi.dtos.category.UpdateCategoryDTO;
-import com.blog.writeapi.models.CategoryModel;
-import com.blog.writeapi.repositories.CategoryRepository;
-import com.blog.writeapi.services.providers.CategoryService;
+import com.blog.writeapi.modules.category.dtos.CreateCategoryDTO;
+import com.blog.writeapi.modules.category.dtos.UpdateCategoryDTO;
+import com.blog.writeapi.modules.category.models.CategoryModel;
+import com.blog.writeapi.modules.category.repository.CategoryRepository;
+import com.blog.writeapi.modules.category.service.providers.CategoryService;
 import com.blog.writeapi.utils.mappers.CategoryMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,6 @@ public class CategoryServiceTest {
 
     @InjectMocks private CategoryService service;
     @Mock private CategoryMapper mapper;
-
 
     CategoryModel category = new CategoryModel().toBuilder()
             .id(1998780200074176609L)

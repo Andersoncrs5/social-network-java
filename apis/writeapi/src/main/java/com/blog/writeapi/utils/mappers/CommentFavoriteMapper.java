@@ -1,7 +1,7 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.commentFavorite.CommentFavoriteDTO;
-import com.blog.writeapi.models.CommentFavoriteModel;
+import com.blog.writeapi.modules.commentFavorite.dtos.CommentFavoriteDTO;
+import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.Mapper;
 

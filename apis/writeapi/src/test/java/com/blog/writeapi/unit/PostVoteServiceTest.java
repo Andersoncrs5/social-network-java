@@ -1,19 +1,18 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.postVote.TogglePostVoteDTO;
-import com.blog.writeapi.models.PostModel;
-import com.blog.writeapi.models.PostVoteModel;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.models.enums.Post.PostStatusEnum;
-import com.blog.writeapi.models.enums.votes.VoteTypeEnum;
-import com.blog.writeapi.repositories.PostVoteRepository;
-import com.blog.writeapi.services.providers.PostVoteService;
+import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postVote.models.PostVoteModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
+import com.blog.writeapi.modules.postVote.repository.PostVoteRepository;
+import com.blog.writeapi.modules.postVote.service.providers.PostVoteService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;

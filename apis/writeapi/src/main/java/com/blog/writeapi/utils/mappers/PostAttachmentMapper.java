@@ -1,10 +1,10 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.postAttachment.CreatePostAttachmentDTO;
-import com.blog.writeapi.dtos.postAttachment.PostAttachmentDTO;
-import com.blog.writeapi.dtos.postAttachment.UpdatePostAttachmentDTO;
-import com.blog.writeapi.models.PostAttachmentModel;
-import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO;
+import com.blog.writeapi.modules.postAttachment.dtos.PostAttachmentDTO;
+import com.blog.writeapi.modules.postAttachment.dtos.UpdatePostAttachmentDTO;
+import com.blog.writeapi.modules.postAttachment.models.PostAttachmentModel;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

@@ -1,11 +1,11 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.dtos.tag.CreateTagDTO;
-import com.blog.writeapi.dtos.tag.UpdateTagDTO;
-import com.blog.writeapi.models.TagModel;
-import com.blog.writeapi.repositories.TagRepository;
-import com.blog.writeapi.services.providers.TagService;
+import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
+import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
+import com.blog.writeapi.modules.tag.models.TagModel;
+import com.blog.writeapi.modules.tag.repository.TagRepository;
+import com.blog.writeapi.modules.tag.service.providers.TagService;
 import com.blog.writeapi.utils.mappers.TagMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

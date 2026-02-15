@@ -1,10 +1,10 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.tag.CreateTagDTO;
-import com.blog.writeapi.dtos.tag.TagDTO;
-import com.blog.writeapi.dtos.tag.UpdateTagDTO;
-import com.blog.writeapi.repositories.TagRepository;
+import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
+import com.blog.writeapi.modules.tag.dtos.TagDTO;
+import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
+import com.blog.writeapi.modules.tag.repository.TagRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

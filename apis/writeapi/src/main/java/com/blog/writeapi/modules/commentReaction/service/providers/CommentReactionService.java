@@ -1,0 +1,69 @@
+package com.blog.writeapi.modules.commentReaction.service.providers;
+
+import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.commentReaction.models.CommentReactionModel;
+import com.blog.writeapi.modules.reaction.models.ReactionModel;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.commentReaction.repository.CommentReactionRepository;
+import com.blog.writeapi.modules.commentReaction.service.docs.ICommentReactionService;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import io.github.resilience4j.retry.annotation.Retry;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
+
+@Slf4j
+@Service
+@Validated
+@RequiredArgsConstructor
+public class CommentReactionService implements ICommentReactionService {
+
+    private final CommentReactionRepository repository;
+    private final Snowflake generator;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<CommentReactionModel> findByUserAndComment(
+            @IsModelInitialized UserModel user,
+            @IsModelInitialized CommentModel comment
+    ) {
+        return this.repository.findByUserAndComment(user, comment);
+    }
+
+    @Override
+    @Retry(name = "create-retry")
+    public CommentReactionModel create(
+            @IsModelInitialized CommentModel comment,
+            @IsModelInitialized ReactionModel reaction,
+            @IsModelInitialized UserModel user
+    ) {
+        CommentReactionModel model = new CommentReactionModel().toBuilder()
+                .comment(comment)
+                .reaction(reaction)
+                .user(user)
+                .id(this.generator.nextId())
+                .build();
+
+        return this.repository.save(model);
+    }
+
+    @Override
+    @Transactional
+    @Retry(name = "delete-retry")
+    public void delete(@IsModelInitialized CommentReactionModel model) {
+        this.repository.delete(model);
+    }
+
+    @Override
+    @Transactional
+    @Retry(name = "update-retry")
+    public CommentReactionModel updateSimple(@IsModelInitialized CommentReactionModel model) {
+        return repository.save(model);
+    }
+
+}

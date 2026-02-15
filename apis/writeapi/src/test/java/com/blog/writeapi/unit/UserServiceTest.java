@@ -1,9 +1,9 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
-import com.blog.writeapi.models.UserModel;
-import com.blog.writeapi.repositories.UserRepository;
-import com.blog.writeapi.services.providers.UserService;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.user.repository.UserRepository;
+import com.blog.writeapi.modules.user.service.providers.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

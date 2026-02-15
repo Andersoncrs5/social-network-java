@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.comment.CommentDTO;
-import com.blog.writeapi.dtos.comment.CreateCommentDTO;
-import com.blog.writeapi.dtos.comment.UpdateCommentDTO;
-import com.blog.writeapi.models.CommentModel;
+import com.blog.writeapi.modules.comment.dtos.CommentDTO;
+import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
+import com.blog.writeapi.modules.comment.dtos.UpdateCommentDTO;
+import com.blog.writeapi.modules.comment.models.CommentModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 

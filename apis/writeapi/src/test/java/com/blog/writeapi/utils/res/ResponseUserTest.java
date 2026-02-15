@@ -1,7 +1,7 @@
 package com.blog.writeapi.utils.res;
 
-import com.blog.writeapi.dtos.user.CreateUserDTO;
-import com.blog.writeapi.dtos.user.UserDTO;
+import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
+import com.blog.writeapi.modules.user.dtos.UserDTO;
 
 public record ResponseUserTest(
         ResponseTokens tokens,

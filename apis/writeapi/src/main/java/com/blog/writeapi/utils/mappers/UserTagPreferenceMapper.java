@@ -1,8 +1,8 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.userTagPreference.UserTagPreferenceDTO;
-import com.blog.writeapi.models.UserTagPreferenceModel;
-import com.blog.writeapi.utils.annotations.valid.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
+import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 

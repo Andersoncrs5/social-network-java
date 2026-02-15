@@ -1,9 +1,9 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.dtos.post.CreatePostDTO;
-import com.blog.writeapi.dtos.post.PostDTO;
-import com.blog.writeapi.dtos.post.UpdatePostDTO;
-import com.blog.writeapi.models.PostModel;
+import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
+import com.blog.writeapi.modules.post.dtos.PostDTO;
+import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
+import com.blog.writeapi.modules.post.models.PostModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 

@@ -1,13 +1,13 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.dtos.category.CategoryDTO;
-import com.blog.writeapi.dtos.post.PostDTO;
-import com.blog.writeapi.dtos.postCategories.CreatePostCategoriesDTO;
-import com.blog.writeapi.dtos.postCategories.PostCategoriesDTO;
-import com.blog.writeapi.dtos.postCategories.UpdatePostCategoriesDTO;
-import com.blog.writeapi.repositories.PostCategoriesRepository;
-import com.blog.writeapi.repositories.PostRepository;
+import com.blog.writeapi.modules.category.dtos.CategoryDTO;
+import com.blog.writeapi.modules.post.dtos.PostDTO;
+import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.dtos.UpdatePostCategoriesDTO;
+import com.blog.writeapi.modules.postCategory.repository.PostCategoriesRepository;
+import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;

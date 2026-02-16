@@ -1,10 +1,10 @@
 package com.blog.writeapi.configs.exception;
 
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -84,6 +84,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
                 null,
                 "The requested file does not exist in our storage.",
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleBusinessRuleException(BusinessRuleException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
                 UUID.randomUUID().toString(),
                 0,
                 false,

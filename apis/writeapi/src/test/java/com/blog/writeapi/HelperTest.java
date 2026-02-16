@@ -10,6 +10,7 @@ import com.blog.writeapi.modules.commentReaction.dtos.CommentReactionDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CreateCommentReactionDTO;
 import com.blog.writeapi.modules.commentVote.dtos.CommentVoteDTO;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
+import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
@@ -57,6 +58,34 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public FollowersDTO followUser(ResponseUserTest followData, ResponseUserTest followingData) throws Exception {
+
+        MvcResult result = this.mockMvc.perform(post("/v1/follow/" + followingData.userDTO().id() + "/toggle")
+                        .header("Authorization", "Bearer " + followData.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<FollowersDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<FollowersDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank();
+
+        assertThat(response.data().id()).isNotZero().isPositive();
+        assertThat(response.data().follower().id()).isEqualTo(followData.userDTO().id());
+        assertThat(response.data().following().id()).isEqualTo(followingData.userDTO().id());
+        assertThat(response.data().isMuted()).isFalse();
+        assertThat(response.data().notifyPosts()).isTrue();
+        assertThat(response.data().notifyComments()).isTrue();
+
+        return response.data();
+    }
 
     public UserTagPreferenceDTO addTagInPreferenceUser(
             ResponseUserTest userData,

@@ -1,0 +1,74 @@
+package com.blog.writeapi.modules.followers.service.providers;
+
+import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
+import com.blog.writeapi.modules.followers.models.FollowersModel;
+import com.blog.writeapi.modules.followers.repository.FollowersRepository;
+import com.blog.writeapi.modules.followers.service.interfaces.IFollowersService;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.mappers.FollowersMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class FollowersService implements IFollowersService {
+
+    private final FollowersRepository repository;
+    private final Snowflake generator;
+    private final FollowersMapper mapper;
+
+    @Override
+    public FollowersModel getByIdSimple(@IsId Long id) {
+        return repository.findById(id).orElseThrow(
+                () -> new ModelNotFoundException("Follow not found")
+        );
+    }
+
+    @Override
+    public Optional<FollowersModel> getByFollowerAndFollowing(
+            @IsModelInitialized UserModel follower,
+            @IsModelInitialized UserModel following
+    ) {
+        return repository.findByFollowerAndFollowing(
+                follower, following
+        );
+    }
+
+    @Override
+    public void delete(@IsModelInitialized FollowersModel follow) {
+        this.repository.delete(follow);
+    }
+
+    @Override
+    public FollowersModel create(
+            @IsModelInitialized UserModel follower,
+            @IsModelInitialized UserModel following
+    ) {
+        FollowersModel follow = new FollowersModel().toBuilder()
+                .id(this.generator.nextId())
+                .following(following)
+                .follower(follower)
+                .build();
+
+        return this.repository.save(follow);
+    }
+
+    @Override
+    public FollowersModel update(
+            @IsModelInitialized FollowersModel follow,
+            UpdateFollowersDTO dto
+    ) {
+        this.mapper.merge(dto, follow);
+
+        return this.repository.save(follow);
+    }
+
+}

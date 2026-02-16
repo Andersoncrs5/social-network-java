@@ -6,73 +6,73 @@ resilience4j:
     instances:
       tag-upload-file-cb:
         registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        failureRateThreshold: 40
-        slowCallDurationThreshold: 1800ms
-        slowCallRateThreshold: 45
-        waitDurationInOpenState: 15s
-        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 30
+        minimumNumberOfCalls: 15
+        failureRateThreshold: 60
+        slowCallDurationThreshold: 3000ms
+        slowCallRateThreshold: 60
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
 
       tag-toggle-cb:
         registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        failureRateThreshold: 40
-        slowCallDurationThreshold: 1800ms
-        slowCallRateThreshold: 45
-        waitDurationInOpenState: 15s
-        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 2000ms
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 4
 
       tagUpdateCB:
         registerHealthIndicator: true
-        slidingWindowSize: 8
-        minimumNumberOfCalls: 4
-        failureRateThreshold: 35
-        slowCallDurationThreshold: 1500ms
-        slowCallRateThreshold: 35
-        waitDurationInOpenState: 20s
-        permittedNumberOfCallsInHalfOpenState: 1
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 2000ms
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
 
       tagToggleCB:
         registerHealthIndicator: true
-        slidingWindowSize: 8
-        minimumNumberOfCalls: 4
-        failureRateThreshold: 35
-        slowCallDurationThreshold: 1500ms
-        slowCallRateThreshold: 35
-        waitDurationInOpenState: 20s
-        permittedNumberOfCallsInHalfOpenState: 1
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 2000ms
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
 
       tagCreateCB:
         registerHealthIndicator: true
-        slidingWindowSize: 8
-        minimumNumberOfCalls: 4
-        failureRateThreshold: 35
-        slowCallDurationThreshold: 1500ms
-        slowCallRateThreshold: 35
-        waitDurationInOpenState: 20s
-        permittedNumberOfCallsInHalfOpenState: 1
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        slowCallDurationThreshold: 2000ms
+        slowCallRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
 
       tagGetCB:
         registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        failureRateThreshold: 50
-        slowCallDurationThreshold: 2500ms
-        slowCallRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 30
+        minimumNumberOfCalls: 15
+        failureRateThreshold: 70
+        slowCallDurationThreshold: 4000ms
+        slowCallRateThreshold: 70
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 10
 
       tagDeleteCB:
         registerHealthIndicator: true
-        slidingWindowSize: 6
-        minimumNumberOfCalls: 3
-        failureRateThreshold: 30
-        slowCallDurationThreshold: 1200ms
-        slowCallRateThreshold: 30
-        waitDurationInOpenState: 30s
-        permittedNumberOfCallsInHalfOpenState: 1
+        slidingWindowSize: 15
+        minimumNumberOfCalls: 8
+        failureRateThreshold: 45
+        slowCallDurationThreshold: 2000ms
+        slowCallRateThreshold: 45
+        waitDurationInOpenState: 15s
+        permittedNumberOfCallsInHalfOpenState: 2
 
   retry:
     instances:

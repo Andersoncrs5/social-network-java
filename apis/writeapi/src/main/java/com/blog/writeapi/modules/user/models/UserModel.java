@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.user.models;
 
+import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
@@ -106,4 +107,13 @@ public class UserModel extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTagPreferenceModel> userTagPreferences;
 
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<FollowersModel> following = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<FollowersModel> followers = new ArrayList<>();
 }

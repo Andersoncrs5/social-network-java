@@ -1,0 +1,84 @@
+Failures:
+[ERROR]   CategoryControllerTest.shouldCreateCategoryOnCategory:52 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldDeleteCategory:288 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldGetCategory:178 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnBadRequestDeleteCategoryWhenPassNumberNegative:365 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnBadRequestDeleteCategoryWhenPassZero:339 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnBadRequestGetCategoryWhenPassNumberNegative:261 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnBadRequestGetCategoryWhenPassZero:235 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnNotFoundWhenTryCreateCategoryOnCategory:153 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnNullDeleteCategory:313 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldReturnNullGetCategory:209 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryAllFields:392 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustDescription:519 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustDisplayOrder:691 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustIsActive:605 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustName:476 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustSlug:562 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryButUpdateJustVisible:648 Status expected:<200> but was:<401>
+[ERROR]   CategoryControllerTest.shouldUpdateCategoryNoFields:434 Status expected:<200> but was:<401>
+[ERROR]   CommentReactionControllerTest.shouldCreateNewReactionToComment:55 Status expected:<200> but was:<401>
+[ERROR]   CommentReactionControllerTest.shouldDeleteReactionToComment:91 Status expected:<200> but was:<401>
+[ERROR]   CommentReactionControllerTest.shouldUpdateReactionInComment:126 Status expected:<200> but was:<401>
+[ERROR]   FollowersControllerTest.shouldFollowUser:150 Status expected:<201> but was:<200>
+[ERROR]   FollowersControllerTest.shouldReturnBadRequestBecauseFollowYourself:225 Status expected:<400> but was:<200>
+[ERROR]   FollowersControllerTest.shouldReturnFollowUpdateAllFields:52 Status expected:<201> but was:<200>
+[ERROR]   FollowersControllerTest.shouldReturnForbBecauseAnotherUserTriedUpdate:93 Status expected:<201> but was:<200>
+[ERROR]   FollowersControllerTest.shouldReturnNotFoundTheUpdateFollow:114 Status expected:<201> but was:<200>
+[ERROR]   FollowersControllerTest.shouldReturnUserNotFound:204 Status expected:<404> but was:<200>
+[ERROR]   FollowersControllerTest.shouldUnfollowUser:177 Status expected:<201> but was:<200>
+[ERROR]   PostCategoriesControllerTest.shouldAddedCategoryToPost:82 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldRemoveCategoryOfPost:122 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnConflictBecauseCategoryAlreadyAdded:55 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnForbWhenExecEndpointUpdate:403 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnForbWhenRemoveCategoryOfPost:149 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryUpdatedJustFieldsActiveWhenExecEndpointUpdate:328 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryUpdatedJustFieldsDisplayWhenExecEndpointUpdate:254 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryUpdatedJustFieldsTrueWhenExecEndpointUpdate:291 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryUpdatedNoFieldsWhenExecEndpointUpdate:365 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryUpdatedWithAllFieldsWhenExecEndpointUpdate:216 Status expected:<200> but was:<401>
+[ERROR]   PostCategoriesControllerTest.shouldReturnPostCategoryWhenGetById:167 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldAddedTagToPost:50 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldRemoveTagOfPost:125 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldReturnForbAddedTagToPostBecauseAnotherUser:88 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldReturnForbTheRemoveTagOfPostBecauseUserNotOwer:151 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldReturnForbWhenUpdatePostTag:285 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldUpdateAllFieldsPostTag:168 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldUpdateJustFieldActivePostTag:207 Status expected:<200> but was:<401>
+[ERROR]   PostTagControllerTest.shouldUpdateJustFieldVisiblePostTag:246 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldCreateNewReaction:48 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldDeleteReaction:87 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateAllFieldsReaction:109 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldActiveReaction:314 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldDisplayOrderReaction:273 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldEmojiUnicodeReaction:232 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldEmojiUrlReaction:191 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldNameReaction:150 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldTypeReaction:396 Status expected:<200> but was:<401>
+[ERROR]   ReactionControllerTest.shouldUpdateJustFieldVisibleReaction:355 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldCreateTag:53 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldDeleteTagById:130 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldGetTagById:85 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldReturnNotFoundWhenTryToDeleteTagById:149 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldReturnNullGetTagById:111 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateAllFieldsOfTag:168 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyDescription:260 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyIsActive:282 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyIsSystem:326 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyIsVisible:304 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyLastUsedAt:347 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlyName:214 Status expected:<200> but was:<401>
+[ERROR]   TagControllerTest.shouldUpdateOnlySlug:238 Status expected:<200> but was:<401>
+[ERROR]   UserTagPreferenceControllerTest.shouldCreatePreferenceIntoUser:45 Status expected:<200> but was:<401>
+[ERROR]   UserTagPreferenceControllerTest.shouldRemovePreferenceIntoUser:70 Status expected:<200> but was:<401>
+[ERROR]   UserTagPreferenceControllerTest.shouldReturnNotFoundWhenCreatePreferenceIntoUser:94 Status expected:<200> but was:<401>
+[ERROR] Errors:
+[ERROR]   WriteapiApplicationTests.contextLoads » IllegalState Failed to load ApplicationContext for [WebMergedContextConfiguration@4d2b9075 testClass = com.blog.writeapi.WriteapiApplicationTests, locations = [], classes = [com.blog.writeapi.WriteapiApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [org.springframework.boot.test.context.PropertyMappingContextCustomizer@0, org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@6e0ff644, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@6d1310f6, org.springframework.boot.test.autoconfigure.OnFailureConditionReportContextCustomizerFactory$OnFailureConditionReportContextCustomizer@50b8ae8d, org.springframework.test.context.support.DynamicPropertiesContextCustomizer@0, org.springframework.boot.webmvc.test.autoconfigure.WebDriverContextCustomizer@27dc79f7, org.springframework.boot.web.server.context.SpringBootTestRandomPortContextCustomizerFactory$Customizer@5cbf9e9f, org.springframework.boot.test.context.SpringBootTestAnnotation@c982d744], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+[ERROR]   PostReactionControllerTest.setup:44 » DataIntegrityViolation could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (`blog_db`.`post_attachments`, CONSTRAINT `FKdwocy2l1nlf11ebpfrax6sto1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`))] [delete from posts where id=? and version=?]; SQL [delete from posts where id=? and version=?]; constraint [FKdwocy2l1nlf11ebpfrax6sto1]
+[ERROR]   PostReactionControllerTest.setup:44 » DataIntegrityViolation could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (`blog_db`.`post_attachments`, CONSTRAINT `FKdwocy2l1nlf11ebpfrax6sto1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`))] [delete from posts where id=? and version=?]; SQL [delete from posts where id=? and version=?]; constraint [FKdwocy2l1nlf11ebpfrax6sto1]
+[ERROR]   PostReactionControllerTest.setup:44 » DataIntegrityViolation could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (`blog_db`.`post_attachments`, CONSTRAINT `FKdwocy2l1nlf11ebpfrax6sto1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`))] [delete from posts where id=? and version=?]; SQL [delete from posts where id=? and version=?]; constraint [FKdwocy2l1nlf11ebpfrax6sto1]
+[ERROR]   PostAttachmentServiceTest.shouldCreateNewAttachment:176 » NullPointer Cannot invoke "org.springframework.web.multipart.MultipartFile.getSize()" because the return value of "com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO.getFile()" is null
+[ERROR]   StorageServiceTest.shouldDeleteObjectWithoutVersionId:162 » NullPointer Cannot invoke "software.amazon.awssdk.http.SdkHttpResponse.isSuccessful()" because the return value of "software.amazon.awssdk.services.s3.model.DeleteObjectResponse.sdkHttpResponse()" is null
+[ERROR]   StorageServiceTest.shouldDeleteSpecificObjectVersion:185 » NullPointer Cannot invoke "software.amazon.awssdk.http.SdkHttpResponse.isSuccessful()" because the return value of "software.amazon.awssdk.services.s3.model.DeleteObjectResponse.sdkHttpResponse()" is null
+[INFO]
+[ERROR] Tests run: 322, Failures: 74, Errors: 7, Skipped: 0

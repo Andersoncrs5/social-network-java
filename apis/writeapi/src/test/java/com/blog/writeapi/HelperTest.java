@@ -24,6 +24,8 @@ import com.blog.writeapi.modules.postVote.dtos.PostVoteDTO;
 import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
 import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
 import com.blog.writeapi.modules.reaction.dtos.ReactionDTO;
+import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
+import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
 import com.blog.writeapi.modules.tag.dtos.TagDTO;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
@@ -32,6 +34,7 @@ import com.blog.writeapi.modules.user.dtos.UserDTO;
 import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
+import com.blog.writeapi.utils.enums.report.ReportPriority;
 import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
@@ -58,6 +61,53 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public ReportTypeDTO createReportType(ResponseUserTest superAdm) {
+        try {
+            CreateReportTypeDTO dto = new CreateReportTypeDTO(
+                    "name" + java.util.UUID.randomUUID(),
+                    "DescAny",
+                    null,
+                    "#0000000",
+                    1,
+                    ReportPriority.HIGH,
+                    true,
+                    true
+            );
+
+            MvcResult result = this.mockMvc.perform(post("/v1/report-type")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .header("Authorization", "Bearer " + superAdm.tokens().token())
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<ReportTypeDTO>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<ReportTypeDTO> response = objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.traceId()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+
+            assertThat(response.data()).isNotNull();
+
+            assertThat(response.data().id()).isPositive().isNotZero();
+            assertThat(response.data().color()).isEqualTo(dto.color());
+            assertThat(response.data().name()).isEqualTo(dto.name());
+            assertThat(response.data().description()).isEqualTo(dto.description());
+            assertThat(response.data().icon()).isEqualTo(dto.icon());
+            assertThat(response.data().color()).isEqualTo(dto.color());
+            assertThat(response.data().displayOrder()).isEqualTo(dto.displayOrder());
+            assertThat(response.data().defaultPriority()).isEqualTo(dto.defaultPriority());
+            assertThat(response.data().isActive()).isEqualTo(dto.isActive());
+            assertThat(response.data().isVisible()).isEqualTo(dto.isVisible());
+
+            return response.data();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public FollowersDTO followUser(ResponseUserTest followData, ResponseUserTest followingData) throws Exception {
 

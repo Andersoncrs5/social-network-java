@@ -1,6 +1,7 @@
 package com.blog.writeapi;
 
 import cn.hutool.core.lang.UUID;
+import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
 import com.blog.writeapi.modules.category.dtos.CreateCategoryDTO;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
@@ -24,6 +25,8 @@ import com.blog.writeapi.modules.postVote.dtos.PostVoteDTO;
 import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
 import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
 import com.blog.writeapi.modules.reaction.dtos.ReactionDTO;
+import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
+import com.blog.writeapi.modules.reportPost.dto.PostReportDTO;
 import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
@@ -35,6 +38,7 @@ import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPrefere
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.enums.report.ReportPriority;
+import com.blog.writeapi.utils.enums.report.ReportReason;
 import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
@@ -61,6 +65,79 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public boolean addRoleInUser(
+            ResponseUserTest master,
+            ResponseUserTest userTest2,
+            String role
+    ) throws Exception {
+
+        ToggleRoleDTO dto = new ToggleRoleDTO(
+                role,
+                userTest2.userDTO().id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/adm/roles/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + master.tokens().token()
+                        ))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data()).isNull();
+
+        return response.status();
+    }
+
+    public PostReportDTO createPostReportDTO(
+            ResponseUserTest userTest,
+            ResponseUserTest userTest2,
+            PostDTO postDTO
+    ) throws Exception {
+
+        CreatePostReportDTO dto = new CreatePostReportDTO(
+                "Post Bad",
+                ReportReason.VIOLENCE,
+                postDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/post-report")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .header("Authorization", "Bearer " + userTest2.tokens().token())
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostReportDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostReportDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data()).isNotNull();
+
+        assertThat(response.data().id()).isPositive().isNotZero();
+        assertThat(response.data().description()).isEqualTo(dto.description());
+        assertThat(response.data().reason()).isEqualTo(dto.reason());
+        assertThat(response.data().post().id()).isEqualTo(dto.postId());
+        assertThat(response.data().user().id()).isEqualTo(userTest2.userDTO().id());
+        assertThat(response.data().postAuthorId()).isEqualTo(postDTO.author().id());
+        assertThat(response.data().postContentSnapshot()).isNotBlank();
+
+        return response.data();
+    }
 
     public ReportTypeDTO createReportType(ResponseUserTest superAdm) {
         try {

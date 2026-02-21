@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.user.controller.docs;
 
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.swagger.user.ResponseUserDTO;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -27,6 +28,22 @@ public interface UserControllerDocs {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseUserDTO.class)))
     ResponseEntity<?> getUser(HttpServletRequest request);
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get user", tags = {"User"})
+    @CircuitBreaker(name = "tagGetCB")
+    @ApiResponse(responseCode = "404",
+            description = "User not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseHttp.class)))
+    @ApiResponse(responseCode = "200",
+            description = "User found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ResponseUserDTO.class)))
+    ResponseEntity<?> getUser(
+            @PathVariable @IsId Long id,
+            HttpServletRequest request
+    );
 
     @DeleteMapping
     @Operation(summary = "Delete user", tags = {"User"})

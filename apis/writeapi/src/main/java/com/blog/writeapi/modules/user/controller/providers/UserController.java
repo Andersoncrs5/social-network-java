@@ -4,6 +4,7 @@ import com.blog.writeapi.modules.user.controller.docs.UserControllerDocs;
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
 import com.blog.writeapi.modules.user.dtos.UserDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.services.interfaces.ITokenService;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.utils.mappers.UserMapper;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -154,6 +156,40 @@ public class UserController implements UserControllerDocs {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<?> getUser(
+            @PathVariable @IsId Long id,
+            HttpServletRequest request
+    ) {
+
+        Optional<UserModel> opt = this.userService.GetById(id);
+
+        if (opt.isEmpty()) {
+            ResponseHttp<Object> res = new ResponseHttp<>(
+                    null,
+                    "User not found",
+                    UUID.randomUUID().toString(),
+                    1,
+                    false,
+                    OffsetDateTime.now()
+            );
+
+            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
+        }
+
+        UserDTO userDTO = this.mapper.toDTO(opt.get());
+
+        ResponseHttp<UserDTO> res = new ResponseHttp<>(
+                userDTO,
+                "User found",
+                UUID.randomUUID().toString(),
+                1,
+                true,
+                OffsetDateTime.now()
+        );
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
 
 }

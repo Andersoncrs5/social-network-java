@@ -6,6 +6,8 @@ import com.blog.writeapi.modules.role.repository.RoleRepository;
 import com.blog.writeapi.modules.role.service.docs.IRoleService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,8 +31,24 @@ public class RoleService implements IRoleService {
 
     @Override
     @Transactional(readOnly = true)
+    public RoleModel findByNameSimple(@NotBlank String name) {
+        return this.repository.findByNameIgnoreCase(name).orElseThrow(() ->
+                new ModelNotFoundException("Role not found with name: " + name)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<RoleModel> findById(@IsId Long id) {
         return this.repository.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RoleModel findByIdSimple(@IsId Long id) {
+        return this.repository.findById(id).orElseThrow(() ->
+                new ModelNotFoundException("Role not found")
+        );
     }
 
     @Override

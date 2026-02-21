@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.models;
 
+import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.postCategory.models.PostCategoriesModel;
@@ -80,5 +81,10 @@ public class PostModel extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReactionModel> reactions;
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReportModel> reports = new ArrayList<>();
 
 }

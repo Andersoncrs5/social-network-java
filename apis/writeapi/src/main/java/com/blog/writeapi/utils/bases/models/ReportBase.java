@@ -32,7 +32,7 @@ public abstract class ReportBase extends BaseEntity {
     private ReportStatus status = ReportStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
-    private ModerationActionType moderationActionType;
+    private ModerationActionType moderationActionType = ModerationActionType.NONE;
 
     @Column(name = "moderator_notes", columnDefinition = "TEXT")
     private String moderatorNotes;

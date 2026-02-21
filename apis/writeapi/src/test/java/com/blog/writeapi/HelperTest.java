@@ -1,6 +1,7 @@
 package com.blog.writeapi;
 
 import cn.hutool.core.lang.UUID;
+import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
 import com.blog.writeapi.modules.category.dtos.CreateCategoryDTO;
@@ -55,8 +56,7 @@ import java.time.OffsetDateTime;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Service
@@ -66,7 +66,91 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
-    public boolean addRoleInUser(
+    public ResponseUserTest loginUserInModerator() throws Exception {
+        ResponseUserTest userModerator = this.createUser();
+        ResponseUserTest master = this.loginSuperAdm();
+
+        this.addRoleInUser(master, userModerator, "MODERATOR_ROLE");
+
+        ResponseTokens response = this.loginUser(userModerator);
+
+        MvcResult resultGet = mockMvc.perform(get("/v1/user/me")
+                        .header("Authorization", "Bearer " + response.token()))
+                .andExpect(status().isOk()).andReturn();
+
+        String json = resultGet.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<UserDTO>> typeRefGet = new TypeReference<>() {};
+
+        ResponseHttp<UserDTO> responseGet =
+                objectMapper.readValue(json, typeRefGet);
+
+        return new ResponseUserTest(
+                response,
+                userModerator.dto(),
+                responseGet.data()
+        );
+    }
+
+    public ResponseTokens loginUser(ResponseUserTest res) throws Exception {
+
+        LoginUserDTO dto = new LoginUserDTO(
+                res.dto().email(),
+                res.dto().password()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String registerJson = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<ResponseTokens>> typeRef =
+                new TypeReference<>() {};
+
+        ResponseHttp<ResponseTokens> response =
+                objectMapper.readValue(registerJson, typeRef);
+
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.data().token()).isNotBlank();
+        assertThat(response.data().refreshToken()).isNotBlank();
+
+        return response.data();
+    }
+
+    public void turnUserInAdm(
+            ResponseUserTest master,
+            ResponseUserTest userTest
+    ) {
+        try {
+            ToggleRoleAdmDTO dto = new ToggleRoleAdmDTO(
+                    userTest.userDTO().id()
+            );
+
+            MvcResult result = mockMvc.perform(patch("/v1/adm/toggle/role/adm")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .header("Authorization", "Bearer " + master.tokens().token())
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<Object> response =
+                    objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.traceId()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+
+            assertThat(response.data()).isNull();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addRoleInUser(
             ResponseUserTest master,
             ResponseUserTest userTest2,
             String role
@@ -97,7 +181,6 @@ public class HelperTest {
 
         assertThat(response.data()).isNull();
 
-        return response.status();
     }
 
     public PostReportDTO createPostReportDTO(

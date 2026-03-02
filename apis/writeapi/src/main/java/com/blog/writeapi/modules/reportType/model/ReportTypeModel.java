@@ -1,10 +1,15 @@
 package com.blog.writeapi.modules.reportType.model;
 
+import com.blog.writeapi.modules.postReportType.model.PostReportTypeModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.blog.writeapi.utils.enums.report.ReportPriority;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -46,4 +51,9 @@ public class ReportTypeModel extends BaseEntity {
     @Builder.Default
     @Column(name = "is_visible", nullable = false)
     private Boolean isVisible = true;
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "type", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReportTypeModel> reports = new ArrayList<>();
 }

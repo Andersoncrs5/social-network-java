@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postReportType.model;
 
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
+import com.blog.writeapi.modules.reportType.model.ReportTypeModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,9 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(
-        name = "post_reaction_types",
+        name = "post_report_types",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_post_reaction_types", columnNames = {"post_id", "type_id"})
+                @UniqueConstraint(name = "uk_post_report_types", columnNames = {"report_id", "type_id"})
         }
 )
 @EntityListeners(AuditingEntityListener.class)
@@ -39,6 +40,6 @@ public class PostReportTypeModel extends BaseEntity {
             nullable = false,
             columnDefinition = "BIGINT UNSIGNED"
     )
-    private PostReportTypeModel type;
+    private ReportTypeModel type;
 
 }

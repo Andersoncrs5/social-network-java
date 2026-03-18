@@ -20,6 +20,7 @@ import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
 import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
 import com.blog.writeapi.modules.postReaction.dtos.CreatePostReactionDTO;
 import com.blog.writeapi.modules.postReaction.dtos.PostReactionDTO;
+import com.blog.writeapi.modules.postReportType.dto.CreatePostReportTypeDTO;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.PostTagDTO;
 import com.blog.writeapi.modules.postVote.dtos.PostVoteDTO;
@@ -65,6 +66,32 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public void AddedReportTypeToPostReportType(
+            ResponseUserTest userTest2,
+            ReportTypeDTO reportTypeDTO,
+            PostReportDTO postReportDTO
+    ) throws Exception {
+        CreatePostReportTypeDTO dto = new CreatePostReportTypeDTO(
+                postReportDTO.id(),
+                reportTypeDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/post-report-type/toggle")
+                .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.data()).isNull();
+        assertThat(response.message()).isNotBlank();
+    }
+
 
     public ResponseUserTest loginUserInModerator() throws Exception {
         ResponseUserTest userModerator = this.createUser();

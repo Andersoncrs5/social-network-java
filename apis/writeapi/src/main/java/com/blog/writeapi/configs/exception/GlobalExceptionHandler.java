@@ -1,8 +1,6 @@
 package com.blog.writeapi.configs.exception;
 
-import com.blog.writeapi.utils.exceptions.BusinessRuleException;
-import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
-import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
+import com.blog.writeapi.utils.exceptions.*;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolationException;
@@ -29,6 +27,30 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UniqueConstraintViolationException.class)
+    public ResponseEntity<ResponseHttp<Void>> handleUniqueConstraintViolationException(UniqueConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<ResponseHttp<Void>> handleInternalServerErrorException(InternalServerErrorException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ResponseHttp<Void>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {

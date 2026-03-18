@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -39,6 +40,11 @@ public class PostReportTypeService implements IPostReportTypeService {
             @IsModelInitialized PostReportModel report,
             @IsModelInitialized ReportTypeModel type
     ) {
+        OffsetDateTime expirationLimit = report.getCreatedAt().plusMinutes(10);
+        if (OffsetDateTime.now().isAfter(expirationLimit)) {
+            throw new BusinessRuleException("The reporting window has expired. You can only add report types within 10 minutes of creation.");
+        }
+
         PostReportTypeModel model = PostReportTypeModel.builder()
                 .id(generator.nextId())
                 .report(report)

@@ -9,11 +9,17 @@ import com.blog.writeapi.modules.reportType.model.ReportTypeModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostReportTypeService implements IPostReportTypeService {
@@ -33,13 +39,28 @@ public class PostReportTypeService implements IPostReportTypeService {
             @IsModelInitialized PostReportModel report,
             @IsModelInitialized ReportTypeModel type
     ) {
-        PostReportTypeModel model = new PostReportTypeModel().toBuilder()
+        PostReportTypeModel model = PostReportTypeModel.builder()
                 .id(generator.nextId())
                 .report(report)
                 .type(type)
                 .build();
 
-        return this.repository.save(model);
+        try {
+            return this.repository.save(model);
+        } catch (DataIntegrityViolationException e) {
+            String message = e.getMostSpecificCause().getMessage();
+
+            if (message != null && message.contains("uk_post_report_type")) {
+                throw new UniqueConstraintViolationException(
+                        "This report already has this type assigned."
+                );
+            }
+
+            throw new BusinessRuleException("Database integrity error: " + message);
+        } catch (Exception e) {
+            log.error("Error creating PostReportType", e);
+            throw new InternalServerErrorException("Error creating report association.");
+        }
     }
 
     public Boolean existsByReportAndType(

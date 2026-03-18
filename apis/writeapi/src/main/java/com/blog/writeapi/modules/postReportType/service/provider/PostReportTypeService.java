@@ -9,7 +9,6 @@ import com.blog.writeapi.modules.reportType.model.ReportTypeModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
-import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +57,7 @@ public class PostReportTypeService implements IPostReportTypeService {
 
         if (exists.isPresent()) {
             this.repository.delete(exists.get());
-            return new ResultToggle<>(exists, ToggleEnum.REMOVED);
+            return ResultToggle.removed();
         }
 
         PostReportTypeModel model = PostReportTypeModel.builder()
@@ -69,10 +68,7 @@ public class PostReportTypeService implements IPostReportTypeService {
 
         PostReportTypeModel saved = this.repository.save(model);
 
-        return new ResultToggle<>(
-            Optional.of(saved),
-            ToggleEnum.ADDED
-        );
+        return ResultToggle.added(saved);
     }
 
 }

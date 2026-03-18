@@ -155,7 +155,7 @@ public class PostReportTypeServiceTest {
 
         ResultToggle<PostReportTypeModel> toggle = this.service.toggle(report, type);
 
-        assertThat(toggle.body().isPresent()).isTrue();
+        assertThat(toggle.body().isEmpty()).isTrue();
         assertThat(toggle.result()).isEqualTo(ToggleEnum.REMOVED);
 
         verify(repository, times(1)).delete(reportType);

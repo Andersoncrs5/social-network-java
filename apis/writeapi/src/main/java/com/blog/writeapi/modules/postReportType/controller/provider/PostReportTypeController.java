@@ -10,6 +10,7 @@ import com.blog.writeapi.modules.reportType.model.ReportTypeModel;
 import com.blog.writeapi.modules.reportType.services.provider.ReportTypeService;
 import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.enums.global.ToggleEnum;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.services.interfaces.ITokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,26 +50,12 @@ public class PostReportTypeController implements IPostReportTypeControllerDocs {
         ReportTypeModel reportType = this.reportTypeService.getByIdSimple(dto.typeId());
 
         if (!Objects.equals(postReport.getUser().getId(), userID)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
-                null,
-                "This report is not your",
-                UUID.randomUUID().toString(),
-                1,
-                false,
-                OffsetDateTime.now()
-            ));
+            throw new BusinessRuleException("This report is not your");
         }
 
         OffsetDateTime expirationLimit = postReport.getCreatedAt().plusMinutes(10);
         if (OffsetDateTime.now().isAfter(expirationLimit)) {
-            return ResponseEntity.status(HttpStatus.GONE).body(new ResponseHttp<>(
-                    null,
-                    "The reporting window has expired. You can only add report types within 10 minutes of creation.",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
+            throw new BusinessRuleException("The reporting window has expired. You can only add report types within 10 minutes of creation.");
         }
 
         ResultToggle<PostReportTypeModel> toggle = this.service.toggle(postReport, reportType);

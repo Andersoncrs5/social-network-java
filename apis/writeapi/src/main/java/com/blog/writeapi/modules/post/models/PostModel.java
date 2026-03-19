@@ -11,6 +11,7 @@ import com.blog.writeapi.modules.postVote.models.PostVoteModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -32,6 +33,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class PostModel extends BaseEntity {
 
     @Column(nullable = false, length = 200)
@@ -60,12 +62,15 @@ public class PostModel extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostCategoriesModel> categories;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostTagModel> tags;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CommentModel> comments;
 

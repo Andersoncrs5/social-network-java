@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.comment.models;
 
+import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
 import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
@@ -9,6 +10,7 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -32,6 +34,7 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CommentModel extends BaseEntity {
 
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -54,8 +57,9 @@ public class CommentModel extends BaseEntity {
     private CommentModel parent;
 
     @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<CommentModel> replies;
+    private List<CommentModel> replies = new ArrayList<>();
 
     @Column(name = "is_edited")
     private boolean edited = false;
@@ -76,10 +80,19 @@ public class CommentModel extends BaseEntity {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentVoteModel> votes = new ArrayList<>();
 
+    @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentReactionModel> reactions;
+    private List<CommentReactionModel> reactions = new ArrayList<>();
 
+    @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentAttachmentModel> attachments;
+    private List<CommentAttachmentModel> attachments = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentReportModel> reports = new ArrayList<>();
 
 }

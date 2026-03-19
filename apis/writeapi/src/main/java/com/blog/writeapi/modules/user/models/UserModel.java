@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.user.models;
 
+import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
@@ -61,79 +62,106 @@ public class UserModel extends BaseEntity {
     @Column
     private OffsetDateTime loginBlockAt;
 
+    @ToString.Exclude
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<UserRoleModel> roles;
 
+    @ToString.Exclude
     @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PostModel> posts;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CommentModel> comments;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PostFavoriteModel> favorites = new ArrayList<>();
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<CommentFavoriteModel> commentFavorites = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostVoteModel> postVotes = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReactionModel> postReactions = new ArrayList<>();
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentVoteModel> commentVotes;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReactionModel> commentReactions;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfileModel profile;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentAttachmentModel> attachments;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserCategoryPreferenceModel> userCategoryPreferences;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTagPreferenceModel> userTagPreferences;
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FollowersModel> following = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FollowersModel> followers = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReportModel> filedPostReports = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
+    @ToString.Exclude
     @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReportModel> postModerators = new ArrayList<>();
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentReportModel> commentReports;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentReportModel> commentModeratorReports;
 }

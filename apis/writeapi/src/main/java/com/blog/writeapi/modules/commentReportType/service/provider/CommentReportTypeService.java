@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -83,13 +84,23 @@ public class CommentReportTypeService implements ICommentReportTypeService {
     @Override
     public ResultToggle<CommentReportTypeModel> toggle(
             @IsModelInitialized CommentReportModel report,
-            @IsModelInitialized ReportTypeModel type
+            @IsModelInitialized ReportTypeModel type,
+            @IsId Long userID
     ) {
+        if (!Objects.equals(report.getUser().getId(), userID)) {
+            throw new BusinessRuleException("This report is not yours");
+        }
+
         Optional<CommentReportTypeModel> exists = this.repository.findByReportAndType(report, type);
 
         if (exists.isPresent()) {
             this.repository.delete(exists.get());
             return ResultToggle.removed();
+        }
+
+        OffsetDateTime expirationLimit = report.getCreatedAt().plusMinutes(10);
+        if (OffsetDateTime.now().isAfter(expirationLimit)) {
+            throw new BusinessRuleException("The reporting window has expired. You can only add report types within 10 minutes of creation.");
         }
 
         CommentReportTypeModel model = CommentReportTypeModel.builder()

@@ -12,6 +12,7 @@ import com.blog.writeapi.modules.commentReaction.dtos.CommentReactionDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CreateCommentReactionDTO;
 import com.blog.writeapi.modules.commentReport.dto.CommentReportDTO;
 import com.blog.writeapi.modules.commentReport.dto.CreateCommentReportDTO;
+import com.blog.writeapi.modules.commentReportType.dto.CreateCommentReportTypeDTO;
 import com.blog.writeapi.modules.commentVote.dtos.CommentVoteDTO;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
 import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
@@ -68,6 +69,34 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public void addReportTypeToComment(
+            CommentReportDTO commentReportDTO,
+            ResponseUserTest userTest2,
+            ReportTypeDTO reportTypeDTO
+    ) throws Exception {
+
+        CreateCommentReportTypeDTO dto = new CreateCommentReportTypeDTO(
+                commentReportDTO.id(),
+                reportTypeDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post("/v1/comment-report-type/toggle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .header("Authorization", "Bearer " + userTest2.tokens().token())
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data()).isNull();
+    }
 
     public CommentReportDTO addReportToComment(
             ResponseUserTest userTest2,

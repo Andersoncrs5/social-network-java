@@ -10,6 +10,8 @@ import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
 import com.blog.writeapi.modules.commentFavorite.dtos.CommentFavoriteDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CommentReactionDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CreateCommentReactionDTO;
+import com.blog.writeapi.modules.commentReport.dto.CommentReportDTO;
+import com.blog.writeapi.modules.commentReport.dto.CreateCommentReportDTO;
 import com.blog.writeapi.modules.commentVote.dtos.CommentVoteDTO;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
 import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
@@ -67,6 +69,48 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public CommentReportDTO addReportToComment(
+            ResponseUserTest userTest2,
+            CommentDTO commentDTO
+    ) {
+
+        try {
+            CreateCommentReportDTO dto = new CreateCommentReportDTO(
+                    "Comment Bad",
+                    ReportReason.VIOLENCE,
+                    commentDTO.id()
+            );
+
+            MvcResult result = mockMvc.perform(post("/v1/comment-report")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+                    .header("Authorization", "Bearer " + userTest2.tokens().token())
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<CommentReportDTO>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<CommentReportDTO> response = objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+
+            assertThat(response.data()).isNotNull();
+
+            assertThat(response.data().id()).isPositive().isNotZero();
+            assertThat(response.data().description()).isEqualTo(dto.description());
+            assertThat(response.data().reason()).isEqualTo(dto.reason());
+            assertThat(response.data().comment().id()).isEqualTo(dto.commentId());
+            assertThat(response.data().user().id()).isEqualTo(userTest2.userDTO().id());
+            assertThat(response.data().commentAuthorId()).isEqualTo(commentDTO.user().id());
+            assertThat(response.data().commentContentSnapshot()).isNotBlank();
+
+            return response.data();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void AddedReportTypeToPostReportType(
             ResponseUserTest userTest2,
             ReportTypeDTO reportTypeDTO,
@@ -91,7 +135,6 @@ public class HelperTest {
         assertThat(response.data()).isNull();
         assertThat(response.message()).isNotBlank();
     }
-
 
     public ResponseUserTest loginUserInModerator() throws Exception {
         ResponseUserTest userModerator = this.createUser();

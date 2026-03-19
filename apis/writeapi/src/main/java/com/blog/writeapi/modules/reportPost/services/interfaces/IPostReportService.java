@@ -28,5 +28,5 @@ public interface IPostReportService {
             @IsModelInitialized PostReportModel report,
             @IsModelInitialized UserModel moderator
     );
-    void delete(@IsModelInitialized PostReportModel report);
+    void delete(@IsModelInitialized PostReportModel report, @IsId Long userId);
 }

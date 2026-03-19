@@ -42,14 +42,18 @@ public class TagController implements TagControllerDocs {
 
         TagDTO tagDTO = this.mapper.toDTO(tagModel);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
-                tagDTO,
-                "Tag created with successfully",
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
-        ));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                    new ResponseHttp<>(
+                        tagDTO,
+                        "Tag created with successfully",
+                        UUID.randomUUID().toString(),
+                        1,
+                        true,
+                        OffsetDateTime.now()
+                    )
+                );
     }
 
     @Override

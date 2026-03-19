@@ -53,20 +53,7 @@ public class PostTagController implements PostTagControllerDocs {
         PostModel post = this.postService.getByIdSimple(dto.postId());
         TagModel tag = this.tagService.getByIdSimple(dto.tagId());
 
-        if (!post.getAuthor().getId().equals(userId)) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "You are not the author of this post",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
-        }
-
-        PostTagModel model = this.service.create(dto, post, tag);
+        PostTagModel model = this.service.create(dto, post, tag, userId);
 
         PostTagDTO mapperDTO = this.mapper.toDTO(model);
 
@@ -92,16 +79,14 @@ public class PostTagController implements PostTagControllerDocs {
 
         this.service.delete(model);
 
-        ResponseHttp<Object> res = new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,
                 "Tag removed with successfully",
                 UUID.randomUUID().toString(),
                 1,
                 true,
                 OffsetDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        ));
     }
 
     @Override

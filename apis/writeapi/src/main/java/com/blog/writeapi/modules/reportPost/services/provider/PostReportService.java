@@ -15,7 +15,6 @@ import com.blog.writeapi.utils.enums.report.ReportStatus;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostReportMapper;
-import com.blog.writeapi.utils.res.ResponseHttp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -53,10 +53,17 @@ public class PostReportService implements IPostReportService {
     }
 
     @Override
-    public void delete(@IsModelInitialized PostReportModel report) {
+    public void delete(
+            @IsModelInitialized PostReportModel report,
+            @IsId Long userId
+    ) {
         OffsetDateTime limit = report.getCreatedAt().plusHours(24);
         if (OffsetDateTime.now().isAfter(limit)) {
             throw new BusinessRuleException("Reports can only be deleted within 24 hours of creation.", HttpStatus.FORBIDDEN);
+        }
+
+        if (!Objects.equals(report.getUser().getId(), userId)) {
+            throw new BusinessRuleException("You have not permission to delete this report");
         }
 
         this.repository.delete(report);

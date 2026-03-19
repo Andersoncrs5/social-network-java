@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -78,8 +79,18 @@ public class PostReportTypeService implements IPostReportTypeService {
 
     public ResultToggle<PostReportTypeModel> toggle(
             @IsModelInitialized PostReportModel report,
-            @IsModelInitialized ReportTypeModel type
+            @IsModelInitialized ReportTypeModel type,
+            @IsId Long userID
     ) {
+        if (!Objects.equals(report.getUser().getId(), userID)) {
+            throw new BusinessRuleException("This report is not your");
+        }
+
+        OffsetDateTime expirationLimit = report.getCreatedAt().plusMinutes(10);
+        if (OffsetDateTime.now().isAfter(expirationLimit)) {
+            throw new BusinessRuleException("The reporting window has expired. You can only add report types within 10 minutes of creation.");
+        }
+
         Optional<PostReportTypeModel> exists = this.repository.findByReportAndType(report, type);
 
         if (exists.isPresent()) {

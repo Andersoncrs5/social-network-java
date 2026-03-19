@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -86,30 +85,7 @@ public class PostReportController implements PostReportControllerDocs {
 
         PostReportModel report = this.service.findByIdSimple(id);
 
-        if (!Objects.equals(report.getUser().getId(), userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
-                    null,
-                    "You have not permission to delete this report",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
-        }
-
-        OffsetDateTime limit = report.getCreatedAt().plusHours(24);
-        if (OffsetDateTime.now().isAfter(limit)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
-                    null,
-                    "Reports can only be deleted within 24 hours of creation.",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
-        }
-
-        this.service.delete(report);
+        this.service.delete(report, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,

@@ -22,6 +22,7 @@ public interface IPostReportTypeService  {
     );
     ResultToggle<PostReportTypeModel> toggle(
             @IsModelInitialized PostReportModel report,
-            @IsModelInitialized ReportTypeModel type
+            @IsModelInitialized ReportTypeModel type,
+            @IsId Long userID
     );
 }

@@ -49,16 +49,7 @@ public class PostReportTypeController implements IPostReportTypeControllerDocs {
         PostReportModel postReport = this.postReportService.findByIdSimple(dto.reportId());
         ReportTypeModel reportType = this.reportTypeService.getByIdSimple(dto.typeId());
 
-        if (!Objects.equals(postReport.getUser().getId(), userID)) {
-            throw new BusinessRuleException("This report is not your");
-        }
-
-        OffsetDateTime expirationLimit = postReport.getCreatedAt().plusMinutes(10);
-        if (OffsetDateTime.now().isAfter(expirationLimit)) {
-            throw new BusinessRuleException("The reporting window has expired. You can only add report types within 10 minutes of creation.");
-        }
-
-        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(postReport, reportType);
+        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(postReport, reportType, userID);
 
         String message = toggle.result() == ToggleEnum.ADDED
                 ? "Report added" : "Report removed";

@@ -48,32 +48,32 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
 
         Boolean exists = this.service.existsByPostAndCategory(post, category);
         if (exists) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "Category already was added!",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                new ResponseHttp<>(
+                        null,
+                        "Category already was added!",
+                        UUID.randomUUID().toString(),
+                        1,
+                        false,
+                        OffsetDateTime.now()
+                )
             );
-
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
         }
 
         PostCategoriesModel categoriesModel = this.service.create(dto, post, category);
 
         PostCategoriesDTO mapperDTO = this.mapper.toDTO(categoriesModel);
 
-        ResponseHttp<PostCategoriesDTO> res = new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            new ResponseHttp<>(
                 mapperDTO,
                 "Category added with successfully",
                 UUID.randomUUID().toString(),
                 1,
                 true,
                 OffsetDateTime.now()
+            )
         );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
     @Override
@@ -83,16 +83,16 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
 
         this.service.delete(postCategoriesModel);
 
-        ResponseHttp<Object> res = new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.OK).body(
+            new ResponseHttp<>(
                 null,
                 "Category removed with successfully",
                 UUID.randomUUID().toString(),
                 1,
                 true,
                 OffsetDateTime.now()
+            )
         );
-
-        return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
     @Override

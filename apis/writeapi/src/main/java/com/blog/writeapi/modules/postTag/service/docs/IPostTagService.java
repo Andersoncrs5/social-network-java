@@ -18,7 +18,8 @@ public interface IPostTagService {
     PostTagModel create(
             @NotNull CreatePostTagDTO dto,
             @IsModelInitialized PostModel post,
-            @IsModelInitialized TagModel tag
+            @IsModelInitialized TagModel tag,
+            @IsId Long userId
     );
     PostTagModel update(
             @NotNull UpdatePostTagDTO dto,

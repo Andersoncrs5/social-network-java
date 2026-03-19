@@ -154,7 +154,7 @@ public class PostTagServiceTest {
 
         when(repository.save(any(PostTagModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        PostTagModel result = this.service.create(dto, post, tag);
+        PostTagModel result = this.service.create(dto, post, tag, user.getId());
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(this.postTag.getId());

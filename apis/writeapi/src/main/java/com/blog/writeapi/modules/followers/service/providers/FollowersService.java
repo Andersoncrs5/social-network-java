@@ -8,12 +8,14 @@ import com.blog.writeapi.modules.followers.service.interfaces.IFollowersService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.FollowersMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -52,6 +54,11 @@ public class FollowersService implements IFollowersService {
             @IsModelInitialized UserModel follower,
             @IsModelInitialized UserModel following
     ) {
+
+        if (Objects.equals(follower.getId(), following.getId())) {
+            throw new BusinessRuleException("You cannot follow yourself.");
+        }
+
         FollowersModel follow = new FollowersModel().toBuilder()
                 .id(this.generator.nextId())
                 .following(following)

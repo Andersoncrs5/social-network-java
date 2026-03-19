@@ -81,11 +81,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
         Long userId = this.tokenService.extractUserIdFromRequest(request);
         PostAttachmentModel attachment = this.service.getByIdSimple(id);
 
-        if (!Objects.equals(attachment.getUploader().getId(), userId)) {
-            throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
-        }
-
-        Boolean deleted = this.service.delete(attachment);
+        Boolean deleted = this.service.delete(attachment, userId);
 
         if (!deleted) {
             return new ResponseEntity<>(new ResponseHttp<>(

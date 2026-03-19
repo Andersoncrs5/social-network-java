@@ -120,7 +120,7 @@ public class PostAttachmentServiceTest {
 
         doNothing().when(repository).delete(this.attachment);
 
-        Boolean deleted = this.service.delete(this.attachment);
+        Boolean deleted = this.service.delete(this.attachment, user.getId());
 
         assertThat(deleted).isTrue();
 
@@ -143,7 +143,7 @@ public class PostAttachmentServiceTest {
         when(storageService.deleteObject(eq("test-bucket"), eq(this.attachment.getStorageKey()), any()))
                 .thenReturn(false);
 
-        Boolean deleted = this.service.delete(this.attachment);
+        Boolean deleted = this.service.delete(this.attachment, user.getId());
 
         assertThat(deleted).isFalse();
 

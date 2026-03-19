@@ -68,16 +68,16 @@ public class PostFavoriteController implements PostFavoriteControllerDocs {
 
         PostFavoriteModel model = this.service.create(post, user);
 
-        ResponseHttp<PostFavoriteDTO> res = new ResponseHttp<>(
-                this.mapper.toDTO(model),
-                "Post added with favorites with successfully",
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseHttp<>(
+                        this.mapper.toDTO(model),
+                        "Post added with favorites with successfully",
+                        UUID.randomUUID().toString(),
+                        1,
+                        true,
+                        OffsetDateTime.now()
+                )
         );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
 

@@ -130,7 +130,7 @@ public class PostReportTypeServiceTest {
         when(generator.nextId()).thenReturn(generatedId);
         when(repository.save(any(PostReportTypeModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(report, type);
+        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(report, type, user.getId());
 
         assertThat(toggle.result()).isEqualTo(ToggleEnum.ADDED);
         assertThat(toggle.body()).isPresent();
@@ -153,7 +153,7 @@ public class PostReportTypeServiceTest {
                 .when(repository)
                 .delete(reportType);
 
-        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(report, type);
+        ResultToggle<PostReportTypeModel> toggle = this.service.toggle(report, type, user.getId());
 
         assertThat(toggle.body().isEmpty()).isTrue();
         assertThat(toggle.result()).isEqualTo(ToggleEnum.REMOVED);

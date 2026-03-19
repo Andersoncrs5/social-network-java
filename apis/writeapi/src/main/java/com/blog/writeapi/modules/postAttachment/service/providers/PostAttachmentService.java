@@ -8,6 +8,7 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.postAttachment.repository.PostAttachmentRepository;
 import com.blog.writeapi.modules.postAttachment.service.docs.IPostAttachmentService;
+import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.services.providers.StorageService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +45,12 @@ public class PostAttachmentService implements IPostAttachmentService {
                 .orElseThrow(() -> new ModelNotFoundException("Attachment not found"));
     }
 
-    public Boolean delete(@IsModelInitialized PostAttachmentModel model) {
+    public Boolean delete(@IsModelInitialized PostAttachmentModel model, @IsId Long userId) {
+
+        if (!Objects.equals(model.getUploader().getId(), userId)) {
+            throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
+        }
+
         Boolean exists = this.storageService.deleteObject(BUCKET, model.getStorageKey(), null);
         if (!exists)
             return false;
@@ -54,6 +61,10 @@ public class PostAttachmentService implements IPostAttachmentService {
     }
 
     public Optional<PostAttachmentModel> create(CreatePostAttachmentDTO dto, @IsModelInitialized UserModel user, @IsModelInitialized PostModel post) {
+        if (!Objects.equals(post.getAuthor().getId(), user.getId())) {
+            throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
+        }
+
         PostAttachmentModel model = this.mapper.toModel(dto);
         model.setStorageKey(UUID.randomUUID().toString());
 

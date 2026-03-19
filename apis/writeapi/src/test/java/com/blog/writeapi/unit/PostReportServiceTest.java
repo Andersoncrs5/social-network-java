@@ -75,15 +75,17 @@ public class PostReportServiceTest {
         assertThat(exists).isTrue();
 
         verify(repository, times(1)).existsByPostAndUser(post, user);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldDeletePostReport() {
         doNothing().when(repository).delete(report);
 
-        this.service.delete(report);
+        this.service.delete(report, user.getId());
 
         verify(repository, times(1)).delete(report);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test

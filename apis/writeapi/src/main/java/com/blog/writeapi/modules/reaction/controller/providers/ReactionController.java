@@ -41,16 +41,14 @@ public class ReactionController implements ReactionControllerDocs {
     ) {
         ReactionModel reaction = this.service.create(dto);
 
-        ResponseHttp<ReactionDTO> res = new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
                 this.mapper.toDTO(reaction),
                 "Reaction created successfully",
                 UUID.randomUUID().toString(),
                 1,
                 true,
                 OffsetDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        ));
     }
 
     @Override
@@ -61,16 +59,14 @@ public class ReactionController implements ReactionControllerDocs {
         ReactionModel reaction = this.service.getByIdSimple(id);
         this.service.delete(reaction);
 
-        ResponseHttp<Object> res = new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,
                 "Reaction deleted successfully",
                 UUID.randomUUID().toString(),
                 1,
                 true,
                 OffsetDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        ));
     }
 
     @Override

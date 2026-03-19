@@ -12,12 +12,15 @@ import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostReportMapper;
+import com.blog.writeapi.utils.res.ResponseHttp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -51,6 +54,11 @@ public class PostReportService implements IPostReportService {
 
     @Override
     public void delete(@IsModelInitialized PostReportModel report) {
+        OffsetDateTime limit = report.getCreatedAt().plusHours(24);
+        if (OffsetDateTime.now().isAfter(limit)) {
+            throw new BusinessRuleException("Reports can only be deleted within 24 hours of creation.", HttpStatus.FORBIDDEN);
+        }
+
         this.repository.delete(report);
     }
 
@@ -94,6 +102,14 @@ public class PostReportService implements IPostReportService {
             @IsModelInitialized PostReportModel report,
             @IsModelInitialized UserModel moderator
     ) {
+        if (report.getModeratedAt() != null) {
+            OffsetDateTime limit = report.getModeratedAt().plusDays(1);
+
+            if (OffsetDateTime.now().isAfter(limit)) {
+                throw new BusinessRuleException("The edit window for this report (24h) has expired.");
+            }
+        }
+
         this.mapper.merge(dto, report);
         report.setModerator(moderator);
 

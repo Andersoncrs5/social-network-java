@@ -22,6 +22,7 @@ public interface ICommentReportTypeService {
     );
     ResultToggle<CommentReportTypeModel> toggle(
             @IsModelInitialized CommentReportModel report,
-            @IsModelInitialized ReportTypeModel type
+            @IsModelInitialized ReportTypeModel type,
+            @IsId Long userID
     );
 }

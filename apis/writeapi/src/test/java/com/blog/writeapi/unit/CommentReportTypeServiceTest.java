@@ -153,7 +153,7 @@ public class CommentReportTypeServiceTest {
         when(generator.nextId()).thenReturn(generatedId);
         when(repository.save(any(CommentReportTypeModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(report, type);
+        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(report, type, user.getId());
 
         assertThat(toggle.result()).isEqualTo(ToggleEnum.ADDED);
         assertThat(toggle.body()).isPresent();
@@ -176,7 +176,7 @@ public class CommentReportTypeServiceTest {
                 .when(repository)
                 .delete(commentReportType);
 
-        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(report, type);
+        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(report, type, user.getId());
 
         assertThat(toggle.body().isEmpty()).isTrue();
         assertThat(toggle.result()).isEqualTo(ToggleEnum.REMOVED);

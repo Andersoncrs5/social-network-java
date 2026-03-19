@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessRuleException.class)
     public ResponseEntity<@NonNull ResponseHttp<Void>> handleBusinessRuleException(BusinessRuleException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
+        return ResponseEntity.status(ex.getStatus()).body(new ResponseHttp<>(
                 null,
                 ex.getMessage(),
                 UUID.randomUUID().toString(),

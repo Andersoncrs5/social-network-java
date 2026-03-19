@@ -132,21 +132,6 @@ public class PostReportController implements PostReportControllerDocs {
 
         PostReportModel report = this.service.findByIdSimple(id);
 
-        if (report.getModeratedAt() != null) {
-            OffsetDateTime limit = report.getModeratedAt().plusDays(1);
-
-            if (OffsetDateTime.now().isAfter(limit)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
-                        null,
-                        "The edit window for this report (24h) has expired.",
-                        UUID.randomUUID().toString(),
-                        1,
-                        false,
-                        OffsetDateTime.now()
-                ));
-            }
-        }
-
         PostReportModel reportUpdated = this.service.update(dto, report, moderator);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(

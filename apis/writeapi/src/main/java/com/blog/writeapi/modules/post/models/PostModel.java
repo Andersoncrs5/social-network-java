@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.models;
 
+import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.comment.models.CommentModel;
@@ -39,7 +40,7 @@ public class PostModel extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, unique = true, length = 255)
+    @Column(nullable = false, unique = true, length = 500)
     private String slug;
 
     @Column(columnDefinition = "TEXT")
@@ -64,15 +65,15 @@ public class PostModel extends BaseEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PostCategoriesModel> categories;
+    private List<PostCategoriesModel> categories = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PostTagModel> tags;
+    private List<PostTagModel> tags = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CommentModel> comments;
+    private List<CommentModel> comments = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -81,15 +82,20 @@ public class PostModel extends BaseEntity {
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostVoteModel> votes;
+    private List<PostVoteModel> votes = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostReactionModel> reactions;
+    private List<PostReactionModel> reactions = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReportModel> reports = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostViewModel> viewList = new ArrayList<>();
+
 
 }

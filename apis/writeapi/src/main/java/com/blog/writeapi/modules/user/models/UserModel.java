@@ -2,6 +2,7 @@ package com.blog.writeapi.modules.user.models;
 
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
+import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
@@ -164,4 +165,10 @@ public class UserModel extends BaseEntity {
     @ToString.Exclude
     @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReportModel> commentModeratorReports;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostViewModel> viewList;
+
 }

@@ -1,8 +1,7 @@
 post_stats
 comment_stats
-post_views
-followers
 notifications
+comment_views
 reports
 audit_logs
 search_index

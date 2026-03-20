@@ -43,7 +43,7 @@ import java.util.List;
 public class UserModel extends BaseEntity {
 
     @Column(length = 100, nullable = false)
-    private String name;
+    protected String name;
 
     @Column(length = 100, unique = true, nullable = false)
     private String username;

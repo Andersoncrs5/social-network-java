@@ -2,6 +2,7 @@ package com.blog.writeapi.integration;
 
 import com.blog.writeapi.HelperTest;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
+import com.blog.writeapi.modules.category.repository.CategoryRepository;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
 import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
@@ -38,6 +39,7 @@ public class PostCategoriesControllerTest {
 
     @Autowired private PostCategoriesRepository repository;
     @Autowired private PostRepository postRepository;
+    @Autowired private CategoryRepository categoryRepository;
 
     @Autowired
     private HelperTest helper;
@@ -45,6 +47,7 @@ public class PostCategoriesControllerTest {
     @BeforeEach
     void setup () {
         this.repository.deleteAll();
+        this.categoryRepository.deleteAll();
         this.postRepository.deleteAll();
     }
 

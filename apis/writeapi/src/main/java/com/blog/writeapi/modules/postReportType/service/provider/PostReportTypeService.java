@@ -11,6 +11,7 @@ import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsMode
 import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +84,7 @@ public class PostReportTypeService implements IPostReportTypeService {
             @IsId Long userID
     ) {
         if (!Objects.equals(report.getUser().getId(), userID)) {
-            throw new BusinessRuleException("This report is not your");
+            throw new ResourceOwnerMismatchException("This report is not your");
         }
 
         OffsetDateTime expirationLimit = report.getCreatedAt().plusMinutes(10);

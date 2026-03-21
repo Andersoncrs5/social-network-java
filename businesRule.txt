@@ -1,7 +1,6 @@
 post_stats
 comment_stats
 notifications
-comment_views
 reports
 audit_logs
 search_index

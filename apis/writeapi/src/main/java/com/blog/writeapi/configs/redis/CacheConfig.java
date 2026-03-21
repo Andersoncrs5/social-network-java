@@ -1,5 +1,7 @@
 package com.blog.writeapi.configs.redis;
 
+import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
@@ -9,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -43,12 +47,31 @@ public class CacheConfig {
     }
 
     @Bean
-    public org.springframework.cache.CacheManager cacheManager(
-            org.springframework.data.redis.connection.RedisConnectionFactory connectionFactory
-    ) {
-        return org.springframework.data.redis.cache.RedisCacheManager
-                .builder(connectionFactory)
-                .cacheDefaults(cacheConfiguration())
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                RedisSerializer.json()
+                        )
+                )
+                .computePrefixWith(cacheName -> "blog-write-api::" + cacheName + "::")
+                .disableCachingNullValues();
+
+        Map<String, RedisCacheConfiguration> configs = new HashMap<>();
+
+        configs.put("category",
+                defaultConfig.entryTtl(Duration.ofMinutes(15)));
+
+        configs.put("user",
+                defaultConfig.entryTtl(Duration.ofMinutes(10)));
+
+        configs.put("auth",
+                defaultConfig.entryTtl(Duration.ofMinutes(5)));
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(configs)
                 .build();
     }
 }

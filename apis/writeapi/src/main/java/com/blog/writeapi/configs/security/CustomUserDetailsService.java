@@ -26,7 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
     private static final String PREFIX = "auth:user:";
 
     @Override
@@ -34,14 +33,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         String key = PREFIX + email;
 
         try {
-            Object object = redisTemplate.opsForValue().get(key);
+            Object cached = redisTemplate.opsForValue().get(key);
 
-            if (object != null) {
-                String json = object.toString();
-                return objectMapper.readValue(json, UserPrincipal.class);
+            if (cached != null) {
+                return (UserPrincipal) cached;
             }
         } catch (Exception e) {
-            log.warn("Error the to read cache of Redis to {}: {}", email, e.getMessage());
+            log.warn("Error reading cache from Redis to {}: {}", email, e.getMessage());
         }
 
         UserModel user = userRepository.findByEmailIgnoreCase(email)
@@ -63,15 +61,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         );
 
         try {
-            String jsonToCache = objectMapper.writeValueAsString(principal);
-            redisTemplate.opsForValue().set(key, jsonToCache, Duration.ofMinutes(10));
+            redisTemplate.opsForValue().set(key, principal, Duration.ofMinutes(10)); // 👈 direto
         } catch (Exception e) {
-            log.error("Erro ao salvar no Redis: {}", e.getMessage());
+            log.error("Error saving to Redis: {}", e.getMessage());
         }
 
         return principal;
     }
-
 
 //    @Override
 //    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

@@ -15,6 +15,9 @@ import com.blog.writeapi.utils.mappers.CategoryMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +40,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "category", key = "'category:' + #id")
     public CategoryModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(() -> new ModelNotFoundException("Category not found"));
     }
@@ -46,7 +50,7 @@ public class CategoryService implements ICategoryService {
     public Boolean existsById(@IsId Long id) { return repository.existsById(id); }
 
     @Override
-    @Transactional
+    @CacheEvict(value = "category", key = "'category:' + #category.id")
     public void delete(@IsModelInitialized CategoryModel category) { this.repository.delete(category); }
 
     @Override
@@ -71,7 +75,6 @@ public class CategoryService implements ICategoryService {
      */
     @Override
     @Deprecated()
-    @Transactional
     public CategoryModel create(CreateCategoryDTO dto) {
         CategoryModel category = this.mapper.toModel(dto);
         category.setId(generator.nextId());
@@ -80,7 +83,7 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    @Transactional
+    @CachePut(value = "category", key = "'category:' + #id")
     public CategoryModel create(CreateCategoryDTO dto, CategoryModel categoryModel) {
         CategoryModel category = this.mapper.toModel(dto);
         category.setId(generator.nextId());
@@ -91,7 +94,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Retry(name = "update-retry")
-    @Transactional
+    @CachePut(value = "category", key = "'category:' + #id")
     public CategoryModel update(UpdateCategoryDTO dto, @IsModelInitialized CategoryModel category) {
         mapper.merge(dto, category);
 
@@ -100,7 +103,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     @Retry(name = "update-retry")
-    @Transactional
+    @CachePut(value = "category", key = "'category:' + #id")
     public CategoryModel update(UpdateCategoryDTO dto, @IsModelInitialized CategoryModel category, CategoryModel parent) {
         mapper.merge(dto, category);
 
@@ -112,7 +115,5 @@ public class CategoryService implements ICategoryService {
 
         return this.repository.save(category);
     }
-
-
 
 }

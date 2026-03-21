@@ -16,6 +16,7 @@ import com.blog.writeapi.utils.mappers.PostTagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +70,7 @@ public class PostTagService implements IPostTagService {
             @IsId Long userId
             ) {
         if (!post.getAuthor().getId().equals(userId)) {
-            throw new BusinessRuleException("You are not the author of this post");
+            throw new BusinessRuleException("You are not the author of this post", HttpStatus.FORBIDDEN);
         }
 
         PostTagModel model = this.mapper.toModel(dto);

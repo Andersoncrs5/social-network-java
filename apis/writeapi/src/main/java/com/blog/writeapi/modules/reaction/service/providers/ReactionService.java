@@ -14,6 +14,9 @@ import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -42,6 +45,7 @@ public class ReactionService implements IReactionService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "reaction", key = "#id")
     public ReactionModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(
                 () -> new ModelNotFoundException("Reaction not found")
@@ -55,15 +59,15 @@ public class ReactionService implements IReactionService {
     }
 
     @Override
-    @Transactional
     @Retry(name = "delete-retry")
+    @CacheEvict(value = "reaction", key = "#reaction.id")
     public void delete(@IsModelInitialized ReactionModel reaction) {
         this.repository.delete(reaction);
     }
 
     @Override
-    @Transactional
     @Retry(name = "create-retry")
+    @CachePut(value = "reaction", key = "#result.id")
     public ReactionModel create(CreateReactionDTO dto) {
         ReactionModel model = this.mapper.toModel(dto);
 
@@ -75,6 +79,7 @@ public class ReactionService implements IReactionService {
     @Override
     @Transactional
     @Retry(name = "update-retry")
+    @CachePut(value = "reaction", key = "#result.id")
     public ReactionModel update(UpdateReactionDTO dto, @IsModelInitialized ReactionModel reaction) {
         this.mapper.merge(dto, reaction);
 

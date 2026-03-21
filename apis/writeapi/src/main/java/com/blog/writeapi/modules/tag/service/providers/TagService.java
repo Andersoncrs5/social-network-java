@@ -14,6 +14,9 @@ import com.blog.writeapi.utils.mappers.TagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,7 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "tag", key = "#id")
     public TagModel getByIdSimple(@IsId Long id) {
         return this.repository.findById(id).orElseThrow(
                 () -> new ModelNotFoundException("Tag not found")
@@ -62,10 +66,11 @@ public class TagService implements ITagService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tag", key = "#tag.id")
     public void delete(@IsModelInitialized TagModel tag) { this.repository.delete(tag); }
 
     @Override
-    @Transactional
+    @CachePut(value = "tag", key = "#result.id")
     public TagModel create(CreateTagDTO dto) {
         TagModel model = this.mapper.toModel(dto);
         model.setId(generator.nextId());
@@ -76,12 +81,10 @@ public class TagService implements ITagService {
     }
 
     @Override
-    @Transactional
     @Retry(name = "update-retry")
+    @CachePut(value = "tag", key = "#result.id")
     public TagModel update(UpdateTagDTO dto, @IsModelInitialized TagModel tag) {
         mapper.merge(dto, tag);
-
         return this.repository.save(tag);
     }
-
 }

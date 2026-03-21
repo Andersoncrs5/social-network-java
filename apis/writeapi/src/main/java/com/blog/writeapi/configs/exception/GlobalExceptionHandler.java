@@ -10,6 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +33,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UniqueConstraintViolationException.class)
     public ResponseEntity<ResponseHttp<Void>> handleUniqueConstraintViolationException(UniqueConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ResponseHttp<Void>> handleDisabledException(DisabledException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ResponseHttp<Void>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseHttp<>(
                 null,
                 ex.getMessage(),
                 UUID.randomUUID().toString(),

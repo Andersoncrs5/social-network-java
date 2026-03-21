@@ -57,7 +57,7 @@ public class CommentReportController implements ICommentReportControllerDocs {
         boolean exists = this.service.existsByCommentAndUser(comment, user);
 
         if (exists) {
-            throw new BusinessRuleException("You already report this comment!");
+            throw new BusinessRuleException("You already report this comment!", HttpStatus.CONFLICT);
         }
 
         CommentReportModel model = this.service.create(dto, comment, user);

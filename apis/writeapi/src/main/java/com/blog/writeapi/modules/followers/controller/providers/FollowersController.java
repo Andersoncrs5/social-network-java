@@ -42,7 +42,7 @@ public class FollowersController implements FollowersControllerDocs {
 
     @Override
     public ResponseEntity<?> toggle(
-        @PathVariable @IsId Long followingId,
+        @PathVariable Long followingId,
         HttpServletRequest request
     ) {
         Long followId = this.tokenService.extractUserIdFromRequest(request);
@@ -83,7 +83,7 @@ public class FollowersController implements FollowersControllerDocs {
 
     @Override
     public ResponseEntity<?> update(
-            @PathVariable @IsId Long id,
+            @PathVariable Long id,
             @RequestBody UpdateFollowersDTO dto,
             HttpServletRequest request
     ) {

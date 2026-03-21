@@ -6,73 +6,73 @@ resilience4j:
     instances:
       tag-upload-file-cb:
         registerHealthIndicator: true
-        slidingWindowSize: 30
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 50
+        failureRateThreshold: 80
+        slowCallDurationThreshold: 5000ms
+        slowCallRateThreshold: 80
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 10
+
+      tag-toggle-cb:
+        registerHealthIndicator: true
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 70
+        slowCallDurationThreshold: 3000ms
+        slowCallRateThreshold: 70
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 10
+
+      tagUpdateCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 70
+        slowCallDurationThreshold: 3000ms
+        slowCallRateThreshold: 70
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 8
+
+      tagToggleCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 70
+        slowCallDurationThreshold: 3000ms
+        slowCallRateThreshold: 70
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 8
+
+      tagCreateCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 50
+        minimumNumberOfCalls: 20
+        failureRateThreshold: 70
+        slowCallDurationThreshold: 3000ms
+        slowCallRateThreshold: 70
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 8
+
+      tagGetCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 200
+        minimumNumberOfCalls: 50
+        failureRateThreshold: 85
+        slowCallDurationThreshold: 6000ms
+        slowCallRateThreshold: 85
+        waitDurationInOpenState: 3s
+        permittedNumberOfCallsInHalfOpenState: 20
+
+      tagDeleteCB:
+        registerHealthIndicator: true
+        slidingWindowSize: 40
         minimumNumberOfCalls: 15
         failureRateThreshold: 60
         slowCallDurationThreshold: 3000ms
         slowCallRateThreshold: 60
         waitDurationInOpenState: 10s
         permittedNumberOfCallsInHalfOpenState: 5
-
-      tag-toggle-cb:
-        registerHealthIndicator: true
-        slidingWindowSize: 20
-        minimumNumberOfCalls: 10
-        failureRateThreshold: 50
-        slowCallDurationThreshold: 2000ms
-        slowCallRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 4
-
-      tagUpdateCB:
-        registerHealthIndicator: true
-        slidingWindowSize: 20
-        minimumNumberOfCalls: 10
-        failureRateThreshold: 50
-        slowCallDurationThreshold: 2000ms
-        slowCallRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
-
-      tagToggleCB:
-        registerHealthIndicator: true
-        slidingWindowSize: 20
-        minimumNumberOfCalls: 10
-        failureRateThreshold: 50
-        slowCallDurationThreshold: 2000ms
-        slowCallRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
-
-      tagCreateCB:
-        registerHealthIndicator: true
-        slidingWindowSize: 20
-        minimumNumberOfCalls: 10
-        failureRateThreshold: 50
-        slowCallDurationThreshold: 2000ms
-        slowCallRateThreshold: 50
-        waitDurationInOpenState: 10s
-        permittedNumberOfCallsInHalfOpenState: 3
-
-      tagGetCB:
-        registerHealthIndicator: true
-        slidingWindowSize: 30
-        minimumNumberOfCalls: 15
-        failureRateThreshold: 70
-        slowCallDurationThreshold: 4000ms
-        slowCallRateThreshold: 70
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 10
-
-      tagDeleteCB:
-        registerHealthIndicator: true
-        slidingWindowSize: 15
-        minimumNumberOfCalls: 8
-        failureRateThreshold: 45
-        slowCallDurationThreshold: 2000ms
-        slowCallRateThreshold: 45
-        waitDurationInOpenState: 15s
-        permittedNumberOfCallsInHalfOpenState: 2
 
   retry:
     instances:
@@ -104,6 +104,16 @@ s3:
   bucketAttachments: attachments
 
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 30
+          max-idle: 20
+          min-idle: 4
+
   servlet:
     multipart:
       max-file-size: 50MB

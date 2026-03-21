@@ -22,6 +22,7 @@ public class RoleInitializr implements CommandLineRunner {
         createRole("ADM_ROLE");
         createRole("SUPER_ADM_ROLE");
         createRole("MODERATOR_ROLE");
+        createRole("ADVERTISER_ROLE");
     }
 
     void createRole(String name) {

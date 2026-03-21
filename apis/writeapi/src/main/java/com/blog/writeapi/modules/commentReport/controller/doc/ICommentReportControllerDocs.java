@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.*;
 
 public interface ICommentReportControllerDocs {
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('USER_ROLE')")
     ResponseEntity<?> create(
             @RequestBody @Valid CreateCommentReportDTO dto,
             HttpServletRequest request
     );
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('USER_ROLE')")
     ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request

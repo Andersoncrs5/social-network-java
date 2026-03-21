@@ -1,6 +1,8 @@
 package com.blog.writeapi.modules.role.models;
 
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -20,6 +22,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class RoleModel {
     @Id
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
@@ -40,6 +43,7 @@ public class RoleModel {
     @LastModifiedDate
     private OffsetDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserRoleModel> roles;
 }

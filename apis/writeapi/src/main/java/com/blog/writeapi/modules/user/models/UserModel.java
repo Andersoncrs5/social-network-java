@@ -19,6 +19,7 @@ import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -40,6 +41,7 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserModel extends BaseEntity {
 
     @Column(length = 100, nullable = false)
@@ -65,7 +67,7 @@ public class UserModel extends BaseEntity {
 
     @ToString.Exclude
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserRoleModel> roles;
 
     @ToString.Exclude
@@ -80,36 +82,36 @@ public class UserModel extends BaseEntity {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<PostFavoriteModel> favorites = new ArrayList<>();
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<CommentFavoriteModel> commentFavorites = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostVoteModel> postVotes = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostReactionModel> postReactions = new ArrayList<>();
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentVoteModel> commentVotes;
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentReactionModel> commentReactions;
 
     @JsonIgnore
@@ -119,17 +121,17 @@ public class UserModel extends BaseEntity {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "uploader", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentAttachmentModel> attachments;
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserCategoryPreferenceModel> userCategoryPreferences;
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserTagPreferenceModel> userTagPreferences;
 
     @JsonIgnore
@@ -147,28 +149,28 @@ public class UserModel extends BaseEntity {
     @JsonIgnore
     @Builder.Default
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostReportModel> filedPostReports = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
     @ToString.Exclude
-    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostReportModel> postModerators = new ArrayList<>();
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentReportModel> commentReports;
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentReportModel> commentModeratorReports;
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostViewModel> viewList;
 
 }

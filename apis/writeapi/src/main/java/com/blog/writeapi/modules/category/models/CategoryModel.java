@@ -3,6 +3,7 @@ package com.blog.writeapi.modules.category.models;
 import com.blog.writeapi.modules.postCategory.models.PostCategoriesModel;
 import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -48,13 +49,16 @@ public class CategoryModel extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private CategoryModel parent;
 
-    @OneToMany(mappedBy = "parent")
+    @JsonIgnore
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
     private List<CategoryModel> children;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostCategoriesModel> posts;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserCategoryPreferenceModel> userCategoryPreferences;
 
 }

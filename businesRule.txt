@@ -20,6 +20,7 @@ pinned_posts
 blocks
 user_settings
 recommendations
+badges
 bans
 moderation_actions
 user_badges / achievements

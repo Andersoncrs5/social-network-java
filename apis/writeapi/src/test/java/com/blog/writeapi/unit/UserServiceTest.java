@@ -1,11 +1,15 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
+import com.blog.writeapi.modules.user.gateway.UserModuleGateway;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.user.service.providers.UserService;
+import com.blog.writeapi.utils.mappers.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,7 +26,9 @@ public class UserServiceTest {
 
     @Mock private UserRepository repository;
     @Mock private Argon2PasswordEncoder encoder;
+    @Mock private UserMapper mapper;
     @Mock private Snowflake snowflakeIdGenerator;
+    @Mock private UserModuleGateway gateway;
 
     @InjectMocks private UserService service;
 
@@ -35,6 +41,13 @@ public class UserServiceTest {
             .email("user@gmail.com")
             .password("12345678")
             .build();
+
+    CreateUserDTO dto = new CreateUserDTO(
+            this.user.getName(),
+            this.user.getUsername(),
+            this.user.getEmail(),
+            this.user.getPassword()
+    );
 
     @Test
     void shouldGetUserById() {
@@ -143,6 +156,31 @@ public class UserServiceTest {
 
         verify(repository, times(1)).existsByUsernameIgnoreCase(user.getUsername());
         verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldCreateUser() {
+        when(mapper.toModel(dto)).thenReturn(user);
+        when(snowflakeIdGenerator.nextId()).thenReturn(user.getId());
+        when(encoder.encode(dto.password())).thenReturn(user.getPassword());
+        when(repository.save(any())).thenReturn(user);
+        when(gateway.createUserSettings(user.getId())).thenReturn(any());
+
+        this.service.Create(dto);
+
+        verify(mapper, times(1)).toModel(dto);
+        verify(snowflakeIdGenerator, times(1)).nextId();
+        verify(encoder, times(1)).encode(dto.password());
+        verify(repository, times(1)).save(any());
+        verify(gateway, times(1)).createUserSettings(user.getId());
+
+        InOrder order = inOrder(mapper, snowflakeIdGenerator, encoder, repository, gateway);
+
+        order.verify(mapper).toModel(dto);
+        order.verify(snowflakeIdGenerator).nextId();
+        order.verify(encoder).encode(user.getPassword());
+        order.verify(repository).save(user);
+        order.verify(gateway).createUserSettings(user.getId());
     }
 
 }

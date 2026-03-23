@@ -3,6 +3,7 @@ package com.blog.writeapi.modules.user.service.providers;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
+import com.blog.writeapi.modules.user.gateway.UserModuleGateway;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
@@ -27,6 +28,7 @@ public class UserService implements IUserService {
     private final UserMapper mapper;
     private final Snowflake snowflakeIdGenerator;
     private final Argon2PasswordEncoder encoder;
+    private final UserModuleGateway gateway;
 
     @Override
     @Transactional(readOnly = true)
@@ -55,13 +57,11 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional
     public void Delete(@IsModelInitialized UserModel user) {
         repository.delete(user);
     }
 
     @Override
-    @Transactional
     public UserModel Update(UpdateUserDTO dto, @IsModelInitialized UserModel user) {
         mapper.merge(dto, user);
 
@@ -72,14 +72,15 @@ public class UserService implements IUserService {
     }
 
     @Override
-    @Transactional
     public UserModel Create(CreateUserDTO dto) {
         UserModel user = mapper.toModel(dto);
 
         user.setId(snowflakeIdGenerator.nextId());
         user.setPassword(encoder.encode(user.getPassword()));
 
-        return repository.save(user);
+        UserModel userSaved = repository.save(user);
+        this.gateway.createUserSettings(userSaved.getId());
+        return userSaved;
     }
 
     @Override
@@ -87,7 +88,6 @@ public class UserService implements IUserService {
     public Optional<UserModel> findByEmail(String email) { return repository.findByEmailIgnoreCase(email); }
 
     @Override
-    @Transactional
     public UserModel UpdateSimple(@IsModelInitialized UserModel user) { return this.repository.save(user); }
 
 }

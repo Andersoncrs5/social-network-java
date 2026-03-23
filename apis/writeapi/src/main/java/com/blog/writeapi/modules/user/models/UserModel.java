@@ -16,6 +16,7 @@ import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
 import com.blog.writeapi.modules.postVote.models.PostVoteModel;
 import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
 import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
+import com.blog.writeapi.modules.userSettings.model.UserSettingsModel;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -172,5 +173,10 @@ public class UserModel extends BaseEntity {
     @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostViewModel> viewList;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserSettingsModel settings;
 
 }

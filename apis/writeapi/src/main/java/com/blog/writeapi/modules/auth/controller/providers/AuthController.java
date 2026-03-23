@@ -10,6 +10,10 @@ import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.modules.userProfile.service.docs.IUserProfileService;
 import com.blog.writeapi.modules.userRole.service.docs.IUserRoleService;
+import com.blog.writeapi.modules.userSettings.model.UserSettingsModel;
+import com.blog.writeapi.modules.userSettings.service.interfaces.IUserSettingsService;
+import com.blog.writeapi.utils.mappers.UserMapper;
+import com.blog.writeapi.utils.mappers.UserSettingsMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseTokens;
 import com.blog.writeapi.utils.services.interfaces.ITokenService;
@@ -34,9 +38,13 @@ public class AuthController implements AuthControllerDocs {
     private final IUserService userService;
     private final IRoleService roleService;
     private final IUserRoleService userRoleService;
+    private final IUserSettingsService userSettingsService;
     private final ITokenService tokenService;
     private final Argon2PasswordEncoder encoder;
     private final IUserProfileService iUserProfileService;
+
+    private final UserMapper userMapper;
+    private final UserSettingsMapper userSettingsMapper;
 
     @Override
     public ResponseEntity<?> login(@Valid @RequestBody LoginUserDTO dto, HttpServletRequest request) {
@@ -56,11 +64,15 @@ public class AuthController implements AuthControllerDocs {
 
         user.setRefreshToken(refreshToken);
 
-        this.userService.UpdateSimple(user);
+        UserModel userUpdated = this.userService.UpdateSimple(user);
+        UserSettingsModel settings = this.userSettingsService.findByUserIdSimple(userUpdated.getId());
 
         ResponseTokens tokens = new ResponseTokens(
                 token,
-                refreshToken
+                refreshToken,
+                userMapper.toDTO(userUpdated),
+                userSettingsMapper.toDTO(settings),
+                roles.stream().map(RoleModel::getName).toList()
         );
 
         ResponseHttp<ResponseTokens> response = new ResponseHttp<>(
@@ -85,22 +97,28 @@ public class AuthController implements AuthControllerDocs {
 
         this.userRoleService.create(user, roleOpt.get());
 
-        String token = this.tokenService.generateToken(user, List.of(roleOpt.get()));
+        var roles = List.of(roleOpt.get());
+
+        String token = this.tokenService.generateToken(user, roles);
         String refreshToken = this.tokenService.generateRefreshToken(user);
 
         user.setRefreshToken(refreshToken);
 
-        UserModel updated = this.userService.UpdateSimple(user);
-        this.iUserProfileService.create(updated);
+        UserModel userUpdated = this.userService.UpdateSimple(user);
+        this.iUserProfileService.create(userUpdated);
+        UserSettingsModel settingsModel = this.userSettingsService.findByUserIdSimple(userUpdated.getId());
 
         ResponseTokens tokens = new ResponseTokens(
                 token,
-                refreshToken
+                refreshToken,
+                userMapper.toDTO(userUpdated),
+                userSettingsMapper.toDTO(settingsModel),
+                roles.stream().map(RoleModel::getName).toList()
         );
 
         ResponseHttp<ResponseTokens> response = new ResponseHttp<>(
                 tokens,
-        "Welcome",
+                "Welcome",
                 UUID.randomUUID().toString(),
                 1,
                 true,

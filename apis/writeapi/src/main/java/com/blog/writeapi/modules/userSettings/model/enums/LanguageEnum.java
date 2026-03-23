@@ -3,7 +3,8 @@ package com.blog.writeapi.modules.userSettings.model.enums;
 public enum LanguageEnum {
     PT_BR("pt-BR", "Português (Brasil)"),
     EN_US("en-US", "English (US)"),
-    ES_ES("es-ES", "Español");
+    ES_ES("es-ES", "Español"),
+    NONE("none", "no language");
 
     private final String code;
     private final String label;

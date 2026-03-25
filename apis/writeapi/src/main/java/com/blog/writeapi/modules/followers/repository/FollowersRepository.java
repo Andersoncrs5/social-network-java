@@ -12,4 +12,6 @@ public interface FollowersRepository extends JpaRepository<FollowersModel, Long>
             @IsModelInitialized UserModel follower,
             @IsModelInitialized UserModel following
     );
+
+    Optional<FollowersModel> findByFollowerIdAndFollowingId(Long followerId, Long followingId);
 }

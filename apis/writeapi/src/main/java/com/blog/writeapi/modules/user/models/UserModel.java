@@ -4,6 +4,7 @@ import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
+import com.blog.writeapi.modules.userBlock.model.UserBlockModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
@@ -173,6 +174,16 @@ public class UserModel extends BaseEntity {
     @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostViewModel> viewList;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "blocker", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserBlockModel> usersBlocker;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "blocked", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserBlockModel> usersBlocked;
 
     @JsonIgnore
     @ToString.Exclude

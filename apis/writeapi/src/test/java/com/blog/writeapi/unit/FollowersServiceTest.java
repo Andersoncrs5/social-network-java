@@ -38,7 +38,7 @@ public class FollowersServiceTest {
             .updatedAt(OffsetDateTime.now())
             .build();
 
-    UserModel followering = new UserModel().toBuilder()
+    UserModel following = new UserModel().toBuilder()
             .id(1998780200011111111L)
             .name("user B")
             .email("userb@gmail.com")
@@ -51,7 +51,7 @@ public class FollowersServiceTest {
     FollowersModel model = new FollowersModel().toBuilder()
             .id(1998780200022222222L)
             .follower(follower)
-            .following(followering)
+            .following(following)
             .isMuted(true)
             .notifyPosts(true)
             .notifyComments(true)
@@ -61,28 +61,67 @@ public class FollowersServiceTest {
             .build();
 
     @Test
+    void shouldDeleteUFollowBecauseFollowExists() {
+        when(repository.findByFollowerIdAndFollowingId(anyLong(), anyLong()))
+                .thenReturn(Optional.of(model));
+
+        doNothing().when(repository).delete(model);
+
+        boolean exist = this.service.deleteIfExist(follower.getId(), following.getId());
+
+        assertThat(exist).isTrue();
+
+        verify(repository, times(1)).findByFollowerIdAndFollowingId(anyLong(), anyLong());
+        verify(repository, times(1)).delete(any());
+        verifyNoMoreInteractions(repository);
+
+        InOrder order = inOrder(repository);
+
+        order.verify(repository).findByFollowerIdAndFollowingId(anyLong(), anyLong());
+        order.verify(repository).delete(any());
+    }
+
+    @Test
+    void shouldNotDeleteUFollowBecauseFollowNotExists() {
+        when(repository.findByFollowerIdAndFollowingId(anyLong(), anyLong()))
+                .thenReturn(Optional.empty());
+
+        boolean exist = this.service.deleteIfExist(follower.getId(), following.getId());
+
+        assertThat(exist).isFalse();
+
+        verify(repository, times(1)).findByFollowerIdAndFollowingId(anyLong(), anyLong());
+        verify(repository, never()).delete(any());
+
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
     void shouldReturnFollowersWhenGetByFollowerAndFollowing() {
-        when(repository.findByFollowerAndFollowing(follower, followering))
+        when(repository.findByFollowerAndFollowing(follower, following))
                 .thenReturn(Optional.of(this.model));
 
-        Optional<FollowersModel> optional = this.service.getByFollowerAndFollowing(follower, followering);
+        Optional<FollowersModel> optional = this.service.getByFollowerAndFollowing(follower, following);
 
         assertThat(optional.isPresent()).isTrue();
         assertThat(optional.get().getId()).isEqualTo(model.getId());
 
-        verify(repository, times(1)).findByFollowerAndFollowing(follower, followering);
+        verify(repository, times(1)).findByFollowerAndFollowing(follower, following);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test
     void shouldReturnNullWhenGetByFollowerAndFollowing() {
-        when(repository.findByFollowerAndFollowing(follower, followering))
+        when(repository.findByFollowerAndFollowing(follower, following))
                 .thenReturn(Optional.empty());
 
-        Optional<FollowersModel> optional = this.service.getByFollowerAndFollowing(follower, followering);
+        Optional<FollowersModel> optional = this.service.getByFollowerAndFollowing(follower, following);
 
         assertThat(optional.isEmpty()).isTrue();
 
-        verify(repository, times(1)).findByFollowerAndFollowing(follower, followering);
+        verify(repository, times(1)).findByFollowerAndFollowing(follower, following);
+        verifyNoMoreInteractions(repository);
+
     }
 
     @Test
@@ -92,6 +131,8 @@ public class FollowersServiceTest {
         this.service.delete(model);
 
         verify(this.repository, times(1)).delete(model);
+        verifyNoMoreInteractions(repository);
+
     }
 
     @Test
@@ -111,6 +152,8 @@ public class FollowersServiceTest {
 
         order.verify(generator).nextId();
         order.verify(repository).save(any(FollowersModel.class));
+
+        verifyNoMoreInteractions(repository, generator);
     }
 
 }

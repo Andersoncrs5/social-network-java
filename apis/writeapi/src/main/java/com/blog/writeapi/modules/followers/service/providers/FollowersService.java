@@ -50,6 +50,24 @@ public class FollowersService implements IFollowersService {
     }
 
     @Override
+    public boolean deleteIfExist(
+            @IsId Long followerId,
+            @IsId Long followingId
+    ) {
+        Optional<FollowersModel> exists = repository.findByFollowerIdAndFollowingId(followerId, followingId);
+        exists.ifPresent(this.repository::delete);
+        return exists.isPresent();
+    }
+
+    public void deleteFollowRelationships(
+            @IsId Long followerId,
+            @IsId Long followingId
+    ) {
+        this.deleteIfExist(followerId, followingId);
+        this.deleteIfExist(followingId, followerId);
+    }
+
+    @Override
     public FollowersModel create(
             @IsModelInitialized UserModel follower,
             @IsModelInitialized UserModel following

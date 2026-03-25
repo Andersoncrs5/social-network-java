@@ -70,6 +70,29 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public void addUserWithBlock(
+            ResponseUserTest userTest,
+            ResponseUserTest userTest2
+    ) {
+        try {
+            MvcResult result = mockMvc.perform(post("/v1/user-block/" + userTest2.userDTO().id() + "/toggle")
+                    .header("Authorization", "Bearer " + userTest.tokens().token())
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+
+            assertThat(response.data()).isNull();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void addReportTypeToComment(
             CommentReportDTO commentReportDTO,
             ResponseUserTest userTest2,

@@ -23,4 +23,12 @@ public interface IFollowersService {
             @IsModelInitialized FollowersModel follow,
             UpdateFollowersDTO dto
     );
+    boolean deleteIfExist(
+            @IsId Long followerId,
+            @IsId Long followingId
+    );
+    void deleteFollowRelationships(
+            @IsId Long followerId,
+            @IsId Long followingId
+    );
 }

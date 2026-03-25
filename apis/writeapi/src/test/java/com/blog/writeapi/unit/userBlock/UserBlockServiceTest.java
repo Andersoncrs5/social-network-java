@@ -109,6 +109,9 @@ public class UserBlockServiceTest {
                 .thenReturn(block.getId());
         when(repository.save(any()))
                 .thenReturn(block);
+        doNothing()
+                .when(gateway)
+                .deleteFollowRelationships(blocked.getId(), blocker.getId());
 
         UserBlockModel model = this.service.create(blocker.getId(), blocked.getId());
 
@@ -125,6 +128,7 @@ public class UserBlockServiceTest {
         order.verify(gateway).findByUserId(blocked.getId());
         order.verify(gateway).findByUserId(blocker.getId());
         order.verify(gateway).generateId();
+        order.verify(gateway).deleteFollowRelationships(blocked.getId(), blocker.getId());
         order.verify(repository).save(any());
 
         verifyNoMoreInteractions(repository, gateway);

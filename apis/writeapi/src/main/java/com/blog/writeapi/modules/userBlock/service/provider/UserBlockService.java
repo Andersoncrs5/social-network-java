@@ -63,6 +63,8 @@ public class UserBlockService implements IUserBlockService {
                 .blocker(blocker)
                 .build();
 
+        this.gateway.deleteFollowRelationships(blocked.getId(), blocker.getId());
+
         try {
             return this.repository.save(model);
         } catch (DataIntegrityViolationException e) {

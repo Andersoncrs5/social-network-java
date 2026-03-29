@@ -1,17 +1,18 @@
 package com.blog.writeapi.modules.userReport.model;
 
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userReportType.model.UserReportTypeModel;
 import com.blog.writeapi.utils.bases.models.ReportBase;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -64,8 +65,8 @@ public class UserReportModel extends ReportBase {
     @Column(name = "ai_trust_score_at_report")
     private Double aiTrustScoreAtReport;
 
-//    @JsonIgnore
-//    @Builder.Default
-//    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<UserReportTypeModel> reportTypes = new ArrayList<>();
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserReportTypeModel> reportTypes = new ArrayList<>();
 }

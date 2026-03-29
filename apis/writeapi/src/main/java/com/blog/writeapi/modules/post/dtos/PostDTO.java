@@ -14,6 +14,7 @@ public record PostDTO(
     Integer readingTime,
     Double rankingScore,
     Boolean isFeatured,
+    Long parentId,
     UserDTO author,
     Long version,
     OffsetDateTime createdAt,

@@ -42,6 +42,7 @@ import com.blog.writeapi.modules.user.dtos.UserDTO;
 import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
 import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
+import com.blog.writeapi.modules.userReportType.dto.CreateUserReportTypeDTO;
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.enums.report.ReportPriority;
@@ -71,6 +72,36 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public void addReportTypeToUserReport(
+            UserReportDTO userReportDTO,
+            ReportTypeDTO reportTypeDTO,
+            ResponseUserTest reporter
+    ) {
+        try {
+            CreateUserReportTypeDTO dto = new CreateUserReportTypeDTO(
+                    userReportDTO.id(),
+                    reportTypeDTO.id()
+            );
+
+            MvcResult result = mockMvc.perform(post("/v1/user-report-type/toggle")
+                    .header("Authorization", "Bearer " + reporter.tokens().token())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(dto))
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
+
+            assertThat(response.data()).isNull();
+            assertThat(response.status()).isTrue();
+            assertThat(response.message()).isNotBlank();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public UserReportDTO addReportToUser(
             ResponseUserTest reporter,
@@ -992,49 +1023,41 @@ public class HelperTest {
         return response.data();
     }
 
-    public ResponseUserTest loginSuperAdm() throws Exception {
-        String URL = "/v1/auth/";
+    public ResponseUserTest loginSuperAdm() {
+        try {
+            String URL = "/v1/auth/";
 
-        LoginUserDTO dto = new LoginUserDTO(
-                "system.domain@gmail.com",
-                "0123456789"
-        );
+            LoginUserDTO dto = new LoginUserDTO(
+                    "system.domain@gmail.com",
+                    "0123456789"
+            );
 
-        MvcResult result = mockMvc.perform(post(URL + "/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andReturn();
+            MvcResult result = mockMvc.perform(post(URL + "/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isOk())
+                    .andReturn();
 
-        String registerJson = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<ResponseTokens>> typeRef =
-                new TypeReference<>() {};
+            String registerJson = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<ResponseTokens>> typeRef =
+                    new TypeReference<>() {};
 
-        ResponseHttp<ResponseTokens> response =
-                objectMapper.readValue(registerJson, typeRef);
+            ResponseHttp<ResponseTokens> response =
+                    objectMapper.readValue(registerJson, typeRef);
 
-        assertThat(response.status()).isEqualTo(true);
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.data().token()).isNotBlank();
-        assertThat(response.data().refreshToken()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.data().token()).isNotBlank();
+            assertThat(response.data().refreshToken()).isNotBlank();
 
-
-        MvcResult resultGet = mockMvc.perform(get("/v1/user/me")
-                        .header("Authorization", "Bearer " + response.data().token()))
-                .andExpect(status().isOk()).andReturn();
-
-        String json = resultGet.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<UserDTO>> typeRefGet = new TypeReference<>() {};
-
-        ResponseHttp<UserDTO> responseGet =
-                objectMapper.readValue(json, typeRefGet);
-
-        return new ResponseUserTest(
-                response.data(),
-                null,
-                responseGet.data()
-        );
-
+            return new ResponseUserTest(
+                    response.data(),
+                    null,
+                    response.data().user()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ResponseUserTest createUser() {
@@ -1067,20 +1090,10 @@ public class HelperTest {
             assertThat(response.data().token()).isNotBlank();
             assertThat(response.data().refreshToken()).isNotBlank();
 
-            MvcResult resultGet = mockMvc.perform(get("/v1/user/me")
-                            .header("Authorization", "Bearer " + response.data().token()))
-                    .andExpect(status().isOk()).andReturn();
-
-            String json = resultGet.getResponse().getContentAsString();
-            TypeReference<ResponseHttp<UserDTO>> typeRefGet = new TypeReference<>() {};
-
-            ResponseHttp<UserDTO> responseGet =
-                    objectMapper.readValue(json, typeRefGet);
-
             return new ResponseUserTest(
                     response.data(),
                     dto,
-                    responseGet.data()
+                    response.data().user()
             );
         } catch (Exception e) {
             throw new RuntimeException(e);

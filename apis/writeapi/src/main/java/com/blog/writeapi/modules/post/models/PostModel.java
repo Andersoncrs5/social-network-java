@@ -27,6 +27,7 @@ import java.util.List;
         @Index(name = "idx_post_slug", columnList = "slug"),
         @Index(name = "idx_post_status", columnList = "status"),
         @Index(name = "idx_post_author", columnList = "author_id"),
+        @Index(name = "idx_post_parent", columnList = "parent_id"),
         @Index(name = "idx_post_is_featured", columnList = "is_featured")
 })
 @EntityListeners(AuditingEntityListener.class)
@@ -63,6 +64,15 @@ public class PostModel extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", columnDefinition = "BIGINT UNSIGNED")
+    private PostModel parent;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PostModel> children = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

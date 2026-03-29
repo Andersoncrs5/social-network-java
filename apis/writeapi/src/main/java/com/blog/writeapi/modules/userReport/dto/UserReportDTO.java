@@ -18,7 +18,6 @@ public record UserReportDTO(
         UserDTO reportedUser,
         UserDTO reporter,
         UserDTO moderator,
-        Long postAuthorId,
         String userProfileSnapshot,
         Double aiTrustScoreAtReport,
         Long version,

@@ -5,6 +5,7 @@ import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.userBlock.model.UserBlockModel;
+import com.blog.writeapi.modules.userReport.model.UserReportModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
@@ -189,5 +190,23 @@ public class UserModel extends BaseEntity {
     @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserSettingsModel settings;
+
+    @JsonIgnore
+    @ToString.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "reportedUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserReportModel> reportsReceived = new ArrayList<>();
+
+    @JsonIgnore
+    @ToString.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "reporter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserReportModel> reportsSent = new ArrayList<>();
+
+    @JsonIgnore
+    @ToString.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "moderator", fetch = FetchType.LAZY)
+    private List<UserReportModel> moderatedReports = new ArrayList<>();
 
 }

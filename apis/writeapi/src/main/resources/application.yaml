@@ -137,7 +137,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:4000/blog_db?allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://localhost:4000/social_network_java_db?allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password:
 

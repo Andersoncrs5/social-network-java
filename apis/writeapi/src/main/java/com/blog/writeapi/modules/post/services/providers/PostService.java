@@ -76,6 +76,13 @@ public class PostService implements IPostService {
         post.setAuthor(user);
         post.setStatus(PostStatusEnum.PUBLISHED);
 
+        if (dto.parentId() != null) {
+            PostModel parent = repository.findById(dto.parentId())
+                    .orElseThrow(() -> new ModelNotFoundException("Parent post not found"));
+
+            post.setParent(parent);
+        }
+
         return this.repository.save(post);
     }
 

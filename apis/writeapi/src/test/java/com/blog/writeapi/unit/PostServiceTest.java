@@ -35,6 +35,18 @@ public class PostServiceTest {
             .password("12345678")
             .build();
 
+    PostModel postParent = new PostModel().toBuilder()
+            .id(1111111111111176609L)
+            .title("anyTittle")
+            .slug("any-title")
+            .content("any Content")
+            .status(PostStatusEnum.PUBLISHED)
+            .readingTime(5)
+            .rankingScore(0.0)
+            .isFeatured(false)
+            .author(user)
+            .build();
+
     PostModel post = new PostModel().toBuilder()
             .id(1998780203274176609L)
             .title("anyTittle")
@@ -45,6 +57,7 @@ public class PostServiceTest {
             .rankingScore(0.0)
             .isFeatured(false)
             .author(user)
+            .parent(postParent)
             .build();
 
     @Test
@@ -161,11 +174,13 @@ public class PostServiceTest {
                 this.post.getTitle(),
                 this.post.getSlug(),
                 this.post.getContent(),
-                this.post.getReadingTime()
+                this.post.getReadingTime(),
+                this.postParent.getId()
         );
 
         when(repository.save(any())).thenReturn(this.post);
         when(mapper.toModel(dto)).thenReturn(this.post);
+        when(repository.findById(postParent.getId())).thenReturn(Optional.of(postParent));
         when(this.generator.nextId()).thenReturn(this.post.getId());
 
         PostModel model = this.service.create(dto, this.user);

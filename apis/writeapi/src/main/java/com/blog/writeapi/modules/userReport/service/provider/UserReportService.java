@@ -55,7 +55,7 @@ public class UserReportService implements IUserReportService {
         }
 
         if (!Objects.equals(report.getReporter().getId(), userId)) {
-            throw new BusinessRuleException("You have not permission to delete this report");
+            throw new BusinessRuleException("You have not permission to delete this report", HttpStatus.FORBIDDEN);
         }
 
         this.repository.delete(report);

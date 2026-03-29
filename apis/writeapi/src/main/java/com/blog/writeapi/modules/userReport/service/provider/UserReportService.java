@@ -73,6 +73,10 @@ public class UserReportService implements IUserReportService {
         @IsId Long reportedUserId,
         @IsId Long reporterId
     ) {
+        if (Objects.equals(reportedUserId, reporterId)) {
+            throw new BusinessRuleException("You cannot report yourself");
+        }
+
         UserModel reportedUser = this.gateway.findUserById(reportedUserId);
         UserModel reporter = this.gateway.findUserById(reporterId);
 

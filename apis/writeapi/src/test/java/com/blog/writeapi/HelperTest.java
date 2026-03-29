@@ -40,6 +40,8 @@ import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
 import com.blog.writeapi.modules.user.dtos.LoginUserDTO;
 import com.blog.writeapi.modules.user.dtos.UserDTO;
 import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
+import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
+import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.enums.report.ReportPriority;
@@ -69,6 +71,46 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public UserReportDTO addReportToUser(
+            ResponseUserTest reporter,
+            ResponseUserTest reportedUser
+    ) {
+        try {
+            CreateUserReportDTO dto = new CreateUserReportDTO(
+                    "AnyDesc",
+                    ReportReason.MISINFORMATION,
+                    reportedUser.userDTO().id()
+            );
+
+            MvcResult result = mockMvc.perform(post("/v1/user-report")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto))
+                            .header("Authorization", "Bearer " + reporter.tokens().token()
+                            ))
+                    .andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<UserReportDTO>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<UserReportDTO> response =
+                    objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+            assertThat(response.data()).isNotNull();
+
+            assertThat(response.data().id()).isNotNull();
+            assertThat(response.data().reporter().id()).isEqualTo(reporter.userDTO().id());
+            assertThat(response.data().reportedUser().id()).isEqualTo(reportedUser.userDTO().id());
+            assertThat(response.data().description()).isEqualTo(dto.description());
+            assertThat(response.data().reason()).isEqualTo(dto.reason());
+
+            return response.data();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public void addUserWithBlock(
             ResponseUserTest userTest,

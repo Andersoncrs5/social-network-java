@@ -14,7 +14,10 @@ import java.time.ZoneOffset;
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
+    @Mapping(target = "parent", ignore = true)
     PostModel toModel(@NotNull PostDTO dto);
+
+    @Mapping(target = "parentId", source = "post.parent.id")
     PostDTO toDTO(@NotNull PostModel post);
 
     PostModel toModel(@NotNull CreatePostDTO dto);

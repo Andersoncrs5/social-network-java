@@ -2,13 +2,16 @@ package com.blog.writeapi.configs.startup;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.role.models.RoleModel;
+import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.role.service.providers.RoleService;
+import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.modules.userRole.service.providers.UserRoleService;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -24,6 +27,7 @@ import java.util.Arrays;
 public class SuperAdmInitializr implements CommandLineRunner {
 
     private final UserRepository repository;
+    private final IUserService userService;
     private final RoleService roleService;
     private final UserRoleService userRoleService;
     private final Argon2PasswordEncoder encoder;
@@ -32,20 +36,19 @@ public class SuperAdmInitializr implements CommandLineRunner {
     @Override
     @Transactional
     @Retry(name = "super-adm-retry", fallbackMethod = "fallbackCreateSuperAdm")
-    public void run(String... args) throws Exception {
-        String email = "system.domain@gmail.com";
+    public void run(String @NonNull ... args) throws Exception {
+        CreateUserDTO dto = new CreateUserDTO(
+                "System",
+                "System",
+                "system.domain@gmail.com",
+                "0123456789"
+        );
 
-        UserModel superAdm = repository.findByEmailIgnoreCase(email)
+        UserModel superAdm = repository.findByEmailIgnoreCase(dto.email())
                 .orElseGet(() -> {
                     log.info("Creating initial System User...");
-                    UserModel newUser = new UserModel().toBuilder()
-                            .id(snowflake.nextId())
-                            .name("System")
-                            .username("System")
-                            .email(email)
-                            .password(this.encoder.encode("0123456789"))
-                            .build();
-                    return repository.save(newUser);
+
+                    return userService.Create(dto);
                 });
 
         RoleModel superRole = roleService.findByName("SUPER_ADM_ROLE")
@@ -55,6 +58,7 @@ public class SuperAdmInitializr implements CommandLineRunner {
                 .orElseThrow(() -> new RuntimeException("Role ADM_ROLE not found."));
 
         applyRoles(superAdm, superRole, admRole);
+        log.info("Super Adm id: {} created email: {} password crypto: {}, password: {} ", superAdm.getId(), superAdm.getEmail(), superAdm.getPassword(), dto.password());
     }
 
     private void applyRoles(UserModel user, RoleModel... roles) {

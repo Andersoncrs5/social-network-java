@@ -883,7 +883,8 @@ public class HelperTest {
                         Doo-doo-doo-doo, doo-doo-doo
                         Ooh-ooh, ooh-ooh
                         Ooh-ooh""",
-                5
+                5,
+                null
         );
 
         MvcResult result = this.mockMvc.perform(post(URL)
@@ -1106,6 +1107,66 @@ public class HelperTest {
 
         int randomUnicode = start + random.nextInt(end - start + 1);
         return "U+" + Integer.toHexString(randomUnicode).toUpperCase();
+    }
+
+    public CreatePostDTO createPostDTO(Long postID) {
+        return new CreatePostDTO(
+                "All five horizons revolved around her soul, as the Earth to the Sun",
+                "black-pearl-jem" + generateChars(),
+                """
+                        Sheets of empty canvas, untouched sheets of clay
+                        Were laid spread out before me, as her body once did
+                        All five horizons revolved around her soul, as the Earth to the Sun
+                        Now the air I tasted and breathed has taken a turn
+                        Ooh, and all I taught her was everything
+                        Mmm, oh, I know she gave me all that she wore
+                        And now my bitter hands chafe beneath the clouds
+                        Of what was everything
+                        All the pictures had all been washed in black
+                        Tattooed everything
+                        I take a walk outside, I'm surrounded by some kids at play
+                        I can feel their laughter, so why do I sear?
+                        Mmm, oh, and twisted thoughts that spin 'round my head
+                        I'm spinnin', oh-oh, I'm spinnin'
+                        How quick the Sun can drop away
+                        Now my bitter hands cradle broken glass
+                        Of what was everything
+                        All the pictures have all been washed in black
+                        Tattooed everything
+                        All the love gone bad turned my world to black
+                        Tattooed all I see, all that I am
+                        All I'll be, yeah-yeah
+                        Oh-oh, oh-oh, ooh
+                        I know someday you'll have a beautiful life, I know you'll be a star
+                        In somebody else's sky, but why, why
+                        Why can't it be, oh, can't it be mine?
+                        Ooh, ah, yeah
+                        Ah, ooh-ooh
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (oh, oh-yeah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah)
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ah, yeah)
+                        Doo-doo-doo-doo, doo-doo-doo (ah-ah, yeah)
+                        Doo-doo-doo-doo, doo-doo-doo (yeah, ah)
+                        Doo-doo-doo-doo, doo-doo-doo (yeah-yeah-yeah)
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Doo-doo-doo-doo, doo-doo-doo (ooh-ooh)
+                        Ooh-ooh, ooh-ooh
+                        Doo-doo-doo-doo, doo-doo-doo
+                        Ooh-ooh, ooh-ooh
+                        Ooh-ooh""",
+                5,
+                postID
+        );
     }
 
 }

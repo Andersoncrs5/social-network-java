@@ -23,6 +23,8 @@ public record CreatePostDTO(
         String content,
 
         @Max(240)
-        Integer readingTime
+        Integer readingTime,
+
+        Long parentId
 ) {
 }

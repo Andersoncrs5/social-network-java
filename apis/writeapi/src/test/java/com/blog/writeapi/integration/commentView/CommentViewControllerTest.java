@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration.commentView;
 
 import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.comment.repository.CommentRepository;
 import com.blog.writeapi.modules.commentView.repository.CommentViewRepository;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
+@Import(TestContainerConfig.class)
 public class CommentViewControllerTest {
     private final String URL = "/v1/comment-view";
 

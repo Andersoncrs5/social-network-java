@@ -117,7 +117,7 @@ public class PostModel extends BaseEntity {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PinnedPostModel> pinnedList = new ArrayList<>();
 
 

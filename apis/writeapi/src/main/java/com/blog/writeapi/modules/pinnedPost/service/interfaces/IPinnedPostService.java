@@ -7,6 +7,7 @@ import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 
 public interface IPinnedPostService {
+    PinnedPostModel findByIdSimple(@IsId Long id);
     boolean existsByUserIdAndPostId(
             @IsId Long userId,
             @IsId Long postId

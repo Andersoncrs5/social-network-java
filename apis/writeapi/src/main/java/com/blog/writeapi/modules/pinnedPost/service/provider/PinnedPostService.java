@@ -13,6 +13,7 @@ import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PinnedPostMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,11 @@ public class PinnedPostService implements IPinnedPostService {
             @IsId Long postId
     ) {
         return repository.existsByUserIdAndPostId(userId, postId);
+    }
+
+    @Override
+    public PinnedPostModel findByIdSimple(@IsId Long id) {
+        return repository.findById(id).orElseThrow(() -> new ModelNotFoundException("PinnedPost not found"));
     }
 
     @Override

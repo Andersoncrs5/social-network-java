@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postReportType.controller.provider;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postReportType.controller.doc.IPostReportTypeControllerDocs;
 import com.blog.writeapi.modules.postReportType.dto.CreatePostReportTypeDTO;
 import com.blog.writeapi.modules.postReportType.model.PostReportTypeModel;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,15 +39,15 @@ public class PostReportTypeController implements IPostReportTypeControllerDocs {
 
     private final PostReportService postReportService;
     private final ReportTypeService reportTypeService;
-    private final ITokenService tokenService;
     private final PostReportTypeService service;
 
     @Override
     public ResponseEntity<?> toggle(
             @RequestBody @Valid CreatePostReportTypeDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
+        Long userID = principal.getId();
         PostReportModel postReport = this.postReportService.findByIdSimple(dto.reportId());
         ReportTypeModel reportType = this.reportTypeService.getByIdSimple(dto.typeId());
 

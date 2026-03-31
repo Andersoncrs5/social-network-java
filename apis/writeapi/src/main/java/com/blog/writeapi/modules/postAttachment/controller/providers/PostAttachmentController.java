@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postAttachment.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postAttachment.controller.docs.PostAttachmentControllerDocs;
 import com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO;
 import com.blog.writeapi.modules.postAttachment.dtos.UpdatePostAttachmentDTO;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,10 +46,10 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
     @Override
     public ResponseEntity<?> create(
             @Valid @ModelAttribute CreatePostAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long id = this.tokenService.extractUserIdFromRequest(request);
-        UserModel user = this.userService.GetByIdSimple(id);
+        UserModel user = principal.getUser();
         PostModel post = this.postService.getByIdSimple(dto.getPostId());
 
         Optional<PostAttachmentModel> optional = this.service.create(dto, user, post);
@@ -76,9 +78,10 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
     @Override
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+        Long userId = principal.getId();
         PostAttachmentModel attachment = this.service.getByIdSimple(id);
 
         Boolean deleted = this.service.delete(attachment, userId);
@@ -108,9 +111,10 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @RequestBody UpdatePostAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+        Long userId = principal.getId();
         PostAttachmentModel attachment = this.service.getByIdSimple(id);
 
         if (!Objects.equals(attachment.getUploader().getId(), userId)) {

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentVote.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.swagger.commentVote.ResponseCommentVoteDTO;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -57,6 +59,7 @@ public interface CommentVoteControllerDocs {
     })
     ResponseEntity<?> toggle(
             @Valid @RequestBody ToggleCommentVoteDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

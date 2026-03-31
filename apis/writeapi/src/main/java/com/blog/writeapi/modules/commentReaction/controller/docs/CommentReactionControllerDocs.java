@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentReaction.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentReaction.dtos.CreateCommentReactionDTO;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.swagger.commentReaction.ResponseCommentReactionDTO;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -59,6 +61,7 @@ public interface CommentReactionControllerDocs {
     })
     ResponseEntity<?> toggle(
             @Valid @RequestBody CreateCommentReactionDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

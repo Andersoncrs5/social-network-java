@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentAttachment.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentAttachment.dtos.CreateCommentAttachmentDTO;
 import com.blog.writeapi.modules.commentAttachment.dtos.UpdateCommentAttachmentDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 public interface ICommentAttachmentController {
@@ -15,14 +17,16 @@ public interface ICommentAttachmentController {
     @CircuitBreaker(name = "tag-upload-file-cb")
     ResponseEntity<?> create(
             @Valid @ModelAttribute CreateCommentAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @DeleteMapping("{id}")
     @CircuitBreaker(name = "tagDeleteCB")
     ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @PatchMapping("{id}")
@@ -30,6 +34,7 @@ public interface ICommentAttachmentController {
     ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @RequestBody UpdateCommentAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

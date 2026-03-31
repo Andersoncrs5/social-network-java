@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.comment.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.comment.controller.docs.CommentControllerDocs;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,13 +67,12 @@ public class CommentController implements CommentControllerDocs {
     @Override
     public ResponseEntity<?> create(
             @Valid @RequestBody CreateCommentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-
         CommentModel parent = null;
         PostModel post = this.postService.getByIdSimple(dto.postID());
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
 
         if (dto.parentId() != null) {
             parent = this.service.getByIdSimple(dto.parentId());

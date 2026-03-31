@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.userTagPreference.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.userTagPreference.controller.docs.UserTagPreferenceControllerDocs;
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
 import com.blog.writeapi.modules.tag.models.TagModel;
@@ -15,6 +16,7 @@ import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,18 +35,15 @@ public class UserTagPreferenceController implements UserTagPreferenceControllerD
 
     private final IUserTagPreferenceService service;
     private final ITagService categoryService;
-    private final IUserService userService;
-    private final ITokenService tokenService;
     private final UserTagPreferenceMapper mapper;
 
     @Override
     public ResponseEntity<?> toggle(
             @PathVariable @IsId Long tagID,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userId);
+        UserModel user = principal.getUser();
         TagModel category = this.categoryService.getByIdSimple(tagID);
 
         Optional<UserTagPreferenceModel> optional = this.service.getByUserAndTag(user, category);

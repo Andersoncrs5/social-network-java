@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postTag.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postTag.controller.docs.PostTagControllerDocs;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.PostTagDTO;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,14 +43,14 @@ public class PostTagController implements PostTagControllerDocs {
     private final PostTagMapper mapper;
     private final IPostService postService;
     private final ITagService tagService;
-    private final ITokenService tokenService;
 
     @Override
     public ResponseEntity<?> create(
             @Valid @RequestBody CreatePostTagDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
             ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+        Long userId = principal.getId();
 
         PostModel post = this.postService.getByIdSimple(dto.postId());
         TagModel tag = this.tagService.getByIdSimple(dto.tagId());

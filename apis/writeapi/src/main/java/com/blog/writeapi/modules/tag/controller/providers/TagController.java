@@ -58,13 +58,10 @@ public class TagController implements TagControllerDocs {
 
     @Override
     public ResponseEntity<?> get(@PathVariable @IsId Long id, HttpServletRequest request) {
-        Optional<TagModel> optional = this.service.getById(id);
-
-        if (optional.isEmpty())
-            return this.buildResponseError("Tag not found", HttpStatus.NOT_FOUND);
+        TagModel optional = this.service.getByIdSimple(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
-                optional.get(),
+                optional,
                 "Tag found with successfully",
                 UUID.randomUUID().toString(),
                 1,
@@ -75,12 +72,9 @@ public class TagController implements TagControllerDocs {
 
     @Override
     public ResponseEntity<?> delete(@PathVariable @IsId Long id, HttpServletRequest request) {
-        Optional<TagModel> optional = this.service.getById(id);
+        TagModel optional = this.service.getByIdSimple(id);
 
-        if (optional.isEmpty())
-            return this.buildResponseError("Tag not found", HttpStatus.NOT_FOUND);
-
-        this.service.delete(optional.get());
+        this.service.delete(optional);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,
@@ -94,12 +88,9 @@ public class TagController implements TagControllerDocs {
 
     @Override
     public ResponseEntity<?> patch(@Valid @RequestBody UpdateTagDTO dto, HttpServletRequest request) {
-        Optional<TagModel> optional = this.service.getById(dto.id());
+        TagModel optional = this.service.getByIdSimple(dto.id());
 
-        if (optional.isEmpty())
-            return this.buildResponseError("Tag not found", HttpStatus.NOT_FOUND);
-
-        TagModel update = this.service.update(dto, optional.get());
+        TagModel update = this.service.update(dto, optional);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 update,
@@ -108,12 +99,6 @@ public class TagController implements TagControllerDocs {
                 1,
                 true,
                 OffsetDateTime.now()
-        ));
-    }
-
-    private ResponseEntity<?> buildResponseError(String message, HttpStatus status) {
-        return ResponseEntity.status(status).body(new ResponseHttp<>(
-                null, message, UUID.randomUUID().toString(), 0, false, OffsetDateTime.now()
         ));
     }
 

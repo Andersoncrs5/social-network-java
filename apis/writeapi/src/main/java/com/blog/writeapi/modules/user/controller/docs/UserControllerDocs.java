@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.user.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.res.ResponseHttp;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 public interface UserControllerDocs {
@@ -27,7 +29,10 @@ public interface UserControllerDocs {
             description = "User found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseUserDTO.class)))
-    ResponseEntity<?> getUser(HttpServletRequest request);
+    ResponseEntity<?> getUser(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    );
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user", tags = {"User"})
@@ -42,7 +47,8 @@ public interface UserControllerDocs {
                     schema = @Schema(implementation = ResponseUserDTO.class)))
     ResponseEntity<?> getUser(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @DeleteMapping
@@ -56,7 +62,10 @@ public interface UserControllerDocs {
             description = "User deleted",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseHttp.class)))
-    ResponseEntity<?> deleteUser(HttpServletRequest request);
+    ResponseEntity<?> deleteUser(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    );
 
     @PatchMapping
     @CircuitBreaker(name = "tagUpdateCB")
@@ -69,5 +78,6 @@ public interface UserControllerDocs {
             description = "User update",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseUserDTO.class)))
-    ResponseEntity<?> update(@Valid @RequestBody UpdateUserDTO dto, HttpServletRequest request);
+    ResponseEntity<?> update(@Valid @RequestBody UpdateUserDTO dto, HttpServletRequest request,
+                             @AuthenticationPrincipal UserPrincipal principal);
 }

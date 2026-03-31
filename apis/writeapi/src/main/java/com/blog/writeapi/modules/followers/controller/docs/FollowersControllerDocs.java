@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.followers.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.res.ResponseHttp;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +50,8 @@ public interface FollowersControllerDocs {
     ResponseEntity<?> toggle(
             @Parameter(description = "Snowflake ID of the user to be followed/unfollowed", example = "1543216789012345")
             @PathVariable @IsId Long followingId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @Operation(
@@ -71,6 +74,7 @@ public interface FollowersControllerDocs {
             @Parameter(description = "ID of the follow relationship (Not the user ID)", example = "1543216789012345")
             @PathVariable @IsId Long id,
             @RequestBody @Valid UpdateFollowersDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

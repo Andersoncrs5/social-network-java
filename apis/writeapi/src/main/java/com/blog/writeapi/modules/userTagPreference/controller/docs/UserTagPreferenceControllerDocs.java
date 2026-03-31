@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.userTagPreference.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.swagger.userTagPreference.ResponseUserTagPreferenceDTO;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -54,6 +56,7 @@ public interface UserTagPreferenceControllerDocs {
     ResponseEntity<?> toggle(
             @Parameter(description = "The Snowflake ID of the comment", example = "1998780200074176609")
             @PathVariable @IsId Long tagID,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

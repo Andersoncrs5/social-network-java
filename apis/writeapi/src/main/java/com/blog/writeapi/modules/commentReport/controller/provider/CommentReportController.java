@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentReport.controller.provider;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.comment.service.docs.ICommentService;
 import com.blog.writeapi.modules.commentReport.controller.doc.ICommentReportControllerDocs;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,11 +49,10 @@ public class CommentReportController implements ICommentReportControllerDocs {
     @Override
     public ResponseEntity<?> create(
             @RequestBody @Valid CreateCommentReportDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userId);
+        UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(dto.commentId());
 
         boolean exists = this.service.existsByCommentAndUser(comment, user);
@@ -79,13 +80,12 @@ public class CommentReportController implements ICommentReportControllerDocs {
     @Override
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
         CommentReportModel report = this.service.findByIdSimple(id);
 
-        if (!Objects.equals(report.getUser().getId(), userId)) {
+        if (!Objects.equals(report.getUser().getId(), principal.getId())) {
             throw new BusinessRuleException("You have not permission to delete this report", HttpStatus.FORBIDDEN);
         }
 
@@ -105,27 +105,27 @@ public class CommentReportController implements ICommentReportControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdateCommentReportDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long moderatorId = this.tokenService.extractUserIdFromRequest(request);
-        UserModel moderator = this.userService.GetByIdSimple(moderatorId);
+        UserModel moderator = principal.getUser();
 
         CommentReportModel report = this.service.findByIdSimple(id);
 
         CommentReportModel reportUpdated = this.service.update(dto, report, moderator);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(
-                    new ResponseHttp<>(
-                        this.mapper.toDTO(reportUpdated),
-                        "Report updated with successfully",
-                        UUID.randomUUID().toString(),
-                        1,
-                        true,
-                        OffsetDateTime.now()
-                    )
-                );
+            .status(HttpStatus.OK)
+            .body(
+                new ResponseHttp<>(
+                    this.mapper.toDTO(reportUpdated),
+                    "Report updated with successfully",
+                    UUID.randomUUID().toString(),
+                    1,
+                    true,
+                    OffsetDateTime.now()
+                )
+            );
     }
 
 }

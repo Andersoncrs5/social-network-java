@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.comment.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
 import com.blog.writeapi.modules.comment.dtos.UpdateCommentDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Comment", description = "Endpoints for managing post comments")
@@ -91,7 +93,8 @@ public interface CommentControllerDocs {
     })
     ResponseEntity<?> create(
             @Valid @RequestBody CreateCommentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @DeleteMapping("/{id}")

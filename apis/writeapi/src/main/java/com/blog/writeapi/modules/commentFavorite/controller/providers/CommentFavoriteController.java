@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentFavorite.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentFavorite.controller.docs.CommentFavoriteControllerDocs;
 import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,11 +43,10 @@ public class CommentFavoriteController implements CommentFavoriteControllerDocs 
     @Override
     public ResponseEntity<?> toggle(
             @PathVariable @IsId Long commentID,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(commentID);
 
         Optional<CommentFavoriteModel> favorite = this.service.findByCommentIdAndUserId(comment, user);

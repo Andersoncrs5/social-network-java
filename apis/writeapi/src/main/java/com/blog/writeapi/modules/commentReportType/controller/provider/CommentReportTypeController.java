@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentReportType.controller.provider;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.commentReport.service.provider.CommentReportService;
 import com.blog.writeapi.modules.commentReportType.controller.doc.CommentReportTypeControllerDocs;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,14 +43,13 @@ public class CommentReportTypeController implements CommentReportTypeControllerD
     @Override
     public ResponseEntity<ResponseHttp<Void>> toggle(
             @RequestBody @Valid CreateCommentReportTypeDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-
         CommentReportModel commentReport = this.commentReportService.findByIdSimple(dto.reportId());
         ReportTypeModel reportType = this.reportTypeService.getByIdSimple(dto.typeId());
 
-        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(commentReport, reportType, userID);
+        ResultToggle<CommentReportTypeModel> toggle = this.service.toggle(commentReport, reportType, principal.getId());
 
         String message = toggle.result() == ToggleEnum.ADDED
                 ? "Report type added" : "Report type removed";

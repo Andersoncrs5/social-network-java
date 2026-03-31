@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentAttachment.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentAttachment.controller.docs.ICommentAttachmentController;
 import com.blog.writeapi.modules.commentAttachment.dtos.CreateCommentAttachmentDTO;
 import com.blog.writeapi.modules.commentAttachment.dtos.UpdateCommentAttachmentDTO;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
@@ -40,10 +42,10 @@ public class CommentAttachmentController implements ICommentAttachmentController
     @Override
     public ResponseEntity<?> create(
             @Valid @ModelAttribute CreateCommentAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(dto.getCommentId());
 
         Optional<CommentAttachmentModel> optional = this.service.create(dto, user, comment);
@@ -72,13 +74,12 @@ public class CommentAttachmentController implements ICommentAttachmentController
     @Override
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
         CommentAttachmentModel attachment = this.service.findByIdSimple(id);
 
-        if (!Objects.equals(attachment.getUploader().getId(), userId))
+        if (!Objects.equals(attachment.getUploader().getId(), principal.getId()))
             throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
 
         boolean deleted = this.service.delete(attachment);
@@ -108,12 +109,12 @@ public class CommentAttachmentController implements ICommentAttachmentController
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @RequestBody UpdateCommentAttachmentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
         CommentAttachmentModel attachment = this.service.findByIdSimple(id);
 
-        if (!Objects.equals(attachment.getUploader().getId(), userId))
+        if (!Objects.equals(attachment.getUploader().getId(), principal.getId()))
             throw new ResourceOwnerMismatchException("You don't have permission to delete this attachment.");
 
         CommentAttachmentModel attachmentUpdated = this.service.update(attachment, dto);

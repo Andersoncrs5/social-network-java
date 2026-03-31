@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.reportPost.controller.provider;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.reportPost.controller.doc.PostReportControllerDocs;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,18 +39,15 @@ public class PostReportController implements PostReportControllerDocs {
 
     private final IPostReportService service;
     private final IPostService postService;
-    private final IUserService userService;
-    private final ITokenService tokenService;
     private final PostReportMapper mapper;
 
     @Override
     public ResponseEntity<?> create(
             @RequestBody @Valid CreatePostReportDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userId);
+        UserModel user = principal.getUser();
         PostModel post = this.postService.getByIdSimple(dto.postId());
 
         Boolean exists = this.service.existsByPostAndUser(post, user);
@@ -79,9 +78,10 @@ public class PostReportController implements PostReportControllerDocs {
     @Override
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+        Long userId = principal.getId();
 
         PostReportModel report = this.service.findByIdSimple(id);
 
@@ -101,10 +101,10 @@ public class PostReportController implements PostReportControllerDocs {
     public ResponseEntity<?> patch(
             @PathVariable @IsId Long id,
             @RequestBody @Valid UpdatePostReportDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long moderatorId = this.tokenService.extractUserIdFromRequest(request);
-        UserModel moderator = this.userService.GetByIdSimple(moderatorId);
+        UserModel moderator = principal.getUser();
 
         PostReportModel report = this.service.findByIdSimple(id);
 

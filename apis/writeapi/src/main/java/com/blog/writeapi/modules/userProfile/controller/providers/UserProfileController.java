@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.userProfile.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.userProfile.controller.docs.UserProfileControllerDocs;
 import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
 import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,17 +32,15 @@ import java.util.UUID;
 public class UserProfileController implements UserProfileControllerDocs {
 
     private final IUserProfileService service;
-    private final IUserService userService;
-    private final ITokenService tokenService;
     private final UserProfileMapper mapper;
 
     @Override
     public ResponseEntity<?> update(
             @Valid @RequestBody UpdateUserProfileDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
             ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
         UserProfileModel profile = this.service.getByUserSimple(user);
 
         UserProfileModel updated = this.service.update(profile, dto);

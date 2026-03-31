@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postTag.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.UpdatePostTagDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 public interface PostTagControllerDocs {
@@ -129,6 +131,7 @@ public interface PostTagControllerDocs {
     )
     ResponseEntity<?> create(
             @Valid @RequestBody CreatePostTagDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 }

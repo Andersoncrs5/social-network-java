@@ -2,6 +2,7 @@ package com.blog.writeapi.modules.postView.controller.provider;
 
 import com.blog.writeapi.configs.api.metadata.ClientMetadataDTO;
 import com.blog.writeapi.configs.api.metadata.HttpRequestUtils;
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.postView.controller.docs.IPostViewControllerDocs;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,20 +35,18 @@ public class PostViewController implements IPostViewControllerDocs {
 
     private final IPostService postService;
     private final IPostViewService service;
-    private final ITokenService tokenService;
-    private final IUserService userService;
     private final HttpRequestUtils httpRequest;
 
     @Override
     public ResponseEntity<?> create(
             @IsId @PathVariable Long postId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
         ClientMetadataDTO metadataDTO = this.httpRequest.extractMetadata(request);
 
         PostModel post = this.postService.getByIdSimple(postId);
-        UserModel user = this.userService.GetByIdSimple(userId);
+        UserModel user = principal.getUser();
 
         this.service.recordView(post, user, metadataDTO);
 

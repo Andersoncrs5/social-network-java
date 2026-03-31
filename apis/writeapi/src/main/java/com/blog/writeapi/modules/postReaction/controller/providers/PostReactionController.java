@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postReaction.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postReaction.controller.docs.PostReactionControllerDocs;
 import com.blog.writeapi.modules.postReaction.dtos.CreatePostReactionDTO;
 import com.blog.writeapi.modules.postReaction.dtos.PostReactionDTO;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,19 +41,16 @@ public class PostReactionController implements PostReactionControllerDocs {
 
     private final IPostReactionService service;
     private final IPostService postService;
-    private final IUserService userService;
-    private final ITokenService tokenService;
     private final IReactionService reactionService;
     private final PostReactionMapper mapper;
 
     @Override
     public ResponseEntity<ResponseHttp<PostReactionDTO>> toggle(
             @Valid @RequestBody CreatePostReactionDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
         PostModel post = this.postService.getByIdSimple(dto.postId());
         ReactionModel reaction = this.reactionService.getByIdSimple(dto.reactionId());
 

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postVote.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postVote.controller.docs.PostVoteControllerDocs;
 import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,12 +44,11 @@ public class PostVoteController implements PostVoteControllerDocs {
     @Override
     public ResponseEntity<?> toggle(
             @Valid @RequestBody TogglePostVoteDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
-
         PostModel post = this.postService.getByIdSimple(dto.postID());
-        UserModel user = this.userService.GetByIdSimple(userID);
+        UserModel user = principal.getUser();
 
         Optional<PostVoteModel> voteOpt = this.service.findByUserAndPost(user, post);
 

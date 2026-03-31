@@ -32,8 +32,6 @@ import java.util.UUID;
 @RequestMapping("/v1/report-type")
 public class ReportTypeController implements ReportTypeControllerDocs {
 
-    private final ITokenService tokenService;
-    private final IUserService userService;
     private final IReportTypeService service;
     private final ReportTypeMapper mapper;
 

@@ -37,14 +37,7 @@ public class CategoryController implements CategoryControllerDocs {
         CategoryModel parent = null;
 
         if (dto.parentId() != null) {
-
-            Optional<CategoryModel> optional = this.service.getById(dto.parentId());
-
-            if (optional.isEmpty()) {
-                return buildErrorResponse("Category not found");
-            }
-
-            parent = optional.get();
+            parent = this.service.getByIdSimple(dto.parentId());
         }
 
         CategoryModel category = this.service.create(dto, parent);
@@ -70,13 +63,9 @@ public class CategoryController implements CategoryControllerDocs {
             Long id,
             HttpServletRequest request
     ) {
-        Optional<CategoryModel> categoryOpt = this.service.getById(id);
+        CategoryModel categoryOpt = this.service.getByIdSimple(id);
 
-        if (categoryOpt.isEmpty()) {
-            return buildErrorResponse("Category not found");
-        }
-
-        CategoryDTO categoryDto = this.mapper.toDTO(categoryOpt.get());
+        CategoryDTO categoryDto = this.mapper.toDTO(categoryOpt);
 
         ResponseHttp<CategoryDTO> res = new ResponseHttp<>(
                 categoryDto,
@@ -97,13 +86,9 @@ public class CategoryController implements CategoryControllerDocs {
             Long id,
             HttpServletRequest request
     ) {
-        Optional<CategoryModel> categoryOpt = this.service.getById(id);
+        CategoryModel categoryOpt = this.service.getByIdSimple(id);
 
-        if (categoryOpt.isEmpty()) {
-            return buildErrorResponse("Category not found");
-        }
-
-        this.service.delete(categoryOpt.get());
+        this.service.delete(categoryOpt);
 
         ResponseHttp<Object> res = new ResponseHttp<>(
                 null,
@@ -123,17 +108,11 @@ public class CategoryController implements CategoryControllerDocs {
             HttpServletRequest request
     ) {
 
-        CategoryModel current = this.service.getById(dto.id()).orElse(null);
-        if (current == null) {
-            return buildErrorResponse("Category to update not found");
-        }
+        CategoryModel current = this.service.getByIdSimple(dto.id());
 
         CategoryModel parent = null;
         if (!Boolean.TRUE.equals(dto.isRoot()) && dto.parentId() != null) {
-            parent = this.service.getById(dto.parentId()).orElse(null);
-            if (parent == null) {
-                return buildErrorResponse("The specified parent category does not exist");
-            }
+            parent = this.service.getByIdSimple(dto.parentId());
         }
 
         CategoryModel updated = this.service.update(dto, current, parent);
@@ -146,12 +125,6 @@ public class CategoryController implements CategoryControllerDocs {
                 1,
                 true,
                 OffsetDateTime.now()
-        ));
-    }
-
-    private ResponseEntity<?> buildErrorResponse(String message) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
-                null, message, UUID.randomUUID().toString(), 0, false, OffsetDateTime.now()
         ));
     }
 }

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.controller.provider;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.controller.docs.PostControllerDocs;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,29 +36,15 @@ import java.util.UUID;
 public class PostController implements PostControllerDocs {
 
     private final IPostService service;
-    private final ITokenService tokenService;
-    private final IUserService userService;
     private final PostMapper mapper;
 
     @Override
-    public ResponseEntity<?> create(@Valid @RequestBody CreatePostDTO dto, HttpServletRequest request) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        Optional<UserModel> opt = this.userService.GetById(userId);
-        if (opt.isEmpty()) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "User not found",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-
-        PostModel model = this.service.create(dto, opt.get());
+    public ResponseEntity<?> create(
+            @Valid @RequestBody CreatePostDTO dto,
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        PostModel model = this.service.create(dto, principal.getUser());
 
         PostDTO postMapped = this.mapper.toDTO(model);
 
@@ -72,22 +60,10 @@ public class PostController implements PostControllerDocs {
 
     @Override
     public ResponseEntity<?> get(@PathVariable @IsId Long id, HttpServletRequest request) {
-        Optional<PostModel> post = this.service.getById(id);
-
-        if (post.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseHttp<>(
-                            null,
-                            "Post not found",
-                            UUID.randomUUID().toString(),
-                            1,
-                            false,
-                            OffsetDateTime.now()
-                            ));
-        }
+        PostModel post = this.service.getByIdSimple(id);
 
         ResponseHttp<PostDTO> res = new ResponseHttp<>(
-                this.mapper.toDTO(post.get()),
+                this.mapper.toDTO(post),
                 "Post found",
                 UUID.randomUUID().toString(),
                 1,

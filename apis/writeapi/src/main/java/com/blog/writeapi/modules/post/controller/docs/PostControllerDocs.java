@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 public interface PostControllerDocs {
@@ -29,7 +31,12 @@ public interface PostControllerDocs {
             description = "Unauthorized: Invalid or expired token",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseHttp.class)))
-    ResponseEntity<?> create(@Valid @RequestBody CreatePostDTO dto, HttpServletRequest request);
+    ResponseEntity<?> create(
+            @Valid @RequestBody CreatePostDTO dto,
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+
+    );
 
     @GetMapping("/{id}")
     @Operation(summary = "Get one post", tags = {tag})

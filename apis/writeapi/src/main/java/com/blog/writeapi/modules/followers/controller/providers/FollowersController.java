@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.followers.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.followers.controller.docs.FollowersControllerDocs;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,15 +45,16 @@ public class FollowersController implements FollowersControllerDocs {
     @Override
     public ResponseEntity<?> toggle(
         @PathVariable Long followingId,
-        HttpServletRequest request
+        HttpServletRequest request,
+        @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long followId = this.tokenService.extractUserIdFromRequest(request);
+        Long followId = principal.getId();
 
         if (Objects.equals(followId, followingId)) {
             throw new BusinessRuleException("You cannot follow yourself.");
         }
 
-        UserModel follow = this.userService.GetByIdSimple(followId);
+        UserModel follow = principal.getUser();
         UserModel following = this.userService.GetByIdSimple(followingId);
 
         Optional<FollowersModel> optional = this.service.getByFollowerAndFollowing(follow, following);
@@ -85,9 +88,10 @@ public class FollowersController implements FollowersControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody UpdateFollowersDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userID = this.tokenService.extractUserIdFromRequest(request);
+        Long userID = principal.getId();
         FollowersModel follow = this.service.getByIdSimple(id);
 
         if (!Objects.equals(follow.getFollower().getId(), userID)) {

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.user.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.user.controller.docs.UserControllerDocs;
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
 import com.blog.writeapi.modules.user.dtos.UserDTO;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,29 +34,16 @@ import java.util.UUID;
 public class UserController implements UserControllerDocs {
 
     private final IUserService userService;
-    private final ITokenService tokenService;
     private final UserMapper mapper;
 
     @Override
-    public ResponseEntity<?> getUser(HttpServletRequest request) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+    public ResponseEntity<?> getUser(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        UserModel opt = principal.getUser();
 
-        Optional<UserModel> opt = this.userService.GetById(userId);
-
-        if (opt.isEmpty()) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                null,
-                    "User not found",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-
-        UserDTO userDTO = this.mapper.toDTO(opt.get());
+        UserDTO userDTO = this.mapper.toDTO(opt);
 
         ResponseHttp<UserDTO> res = new ResponseHttp<>(
                 userDTO,
@@ -69,25 +58,13 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
-    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
+    public ResponseEntity<?> deleteUser(
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        UserModel opt = principal.getUser();
 
-        Optional<UserModel> opt = this.userService.GetById(userId);
-
-        if (opt.isEmpty()) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                null,
-                    "User not found",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-
-        this.userService.Delete(opt.get());
+        this.userService.Delete(opt);
 
         ResponseHttp<Object> res = new ResponseHttp<>(
                 null,
@@ -102,23 +79,12 @@ public class UserController implements UserControllerDocs {
     }
 
     @Override
-    public ResponseEntity<?> update(@Valid @RequestBody UpdateUserDTO dto, HttpServletRequest request) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        Optional<UserModel> opt = this.userService.GetById(userId);
-        if (opt.isEmpty()) {
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "User not found",
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            );
-
-            return new ResponseEntity<>(res, HttpStatus.NOT_FOUND);
-        }
-        UserModel currentUser = opt.get();
+    public ResponseEntity<?> update(
+            @Valid @RequestBody UpdateUserDTO dto,
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        UserModel currentUser = principal.getUser();
 
         if (dto.username() != null && !dto.username().isBlank()) {
             String newUsername = dto.username();
@@ -159,7 +125,8 @@ public class UserController implements UserControllerDocs {
     @Override
     public ResponseEntity<?> getUser(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
 
         Optional<UserModel> opt = this.userService.GetById(id);

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.userCategoryPreference.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.userCategoryPreference.controller.docs.UserCategoryPreferenceControllerDocs;
 import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
 import com.blog.writeapi.modules.category.models.CategoryModel;
@@ -15,6 +16,7 @@ import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,11 +42,10 @@ public class UserCategoryPreferenceController implements UserCategoryPreferenceC
     @Override
     public ResponseEntity<?> toggle(
             @PathVariable @IsId Long categoryId,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
-
-        UserModel user = this.userService.GetByIdSimple(userId);
+        UserModel user = principal.getUser();
         CategoryModel category = this.categoryService.getByIdSimple(categoryId);
 
         Optional<UserCategoryPreferenceModel> optional = this.service.getByUserAndCategory(user, category);

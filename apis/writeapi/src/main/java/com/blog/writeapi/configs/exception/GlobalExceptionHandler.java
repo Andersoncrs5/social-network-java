@@ -179,7 +179,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<@NonNull ResponseHttp<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseHttp<>(
                 null,
-                "Database integrity violation: " + ex.getMostSpecificCause().getMessage(),
+                ex.getMessage(),
                 UUID.randomUUID().toString(),
                 0,
                 false,

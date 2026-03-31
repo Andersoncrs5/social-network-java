@@ -1,0 +1,68 @@
+server:
+  port: 8889 # Porta diferente para evitar conflitos se o app principal estiver rodando
+
+resilience4j:
+  circuitbreaker:
+    enabled: false # Desativa todos os Circuit Breakers por padrão nos testes
+  retry:
+    enabled: false # Desativa os Retries para os testes serem determinísticos
+
+spring:
+  application:
+    name: writeapi-test
+
+  # Banco de Dados em Memória (H2) para velocidade
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:social_network_test_db;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # Limpa o banco após cada execução de teste
+    show-sql: true # Menos ruído no console de testes
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # Redis em memória ou desativado se não for o foco do teste
+  data:
+    redis:
+      host: localhost
+      port: 6379 # Se usar TestContainers, isso será sobrescrito dinamicamente
+
+  # Virtual Threads continuam ativas para validar comportamento em teste
+  threads:
+    virtual:
+      enabled: true
+
+  # LocalStack / S3 Mocks para testes
+  cloud:
+    aws:
+      s3:
+        endpoint: http://localhost:4566
+      credentials:
+        access-key: test
+        secret-key: test
+
+# Mantemos as configs de Argon2 iguais para garantir que o login funcione nos testes
+argon:
+  saltLength: 16
+  hashLength: 32
+  parallelism: 1
+  memory: 4096 # Reduzido para os testes rodarem mais rápido (menos CPU)
+  iterations: 1
+
+# JWT fixo e curto para facilitar os testes de integração
+security:
+  exp:
+    token: 1
+    refresh: 2
+  jwt:
+    secret: test_secret_key_must_be_long_enough_to_avoid_validation_errors_123456789
+
+snowflake:
+  worker-id: 1
+  datacenter-id: 1
+
+s3:
+  bucketAttachments: test-attachments

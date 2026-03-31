@@ -16,7 +16,6 @@ repost
 support
 post_versions
 feedback of system
-pinned_posts
 blocks
 recommendations
 badges

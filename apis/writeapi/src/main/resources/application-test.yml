@@ -11,20 +11,14 @@ spring:
   application:
     name: writeapi-test
 
-  # Banco de Dados em Memória (H2) para velocidade
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:social_network_test_db;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE
-    username: sa
-    password:
-
   jpa:
     hibernate:
-      ddl-auto: create-drop # Limpa o banco após cada execução de teste
-    show-sql: true # Menos ruído no console de testes
-    database-platform: org.hibernate.dialect.H2Dialect
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
-  # Redis em memória ou desativado se não for o foco do teste
   data:
     redis:
       host: localhost

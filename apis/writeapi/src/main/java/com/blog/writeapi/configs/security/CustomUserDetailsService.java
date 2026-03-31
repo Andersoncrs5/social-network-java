@@ -4,9 +4,9 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.userRole.repository.UserRoleRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     private static final String PREFIX = "auth:user:";
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
         String key = PREFIX + email;
 
         try {
@@ -57,7 +57,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getPassword(),
                 roles.stream()
                         .map(role -> new SimpleGrantedAuthority(role.getRole().getName()))
-                        .toList()
+                        .toList(),
+                user
         );
 
         try {

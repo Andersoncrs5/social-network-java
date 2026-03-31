@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
 import com.blog.writeapi.modules.followers.repository.FollowersRepository;

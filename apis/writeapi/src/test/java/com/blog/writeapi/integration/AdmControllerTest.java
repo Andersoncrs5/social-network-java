@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
 import com.blog.writeapi.modules.role.models.RoleModel;

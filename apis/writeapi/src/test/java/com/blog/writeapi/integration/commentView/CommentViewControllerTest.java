@@ -1,7 +1,7 @@
 package com.blog.writeapi.integration.commentView;
 
-import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.TestContainerConfig;
+import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.comment.repository.CommentRepository;
 import com.blog.writeapi.modules.commentView.repository.CommentViewRepository;

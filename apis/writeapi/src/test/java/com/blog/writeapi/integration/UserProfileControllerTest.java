@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
 import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
 import com.blog.writeapi.utils.enums.profile.ProfileVisibilityEnum;

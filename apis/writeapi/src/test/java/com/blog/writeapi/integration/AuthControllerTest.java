@@ -1,7 +1,7 @@
 package com.blog.writeapi.integration;
 
 import cn.hutool.core.lang.UUID;
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
 import com.blog.writeapi.modules.user.dtos.LoginUserDTO;
 import com.blog.writeapi.modules.user.repository.UserRepository;

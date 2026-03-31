@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
 import com.blog.writeapi.modules.userCategoryPreference.dtos.UserCategoryPreferenceDTO;
 import com.blog.writeapi.modules.category.repository.CategoryRepository;

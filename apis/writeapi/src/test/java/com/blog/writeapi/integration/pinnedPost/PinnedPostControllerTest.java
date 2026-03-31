@@ -1,7 +1,7 @@
 package com.blog.writeapi.integration.pinnedPost;
 
-import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.TestContainerConfig;
+import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.pinnedPost.dto.CreatePinnedPostDTO;
 import com.blog.writeapi.modules.pinnedPost.dto.PinnedPostDTO;
 import com.blog.writeapi.modules.pinnedPost.dto.UpdatePinnedPostDTO;

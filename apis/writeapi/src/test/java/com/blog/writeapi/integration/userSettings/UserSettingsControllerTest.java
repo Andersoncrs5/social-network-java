@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration.userSettings;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.userSettings.dto.UpdateUserSettingsDTO;
 import com.blog.writeapi.modules.userSettings.dto.UserSettingsDTO;

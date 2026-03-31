@@ -1,6 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CommentReactionDTO;
 import com.blog.writeapi.modules.commentReaction.dtos.CreateCommentReactionDTO;

@@ -1,4 +1,4 @@
-package com.blog.writeapi;
+package com.blog.writeapi.configs;
 
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;

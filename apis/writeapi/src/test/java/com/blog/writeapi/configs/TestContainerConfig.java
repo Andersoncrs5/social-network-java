@@ -1,4 +1,4 @@
-package com.blog.writeapi;
+package com.blog.writeapi.configs;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

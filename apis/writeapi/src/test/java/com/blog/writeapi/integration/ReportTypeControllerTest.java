@@ -1,7 +1,6 @@
 package com.blog.writeapi.integration;
 
-import com.blog.writeapi.HelperTest;
-import com.blog.writeapi.modules.postVote.dtos.PostVoteDTO;
+import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.UpdateReportTypeDTO;

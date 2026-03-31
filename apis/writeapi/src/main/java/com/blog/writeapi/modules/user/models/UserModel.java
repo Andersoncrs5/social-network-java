@@ -2,6 +2,7 @@ package com.blog.writeapi.modules.user.models;
 
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
+import com.blog.writeapi.modules.pinnedPost.model.PinnedPostModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.userBlock.model.UserBlockModel;
@@ -188,7 +189,7 @@ public class UserModel extends BaseEntity {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserSettingsModel settings;
 
     @JsonIgnore
@@ -206,7 +207,13 @@ public class UserModel extends BaseEntity {
     @JsonIgnore
     @ToString.Exclude
     @Builder.Default
-    @OneToMany(mappedBy = "moderator", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "moderator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserReportModel> moderatedReports = new ArrayList<>();
+
+    @JsonIgnore
+    @ToString.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PinnedPostModel> pinnedList = new ArrayList<>();
 
 }

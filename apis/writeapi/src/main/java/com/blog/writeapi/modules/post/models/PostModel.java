@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.models;
 
+import com.blog.writeapi.modules.pinnedPost.model.PinnedPostModel;
 import com.blog.writeapi.modules.postAttachment.models.PostAttachmentModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
@@ -105,10 +106,19 @@ public class PostModel extends BaseEntity {
     private List<PostReportModel> reports = new ArrayList<>();
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostViewModel> viewList = new ArrayList<>();
 
+    @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostAttachmentModel> attachments;
+    private List<PostAttachmentModel> attachments = new ArrayList<>();
+
+    @JsonIgnore
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PinnedPostModel> pinnedList = new ArrayList<>();
+
 
 }

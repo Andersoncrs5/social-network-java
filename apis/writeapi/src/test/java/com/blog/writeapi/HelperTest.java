@@ -16,6 +16,8 @@ import com.blog.writeapi.modules.commentReportType.dto.CreateCommentReportTypeDT
 import com.blog.writeapi.modules.commentVote.dtos.CommentVoteDTO;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
 import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
+import com.blog.writeapi.modules.pinnedPost.dto.CreatePinnedPostDTO;
+import com.blog.writeapi.modules.pinnedPost.dto.PinnedPostDTO;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
@@ -72,6 +74,37 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public PinnedPostDTO markPostWithPinned(
+            ResponseUserTest userData,
+            PostDTO post
+    ) throws Exception {
+        CreatePinnedPostDTO dto = new CreatePinnedPostDTO(
+                post.id(),
+                1
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/pinned-post")
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .content(objectMapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PinnedPostDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PinnedPostDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data().id()).isNotNull().isPositive();
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
+        assertThat(response.data().orderIndex()).isEqualTo(dto.orderIndex());
+
+        return response.data();
+    }
 
     public void addReportTypeToUserReport(
             UserReportDTO userReportDTO,
@@ -862,7 +895,7 @@ public class HelperTest {
 
         CreatePostDTO dto = new CreatePostDTO(
                 "Black pearl jem",
-                "black-pearl-jem",
+                "black-pearl-jem" + generateChars(),
                 """
                         Sheets of empty canvas, untouched sheets of clay
                         Were laid spread out before me, as her body once did

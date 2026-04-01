@@ -1,4 +1,4 @@
-package com.blog.writeapi.nMoreOne.category;
+package com.blog.writeapi.repositories.category;
 
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.category.models.CategoryModel;
@@ -10,6 +10,7 @@ import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -18,9 +19,10 @@ import java.time.OffsetDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestContainerConfig.class)
-public class CategoryServiceMoreOne {
+public class CategoryRepositoryTest {
 
     @Autowired
     private CategoryService categoryService;
@@ -39,7 +41,7 @@ public class CategoryServiceMoreOne {
             .isActive(true)
             .visible(true)
             .displayOrder(1)
-            .version(1L)
+            .version(null)
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
             .build();

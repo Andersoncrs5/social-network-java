@@ -1,7 +1,6 @@
 post_stats
 comment_stats
 notifications
-reports
 audit_logs
 search_index
 content_flags
@@ -16,7 +15,6 @@ repost
 support
 post_versions
 feedback of system
-blocks
 recommendations
 badges
 bans

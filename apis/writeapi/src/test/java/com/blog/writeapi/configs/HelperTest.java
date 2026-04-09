@@ -75,6 +75,29 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public void addedPostToReading(
+            ResponseUserTest userTest,
+            Long postId
+    ) {
+        try {
+            MvcResult result = mockMvc.perform(post("/v1/post-reading-list/toggle/" + postId)
+                    .header("Authorization", "Bearer " + userTest.tokens().token())
+            ).andExpect(status().isCreated()).andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
+
+            ResponseHttp<Void> response =
+                    objectMapper.readValue(json, typeRef);
+
+            assertThat(response.message()).isNotBlank();
+            assertThat(response.status()).isEqualTo(true);
+            assertThat(response.traceId()).isNotBlank();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public PinnedPostDTO markPostWithPinned(
             ResponseUserTest userData,
             PostDTO post

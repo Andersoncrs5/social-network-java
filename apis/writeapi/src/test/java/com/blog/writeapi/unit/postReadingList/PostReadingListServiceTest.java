@@ -31,44 +31,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class PostReadingListServiceTest {
 
-    @Mock private PostReadingListRepository repository;
-    @Mock private PostReadingListModuleGateway gateway;
-    @Mock private Snowflake generator;
-
-    @InjectMocks private PostReadingListService service;
-
-    UserModel user = UserModel.builder()
-            .id(1998780200074176609L)
-            .name("user")
-            .email("user@gmail.com")
-            .password("12345678")
-            .createdAt(OffsetDateTime.now())
-            .updatedAt(OffsetDateTime.now())
-            .build();
-
-    PostModel post = new PostModel().toBuilder()
-            .id(1998780203274176609L)
-            .title("anyTittle")
-            .slug("any-title")
-            .content("any Content")
-            .status(PostStatusEnum.PUBLISHED)
-            .readingTime(5)
-            .rankingScore(0.0)
-            .isFeatured(false)
-            .author(user)
-            .parent(null)
-            .createdAt(OffsetDateTime.now())
-            .updatedAt(OffsetDateTime.now())
-            .build();
-
-    PostReadingListModel read = new PostReadingListModel().toBuilder()
-            .id(1998780201111111111L)
-            .user(user)
-            .post(post)
-            .version(1L)
-            .createdAt(OffsetDateTime.now())
-            .updatedAt(OffsetDateTime.now())
-            .build();
+    UserModel user = UserModel.builder().id(1998780200074176609L).name("user").email("user@gmail.com").password("12345678").createdAt(OffsetDateTime.now()).updatedAt(OffsetDateTime.now()).build();
+    PostModel post = new PostModel().toBuilder().id(1998780203274176609L).title("anyTittle").slug("any-title").content("any Content").status(PostStatusEnum.PUBLISHED).readingTime(5).rankingScore(0.0).isFeatured(false).author(user).parent(null).createdAt(OffsetDateTime.now()).updatedAt(OffsetDateTime.now()).build();
+    PostReadingListModel read = new PostReadingListModel().toBuilder().id(1998780201111111111L).user(user).post(post).version(1L).createdAt(OffsetDateTime.now()).updatedAt(OffsetDateTime.now()).build();
+    @Mock
+    private PostReadingListRepository repository;
+    @Mock
+    private PostReadingListModuleGateway gateway;
+    @Mock
+    private Snowflake generator;
+    @InjectMocks
+    private PostReadingListService service;
 
     @Test
     void shouldDelete() {
@@ -86,8 +59,7 @@ public class PostReadingListServiceTest {
         Long userId = user.getId();
         Long postId = post.getId();
 
-        when(repository.findByUserIdAndPostId(userId, postId))
-                .thenReturn(java.util.Optional.of(read));
+        when(repository.findByUserIdAndPostId(userId, postId)).thenReturn(java.util.Optional.of(read));
 
         PostReadingListModel result = service.findByUserIdAndPostIdSimple(userId, postId);
 
@@ -106,8 +78,7 @@ public class PostReadingListServiceTest {
         Long userId = user.getId();
         Long postId = post.getId();
 
-        when(repository.findByUserIdAndPostId(userId, postId))
-                .thenReturn(java.util.Optional.empty());
+        when(repository.findByUserIdAndPostId(userId, postId)).thenReturn(java.util.Optional.empty());
 
         assertThrows(ModelNotFoundException.class, () -> {
             service.findByUserIdAndPostIdSimple(userId, postId);
@@ -123,8 +94,7 @@ public class PostReadingListServiceTest {
         Long userId = user.getId();
         Long postId = post.getId();
 
-        when(repository.findByUserIdAndPostId(userId, postId))
-                .thenReturn(java.util.Optional.of(read));
+        when(repository.findByUserIdAndPostId(userId, postId)).thenReturn(java.util.Optional.of(read));
 
         var result = service.findByUserIdAndPostId(userId, postId);
 
@@ -145,12 +115,10 @@ public class PostReadingListServiceTest {
         Long postId = post.getId();
         Long generatedId = read.getId();
 
-
         when(gateway.findPostById(postId)).thenReturn(post);
         when(gateway.findUserById(userId)).thenReturn(user);
         when(generator.nextId()).thenReturn(generatedId);
         when(repository.save(any(PostReadingListModel.class))).thenReturn(read);
-
 
         PostReadingListModel result = service.create(userId, postId);
 
@@ -159,7 +127,6 @@ public class PostReadingListServiceTest {
         assertThat(result.getId()).isEqualTo(generatedId);
         assertThat(result.getUser().getName()).isEqualTo("user");
         assertThat(result.getPost().getTitle()).isEqualTo("anyTittle");
-
 
         InOrder inOrder = inOrder(gateway, generator, repository);
         inOrder.verify(gateway).findPostById(postId);
@@ -183,17 +150,12 @@ public class PostReadingListServiceTest {
 
 
         String dbMessage = "Duplicate entry for key 'uk_post_user_reading_list'";
-        DataIntegrityViolationException exception = new DataIntegrityViolationException(
-                "Conflict",
-                new RuntimeException(dbMessage)
-        );
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("Conflict", new RuntimeException(dbMessage));
 
         when(repository.save(any(PostReadingListModel.class))).thenThrow(exception);
 
 
-        assertThatThrownBy(() -> service.create(userId, postId))
-                .isInstanceOf(UniqueConstraintViolationException.class)
-                .hasMessage("This post already has this type assigned.");
+        assertThatThrownBy(() -> service.create(userId, postId)).isInstanceOf(UniqueConstraintViolationException.class).hasMessage("This post already has this type assigned.");
 
         verify(repository).save(any());
     }
@@ -210,9 +172,7 @@ public class PostReadingListServiceTest {
         when(repository.save(any())).thenThrow(new RuntimeException("Unexpected error"));
 
 
-        assertThatThrownBy(() -> service.create(user.getId(), post.getId()))
-                .isInstanceOf(InternalServerErrorException.class)
-                .hasMessage("Error creating report association.");
+        assertThatThrownBy(() -> service.create(user.getId(), post.getId())).isInstanceOf(InternalServerErrorException.class).hasMessage("Error creating report association.");
 
         verify(repository).save(any());
     }
@@ -227,17 +187,12 @@ public class PostReadingListServiceTest {
 
 
         String genericDbMessage = "Foreign key violation";
-        DataIntegrityViolationException exception = new DataIntegrityViolationException(
-                "Integrity Error",
-                new RuntimeException(genericDbMessage)
-        );
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("Integrity Error", new RuntimeException(genericDbMessage));
 
         when(repository.save(any())).thenThrow(exception);
 
 
-        assertThatThrownBy(() -> service.create(user.getId(), post.getId()))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("Database integrity error: " + genericDbMessage);
+        assertThatThrownBy(() -> service.create(user.getId(), post.getId())).isInstanceOf(BusinessRuleException.class).hasMessageContaining("Database integrity error: " + genericDbMessage);
     }
 
 }

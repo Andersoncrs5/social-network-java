@@ -3,6 +3,7 @@ package com.blog.writeapi.modules.user.models;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.pinnedPost.model.PinnedPostModel;
+import com.blog.writeapi.modules.postReadingList.model.PostReadingListModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.userBlock.model.UserBlockModel;
@@ -215,5 +216,9 @@ public class UserModel extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PinnedPostModel> pinnedList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PostReadingListModel> readingList = new ArrayList<>();
 
 }

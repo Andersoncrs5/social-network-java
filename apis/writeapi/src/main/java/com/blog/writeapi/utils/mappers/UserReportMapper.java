@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UpdateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
@@ -7,12 +8,9 @@ import com.blog.writeapi.modules.userReport.model.UserReportModel;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Mapper(
         componentModel = "spring",
+        config = CentralMapperConfig.class,
         uses = {
                 UserMapper.class
         },
@@ -48,11 +46,4 @@ public interface UserReportMapper {
     // @Mapping(target = "reportTypes", ignore = true)
     void merge(UpdateUserReportDTO dto, @MappingTarget @IsModelInitialized UserReportModel model);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

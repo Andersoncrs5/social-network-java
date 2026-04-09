@@ -1,20 +1,21 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
 import com.blog.writeapi.modules.category.dtos.CreateCategoryDTO;
 import com.blog.writeapi.modules.category.dtos.UpdateCategoryDTO;
 import com.blog.writeapi.modules.category.models.CategoryModel;
+import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-@Mapper(componentModel = "spring")
+@Mapper(
+        config = CentralMapperConfig.class,
+        componentModel = "spring"
+)
 public interface CategoryMapper {
 
     CategoryModel toModel(CategoryDTO dto);
-    CategoryDTO toDTO(CategoryModel category);
+    CategoryDTO toDTO(@IsModelInitialized CategoryModel category);
 
     @Mapping(target = "parent", ignore = true)
     CategoryModel toModel(CreateCategoryDTO dto);
@@ -25,11 +26,4 @@ public interface CategoryMapper {
     @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateCategoryDTO dto, @MappingTarget CategoryModel category);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

@@ -1,17 +1,15 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
 import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
 import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Mapper(
         componentModel = "spring",
+        config = CentralMapperConfig.class,
         uses = {UserMapper.class},
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
@@ -24,13 +22,5 @@ public interface UserProfileMapper {
     void merge(UpdateUserProfileDTO dto, @MappingTarget UserProfileModel category);
 
     UserProfileDTO toDTO(@NotNull UserProfileModel model);
-
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 
 }

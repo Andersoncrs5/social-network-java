@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
 import com.blog.writeapi.modules.user.dtos.UpdateUserDTO;
 import com.blog.writeapi.modules.user.dtos.UserDTO;
@@ -7,12 +8,11 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import org.mapstruct.*;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Service
-@Mapper(componentModel = "spring")
+@Mapper(
+        config = CentralMapperConfig.class,
+        componentModel = "spring"
+)
 public interface UserMapper {
 
     UserModel toModel(UserDTO dto);
@@ -25,11 +25,4 @@ public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateUserDTO dto, @MappingTarget UserModel target);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

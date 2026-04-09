@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.followers.dtos.FollowersDTO;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
@@ -9,12 +10,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Mapper(
         componentModel = "spring",
+        config = CentralMapperConfig.class,
         uses = {UserMapper.class},
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
@@ -30,11 +28,4 @@ public interface FollowersMapper {
     @Mapping(target = "version", ignore = true)
     void merge(UpdateFollowersDTO dto, @MappingTarget FollowersModel model);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

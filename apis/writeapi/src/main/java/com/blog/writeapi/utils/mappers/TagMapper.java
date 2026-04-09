@@ -1,16 +1,16 @@
 package com.blog.writeapi.utils.mappers;
 
-import com.blog.writeapi.modules.tag.dtos.TagDTO;
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
+import com.blog.writeapi.modules.tag.dtos.TagDTO;
 import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
 import com.blog.writeapi.modules.tag.models.TagModel;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-@Mapper(componentModel = "spring")
+@Mapper(
+        config = CentralMapperConfig.class,
+        componentModel = "spring"
+)
 public interface TagMapper {
 
     TagModel toModel(TagDTO dto);
@@ -24,11 +24,4 @@ public interface TagMapper {
     @Mapping(target = "createdAt", ignore = true)
     void merge(UpdateTagDTO dto, @MappingTarget TagModel category);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

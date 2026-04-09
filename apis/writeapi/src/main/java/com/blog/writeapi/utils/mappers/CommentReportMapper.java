@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.commentReport.dto.CommentReportDTO;
 import com.blog.writeapi.modules.commentReport.dto.CreateCommentReportDTO;
 import com.blog.writeapi.modules.commentReport.dto.UpdateCommentReportDTO;
@@ -7,12 +8,9 @@ import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Mapper(
         componentModel = "spring",
+        config = CentralMapperConfig.class,
         uses = {
                 CommentMapper.class,
                 UserMapper.class
@@ -47,11 +45,4 @@ public interface CommentReportMapper {
     @Mapping(target = "updatedAt", ignore = true)
     void merge(UpdateCommentReportDTO dto, @MappingTarget @IsModelInitialized CommentReportModel model);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

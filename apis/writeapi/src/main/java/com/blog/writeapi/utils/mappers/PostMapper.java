@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
@@ -7,11 +8,11 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import jakarta.validation.constraints.NotNull;
 import org.mapstruct.*;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-@Mapper(componentModel = "spring")
+@Mapper(
+        config = CentralMapperConfig.class,
+        componentModel = "spring",
+        uses = { UserMapper.class }
+)
 public interface PostMapper {
 
     @Mapping(target = "parent", ignore = true)
@@ -26,13 +27,5 @@ public interface PostMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     void merge(@NotNull UpdatePostDTO dto, @MappingTarget @NotNull PostModel post);
-
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 
 }

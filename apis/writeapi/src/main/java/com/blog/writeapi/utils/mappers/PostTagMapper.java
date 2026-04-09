@@ -1,16 +1,18 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.PostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.UpdatePostTagDTO;
 import com.blog.writeapi.modules.postTag.models.PostTagModel;
-import org.mapstruct.*;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import jakarta.validation.constraints.NotNull;
+import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        config = CentralMapperConfig.class,
+        componentModel = "spring",
+        uses = { PostMapper.class, TagMapper.class }
+)
 public interface PostTagMapper {
 
     PostTagDTO toDTO(@NotNull PostTagModel model);
@@ -32,11 +34,4 @@ public interface PostTagMapper {
     @Mapping(target = "version", ignore = true)
     void merge(UpdatePostTagDTO dto, @MappingTarget PostTagModel model);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

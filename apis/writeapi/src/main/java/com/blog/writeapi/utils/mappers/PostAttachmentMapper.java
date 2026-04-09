@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.mappers;
 
+import com.blog.writeapi.configs.mapper.CentralMapperConfig;
 import com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO;
 import com.blog.writeapi.modules.postAttachment.dtos.PostAttachmentDTO;
 import com.blog.writeapi.modules.postAttachment.dtos.UpdatePostAttachmentDTO;
@@ -10,13 +11,10 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 @Mapper(
         componentModel = "spring",
         uses = {PostMapper.class, UserMapper.class},
+        config = CentralMapperConfig.class,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
 public interface PostAttachmentMapper {
@@ -35,11 +33,4 @@ public interface PostAttachmentMapper {
     @Mapping(target = "version", ignore = true)
     void merge(UpdatePostAttachmentDTO dto, @MappingTarget PostAttachmentModel model);
 
-    default OffsetDateTime map(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.atOffset(ZoneOffset.UTC);
-    }
-
-    default LocalDateTime map(OffsetDateTime offsetDateTime) {
-        return offsetDateTime == null ? null : offsetDateTime.toLocalDateTime();
-    }
 }

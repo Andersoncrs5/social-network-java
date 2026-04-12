@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.commentAttachment.dtos.CommentAttachmentDTO;
 import com.blog.writeapi.modules.commentAttachment.dtos.UpdateCommentAttachmentDTO;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestContainerConfig.class)
 public class CommentAttachmentControllerTest {
     private final String URL = "/v1/comment-attachment";
 

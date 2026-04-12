@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration.userSettings;
 
 import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.userSettings.dto.UpdateUserSettingsDTO;
 import com.blog.writeapi.modules.userSettings.dto.UserSettingsDTO;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestContainerConfig.class)
 public class UserSettingsControllerTest {
     private final String URL = "/v1/user-settings";
 

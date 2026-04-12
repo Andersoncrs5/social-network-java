@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
 import com.blog.writeapi.modules.tag.dtos.TagDTO;
 import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +32,7 @@ import java.util.Random;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestContainerConfig.class)
 public class TagControllerTest {
     private final String URL = "/v1/tag";
 

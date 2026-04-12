@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration.userBlock;
 
 import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -22,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestContainerConfig.class)
 public class UserBlockControllerTest {
     private final String URL = "/v1/user-block";
 

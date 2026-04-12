@@ -1,6 +1,7 @@
 package com.blog.writeapi.integration;
 
 import com.blog.writeapi.configs.HelperTest;
+import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestContainerConfig.class)
 public class PostReportControllerTest {
     private final String URL = "/v1/post-report";
 

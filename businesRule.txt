@@ -7,9 +7,7 @@ content_flags
 shares
 stories
 direct_messages
-reading_lists
 mentions
-repost
 
 #maybe
 support

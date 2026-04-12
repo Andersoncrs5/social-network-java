@@ -26,6 +26,8 @@ import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
 import com.blog.writeapi.modules.postReaction.dtos.CreatePostReactionDTO;
 import com.blog.writeapi.modules.postReaction.dtos.PostReactionDTO;
 import com.blog.writeapi.modules.postReportType.dto.CreatePostReportTypeDTO;
+import com.blog.writeapi.modules.postShare.dto.CreatePostShareDTO;
+import com.blog.writeapi.modules.postShare.dto.PostShareDTO;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.PostTagDTO;
 import com.blog.writeapi.modules.postVote.dtos.PostVoteDTO;
@@ -46,6 +48,7 @@ import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
 import com.blog.writeapi.modules.userReportType.dto.CreateUserReportTypeDTO;
 import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
+import com.blog.writeapi.utils.enums.postShare.SharePlatformEnum;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.enums.report.ReportPriority;
 import com.blog.writeapi.utils.enums.report.ReportReason;
@@ -74,6 +77,40 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public PostShareDTO sharePost(
+            ResponseUserTest userTest,
+            PostDTO post
+    ) throws Exception {
+        String URL = "/v1/post-share";
+
+        CreatePostShareDTO dto = new CreatePostShareDTO(
+                post.id(),
+                SharePlatformEnum.REDDIT
+        );
+
+        MvcResult result = mockMvc.perform(post(URL)
+                .content(objectMapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + userTest.tokens().token())
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostShareDTO>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<PostShareDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.data().id()).isNotZero().isNotNegative();
+        assertThat(response.data().post().id()).isEqualTo(post.id());
+        assertThat(response.data().user().id()).isEqualTo(userTest.userDTO().id());
+        assertThat(response.data().platform()).isEqualTo(dto.platform());
+
+        return response.data();
+    }
 
     public void addedPostToReading(
             ResponseUserTest userTest,

@@ -3,6 +3,7 @@ package com.blog.writeapi.configs;
 import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
+import com.blog.writeapi.modules.apiKeys.dto.CreateApiKeyDTO;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
 import com.blog.writeapi.modules.category.dtos.CreateCategoryDTO;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
@@ -77,6 +78,31 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public String createApiKey(
+            ResponseUserTest adm
+    ) throws Exception {
+        CreateApiKeyDTO dto = new CreateApiKeyDTO(("api-read-" + generateChars()));
+
+        MvcResult result = mockMvc.perform(post("/v1/admin/api-keys")
+                .content(objectMapper.writeValueAsString(dto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + adm.tokens().token())
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<String>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<String> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(true);
+        assertThat(response.version()).isEqualTo(1);
+
+        assertThat(response.data()).isNotBlank();
+
+        return response.data();
+    }
 
     public PostShareDTO sharePost(
             ResponseUserTest userTest,

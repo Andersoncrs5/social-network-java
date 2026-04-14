@@ -1,5 +1,6 @@
 package com.blog.writeapi.integration.story;
 
+import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.stories.dto.StoryDTO;
@@ -15,17 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -57,38 +53,43 @@ public class StoryControllerTest {
     void shouldCreateNewStory() throws Exception {
         ResponseUserTest userData = this.helper.createUser();
 
-        Path path = Paths.get("src/test/java/com/blog/writeapi/utils/resources/foto.png");
-        byte[] content = Files.readAllBytes(path);
+        this.helper.createStory(userData);
+    }
 
-        MockMultipartFile filePart = new MockMultipartFile(
-                "file",
-                "image" + HelperTest.generateChars() + ".png",
-                "image/png",
-                content
-        );
+    @Test
+    void shouldDeleteStory() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        StoryDTO story = this.helper.createStory(userData);
 
-        MvcResult result = this.mockMvc.perform(multipart(this.URL)
-                        .file(filePart)
-                        .param("fileName", "pochita-wallpaper")
-                        .param("contentType", "image/png")
-                        .param("isPublic", "true")
-                        .param("isVisible", "true")
-                        .param("backgroundColor", "#FFFFFF")
-                        .param("caption", "Black")
-                        .header("Authorization", "Bearer " + userData.tokens().token()))
-                .andExpect(status().isCreated())
-                .andReturn();
+        MvcResult result = mockMvc.perform(delete(this.URL + "/" + story.getId())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", UUID.randomUUID().toString())
+        ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
-        ResponseHttp<StoryDTO> response = objectMapper.readValue(json, new TypeReference<>() {});
+        ResponseHttp<Void> response = objectMapper.readValue(json, new TypeReference<>() {});
 
-        assertThat(response.data().getFileName()).isEqualTo("pochita-wallpaper");
-        assertThat(response.data().getStorageKey()).isNotBlank();
-        assertThat(response.data().getContentType()).isEqualTo("image/png");
-        assertThat(response.data().getFileSize()).isEqualTo(filePart.getBytes().length);
-
+        assertThat(response.data()).isNull();
         assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotBlank();
+    }
 
+    @Test
+    void shouldReturnNotFoundDeleteStory() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+
+        MvcResult result = mockMvc.perform(delete(this.URL + "/" + userData.userDTO().id())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", UUID.randomUUID().toString())
+        ).andExpect(status().isNotFound()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        ResponseHttp<Void> response = objectMapper.readValue(json, new TypeReference<>() {});
+
+        assertThat(response.data()).isNull();
+        assertThat(response.status()).isFalse();
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.message()).isNotBlank();
     }
 
 }

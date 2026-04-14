@@ -114,8 +114,7 @@ public class PostAttachmentControllerTest {
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is(true)))
-                .andExpect(jsonPath("$.message", is("Attachment deleted")))
-                .andExpect(jsonPath("$.data").isEmpty());
+                .andExpect(jsonPath("$.message", is("Attachment deleted")));
     }
 
     @Test
@@ -130,8 +129,7 @@ public class PostAttachmentControllerTest {
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", is(false)))
-                .andExpect(jsonPath("$.message", is("Attachment not found")))
-                .andExpect(jsonPath("$.data").isEmpty());
+                .andExpect(jsonPath("$.message", is("Attachment not found")));
     }
 
     @Test

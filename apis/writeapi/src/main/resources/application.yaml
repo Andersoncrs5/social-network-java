@@ -104,6 +104,10 @@ s3:
   bucketAttachments: attachments
 
 spring:
+  sql:
+    init:
+      mode: always
+
   data:
     redis:
       host: localhost
@@ -142,6 +146,7 @@ spring:
     password:
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     show-sql: true

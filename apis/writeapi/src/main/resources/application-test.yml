@@ -8,10 +8,15 @@ resilience4j:
     enabled: false # Desativa os Retries para os testes serem determinísticos
 
 spring:
+  sql:
+    init:
+      mode: always
+
   application:
     name: writeapi-test
 
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: create-drop
     show-sql: false

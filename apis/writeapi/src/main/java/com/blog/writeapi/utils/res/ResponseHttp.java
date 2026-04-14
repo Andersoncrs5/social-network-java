@@ -1,10 +1,13 @@
 package com.blog.writeapi.utils.res;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ResponseHttp<T>(
         T data,
 
@@ -22,5 +25,38 @@ public record ResponseHttp<T>(
 
         @NotNull
         OffsetDateTime timestamp
-) { }
+) {
 
+        public static <T> ResponseHttp<T> success(T data, String message) {
+                return new ResponseHttp<>(
+                        data,
+                        message,
+                        UUID.randomUUID().toString(),
+                        1,
+                        true,
+                        OffsetDateTime.now()
+                );
+        }
+
+        public static <T> ResponseHttp<T> success(T data, String message, int version) {
+                return new ResponseHttp<>(
+                        data,
+                        message,
+                        UUID.randomUUID().toString(),
+                        version,
+                        true,
+                        OffsetDateTime.now()
+                );
+        }
+
+        public static <T> ResponseHttp<T> error(String message, String traceId) {
+                return new ResponseHttp<>(
+                        null,
+                        message,
+                        traceId,
+                        1,
+                        false,
+                        OffsetDateTime.now()
+                );
+        }
+}

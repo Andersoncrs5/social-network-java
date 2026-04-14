@@ -59,4 +59,4 @@ snowflake:
   datacenter-id: 1
 
 s3:
-  bucketAttachments: test-attachments
+  bucketAttachments: attachments

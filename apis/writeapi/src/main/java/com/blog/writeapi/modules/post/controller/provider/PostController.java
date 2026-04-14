@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.post.controller.provider;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.controller.docs.PostControllerDocs;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
@@ -39,10 +40,12 @@ public class PostController implements PostControllerDocs {
     private final PostMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> create(
             @Valid @RequestBody CreatePostDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PostModel model = this.service.create(dto, principal.getUser());
 
@@ -51,7 +54,7 @@ public class PostController implements PostControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
                 postMapped,
                 "Post created with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -76,7 +79,11 @@ public class PostController implements PostControllerDocs {
 
     @Override
     @IsPostAuthor
-    public ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request) {
+    @Idempotent
+    public ResponseEntity<?> del(
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    ) {
         Optional<PostModel> post = this.service.getById(id);
 
         if (post.isEmpty()) {
@@ -84,7 +91,7 @@ public class PostController implements PostControllerDocs {
                     .body(new ResponseHttp<>(
                             null,
                             "Post not found",
-                            UUID.randomUUID().toString(),
+                            idempotencyKey,
                             1,
                             false,
                             OffsetDateTime.now()
@@ -96,7 +103,7 @@ public class PostController implements PostControllerDocs {
         ResponseHttp<Object> res = new ResponseHttp<>(
                 null,
                 "Post deleted with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -107,10 +114,12 @@ public class PostController implements PostControllerDocs {
 
     @Override
     @IsPostAuthor
+    @Idempotent
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PostModel post = this.service.getByIdSimple(id);
 
@@ -121,7 +130,7 @@ public class PostController implements PostControllerDocs {
         ResponseHttp<PostDTO> res = new ResponseHttp<>(
                 postDto,
                 "Post updated with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

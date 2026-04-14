@@ -1025,6 +1025,7 @@ public class HelperTest {
 
     public PostDTO createPost(ResponseUserTest userData) throws Exception {
         String URL = "/v1/post";
+        var traceID = UUID.randomUUID().toString();
 
         CreatePostDTO dto = new CreatePostDTO(
                 "Black pearl jem",
@@ -1087,8 +1088,9 @@ public class HelperTest {
         MvcResult result = this.mockMvc.perform(post(URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceID)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -1099,6 +1101,7 @@ public class HelperTest {
 
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
+        assertThat(response.traceId()).isEqualTo(traceID);
 
         assertThat(response.data().title()).isEqualTo(dto.title());
         assertThat(response.data().slug()).isEqualTo(dto.slug());

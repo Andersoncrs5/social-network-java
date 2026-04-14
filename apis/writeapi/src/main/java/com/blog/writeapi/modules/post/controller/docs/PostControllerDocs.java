@@ -34,8 +34,8 @@ public interface PostControllerDocs {
     ResponseEntity<?> create(
             @Valid @RequestBody CreatePostDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
-
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @GetMapping("/{id}")
@@ -78,7 +78,11 @@ public interface PostControllerDocs {
             description = "Unauthorized: Invalid or expired token",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseHttp.class)))
-    ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request);
+    ResponseEntity<?> del(
+            @PathVariable @IsId Long id,
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    );
 
     @PatchMapping("/{id}")
     @CircuitBreaker(name = "tagUpdateCB")
@@ -105,7 +109,8 @@ public interface PostControllerDocs {
     ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
 }

@@ -37,16 +37,15 @@ import java.util.UUID;
 public class CommentController implements CommentControllerDocs {
 
     private final ICommentService service;
-    private final ITokenService tokenService;
     private final IPostService postService;
-    private final IUserService userService;
     private final CommentMapper mapper;
 
     @Override
     @IsAuthorComment
     public ResponseEntity<?> del(
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         CommentModel comment = this.service.getByIdSimple(id);
 
@@ -55,7 +54,7 @@ public class CommentController implements CommentControllerDocs {
         ResponseHttp<Object> res = new ResponseHttp<>(
             null,
                 "Comment deleted with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -68,7 +67,8 @@ public class CommentController implements CommentControllerDocs {
     public ResponseEntity<?> create(
             @Valid @RequestBody CreateCommentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         CommentModel parent = null;
         PostModel post = this.postService.getByIdSimple(dto.postID());
@@ -83,7 +83,7 @@ public class CommentController implements CommentControllerDocs {
         ResponseHttp<CommentDTO> res = new ResponseHttp<>(
                 this.mapper.toDTO(commentCreated),
                 "Comment created with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -97,7 +97,8 @@ public class CommentController implements CommentControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdateCommentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
             ) {
         CommentModel comment = this.service.getByIdSimple(id);
 
@@ -106,7 +107,7 @@ public class CommentController implements CommentControllerDocs {
         ResponseHttp<CommentDTO> res = new ResponseHttp<>(
                 this.mapper.toDTO(update),
                 "Comment updated with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

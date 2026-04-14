@@ -60,7 +60,8 @@ public interface CommentControllerDocs {
             @Parameter(description = "The unique Snowflake ID of the comment", example = "1998780200074176609")
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdateCommentDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @PostMapping
@@ -94,7 +95,8 @@ public interface CommentControllerDocs {
     ResponseEntity<?> create(
             @Valid @RequestBody CreateCommentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @DeleteMapping("/{id}")
@@ -133,7 +135,8 @@ public interface CommentControllerDocs {
     ResponseEntity<?> del(
             @Parameter(description = "The Snowflake ID of the comment", example = "1998780200074176609")
             @PathVariable @IsId Long id,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
 }

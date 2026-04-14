@@ -1,16 +1,14 @@
 package com.blog.writeapi.modules.postAttachment.controller.providers;
 
 import com.blog.writeapi.configs.security.UserPrincipal;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.postAttachment.controller.docs.PostAttachmentControllerDocs;
 import com.blog.writeapi.modules.postAttachment.dtos.CreatePostAttachmentDTO;
 import com.blog.writeapi.modules.postAttachment.dtos.UpdatePostAttachmentDTO;
 import com.blog.writeapi.modules.postAttachment.models.PostAttachmentModel;
-import com.blog.writeapi.modules.post.models.PostModel;
-import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.postAttachment.service.docs.IPostAttachmentService;
-import com.blog.writeapi.modules.post.services.interfaces.IPostService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.mappers.PostAttachmentMapper;
@@ -39,9 +37,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
 
     private final IPostAttachmentService service;
     private final IPostService postService;
-    private final IUserService userService;
     private final PostAttachmentMapper mapper;
-    private final ITokenService tokenService;
 
     @Override
     public ResponseEntity<?> create(

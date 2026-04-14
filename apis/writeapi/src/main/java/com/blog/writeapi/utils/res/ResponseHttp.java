@@ -38,6 +38,17 @@ public record ResponseHttp<T>(
                 );
         }
 
+        public static <T> ResponseHttp<T> success(T data, String message, String traceId) {
+                return new ResponseHttp<>(
+                        data,
+                        message,
+                        traceId,
+                        1,
+                        true,
+                        OffsetDateTime.now()
+                );
+        }
+
         public static <T> ResponseHttp<T> success(T data, String message, int version) {
                 return new ResponseHttp<>(
                         data,
@@ -45,6 +56,17 @@ public record ResponseHttp<T>(
                         UUID.randomUUID().toString(),
                         version,
                         true,
+                        OffsetDateTime.now()
+                );
+        }
+
+        public static <T> ResponseHttp<T> error(String message) {
+                return new ResponseHttp<>(
+                        null,
+                        message,
+                        UUID.randomUUID().toString(),
+                        1,
+                        false,
                         OffsetDateTime.now()
                 );
         }

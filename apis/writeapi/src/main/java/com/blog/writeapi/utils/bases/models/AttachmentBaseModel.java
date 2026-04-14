@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.bases.models;
 
+import com.blog.writeapi.utils.enums.attachment.AttachmentTypeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -24,6 +25,9 @@ public abstract class AttachmentBaseModel extends BaseEntity {
     private String fileName;
 
     private String contentType;
+
+    @Column
+    private AttachmentTypeEnum type;
 
     private Long fileSize;
 

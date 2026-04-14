@@ -39,6 +39,7 @@ import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
 import com.blog.writeapi.modules.reportPost.dto.PostReportDTO;
 import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
+import com.blog.writeapi.modules.stories.dto.StoryDTO;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
 import com.blog.writeapi.modules.tag.dtos.TagDTO;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
@@ -61,10 +62,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.Random;
 
@@ -78,6 +83,48 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public StoryDTO createStory(ResponseUserTest userData) throws Exception {
+        try {
+            Path path = Paths.get("src/test/java/com/blog/writeapi/utils/resources/foto.png");
+            byte[] content = Files.readAllBytes(path);
+
+            MockMultipartFile filePart = new MockMultipartFile(
+                    "file",
+                    "image" + HelperTest.generateChars() + ".png",
+                    "image/png",
+                    content
+            );
+
+            MvcResult result = this.mockMvc.perform(multipart("/v1/story")
+                            .file(filePart)
+                            .param("fileName", "pochita-wallpaper")
+                            .param("contentType", "image/png")
+                            .param("isPublic", "true")
+                            .param("isVisible", "true")
+                            .param("backgroundColor", "#FFFFFF")
+                            .param("caption", "Black")
+                            .header("Authorization", "Bearer " + userData.tokens().token())
+                            .header("X-Idempotency-Key", UUID.randomUUID().toString())
+                    )
+                    .andExpect(status().isCreated())
+                    .andReturn();
+
+            String json = result.getResponse().getContentAsString();
+            ResponseHttp<StoryDTO> response = objectMapper.readValue(json, new TypeReference<>() {});
+
+            assertThat(response.data().getFileName()).isEqualTo("pochita-wallpaper");
+            assertThat(response.data().getStorageKey()).isNotBlank();
+            assertThat(response.data().getContentType()).isEqualTo("image/png");
+            assertThat(response.data().getFileSize()).isEqualTo(filePart.getBytes().length);
+
+            assertThat(response.status()).isTrue();
+
+            return response.data();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public String createApiKey(
             ResponseUserTest adm

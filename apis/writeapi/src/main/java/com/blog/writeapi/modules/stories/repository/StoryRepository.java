@@ -17,4 +17,12 @@ public interface StoryRepository extends JpaRepository<@NonNull StoryModel, @Non
     int archiveAllExpired(@Param("now") OffsetDateTime now);
 
     Page<StoryModel> findAllByExpiresAtBeforeAndIsArchivedFalse(OffsetDateTime now, Pageable pageable);
+
+    @Query("SELECT s FROM StoryModel s " +
+            "WHERE s.expiresAt < :now " +
+            "AND s.isArchived = false")
+    Page<StoryModel> findExpiredStoriesToArchive(
+            @Param("now") OffsetDateTime now,
+            Pageable pageable
+    );
 }

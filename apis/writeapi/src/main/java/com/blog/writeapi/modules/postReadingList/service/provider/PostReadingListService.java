@@ -17,6 +17,7 @@ import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
@@ -70,6 +71,7 @@ public class PostReadingListService implements IPostReadingListService {
         }
     }
 
+    @Transactional
     public ResultToggle<PostReadingListModel> toggle(@IsId Long userId, @IsId Long postId) {
         Optional<PostReadingListModel> optional = this.repository.findByUserIdAndPostId(userId, postId);
 

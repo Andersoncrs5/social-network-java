@@ -38,6 +38,17 @@ public record ResponseHttp<T>(
                 );
         }
 
+        public static <T> ResponseHttp<T> success(String message, String traceId) {
+                return new ResponseHttp<>(
+                        null,
+                        message,
+                        traceId,
+                        1,
+                        true,
+                        OffsetDateTime.now()
+                );
+        }
+
         public static <T> ResponseHttp<T> success(T data, String message, String traceId) {
                 return new ResponseHttp<>(
                         data,

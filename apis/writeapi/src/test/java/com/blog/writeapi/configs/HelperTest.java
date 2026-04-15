@@ -40,6 +40,8 @@ import com.blog.writeapi.modules.reportPost.dto.PostReportDTO;
 import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
 import com.blog.writeapi.modules.stories.dto.StoryDTO;
+import com.blog.writeapi.modules.storyReaction.dto.StoryReactionDTO;
+import com.blog.writeapi.modules.storyReaction.dto.ToggleStoryReactionDTO;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
 import com.blog.writeapi.modules.tag.dtos.TagDTO;
 import com.blog.writeapi.modules.user.dtos.CreateUserDTO;
@@ -83,6 +85,40 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public StoryReactionDTO createStoryReaction(
+            ResponseUserTest userTest,
+            StoryDTO storyDTO,
+            ReactionDTO reactionDTO
+    ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
+        ToggleStoryReactionDTO dto = new ToggleStoryReactionDTO(
+                reactionDTO.id(),
+                storyDTO.getId()
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/story-reaction/toggle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .header("Authorization", "Bearer " + userTest.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        ResponseHttp<StoryReactionDTO> response = objectMapper.readValue(json, new TypeReference<>() {});
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
+        assertThat(response.message()).isNotBlank();
+
+        assertThat(response.data().id()).isNotZero();
+        assertThat(response.data().user().id()).isNotZero().isEqualTo(userTest.userDTO().id());
+        assertThat(response.data().story().getId()).isNotZero().isEqualTo(storyDTO.getId());
+        assertThat(response.data().reaction().id()).isNotZero().isEqualTo(reactionDTO.id());
+
+        return response.data();
+    }
 
     public void createStoryView(
             StoryDTO storyDTO,

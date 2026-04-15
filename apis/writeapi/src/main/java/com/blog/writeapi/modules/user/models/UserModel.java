@@ -7,6 +7,7 @@ import com.blog.writeapi.modules.postReadingList.model.PostReadingListModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.stories.model.StoryModel;
+import com.blog.writeapi.modules.storyReaction.model.StoryReactionModel;
 import com.blog.writeapi.modules.userBlock.model.UserBlockModel;
 import com.blog.writeapi.modules.userReport.model.UserReportModel;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
@@ -219,13 +220,18 @@ public class UserModel extends BaseEntity {
     private List<PinnedPostModel> pinnedList = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<PostReadingListModel> readingList = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<StoryModel> stories = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<StoryReactionModel> storyReactions = new ArrayList<>();
 
 }

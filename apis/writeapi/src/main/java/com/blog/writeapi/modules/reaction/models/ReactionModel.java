@@ -2,8 +2,10 @@ package com.blog.writeapi.modules.reaction.models;
 
 import com.blog.writeapi.modules.commentReaction.models.CommentReactionModel;
 import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
+import com.blog.writeapi.modules.storyReaction.model.StoryReactionModel;
 import com.blog.writeapi.utils.enums.reaction.ReactionTypeEnum;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,10 +53,16 @@ public class ReactionModel extends BaseEntity {
     @Column(name = "is_visible", nullable = false)
     private boolean visible;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReactionModel> reactionUsages;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReactionModel> commentUsage;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "reaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoryReactionModel> storyReactions;
 
 }

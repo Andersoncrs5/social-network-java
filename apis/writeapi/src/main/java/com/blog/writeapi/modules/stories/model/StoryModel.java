@@ -1,12 +1,16 @@
 package com.blog.writeapi.modules.stories.model;
 
+import com.blog.writeapi.modules.storyReaction.model.StoryReactionModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.bases.models.AttachmentBaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "stories", indexes = {
@@ -39,4 +43,10 @@ public class StoryModel extends AttachmentBaseModel {
     public boolean isActive() {
         return !isArchived && OffsetDateTime.now().isBefore(expiresAt);
     }
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<StoryReactionModel> storyReactions = new ArrayList<>();
+
 }

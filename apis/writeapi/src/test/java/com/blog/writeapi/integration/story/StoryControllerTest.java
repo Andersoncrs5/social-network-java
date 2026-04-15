@@ -50,6 +50,23 @@ public class StoryControllerTest {
     }
 
     @Test
+    void shouldReturnConflictWhenSameIdempotencyKeyIsUsed() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        StoryDTO story = this.helper.createStory(userData);
+        String traceId = UUID.randomUUID().toString();
+
+        mockMvc.perform(delete(this.URL + "/" + story.getId())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isOk());
+
+        mockMvc.perform(delete(this.URL + "/" + story.getId())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isConflict());
+    }
+
+    @Test
     void shouldCreateNewStory() throws Exception {
         ResponseUserTest userData = this.helper.createUser();
 
@@ -58,12 +75,13 @@ public class StoryControllerTest {
 
     @Test
     void shouldDeleteStory() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         StoryDTO story = this.helper.createStory(userData);
 
         MvcResult result = mockMvc.perform(delete(this.URL + "/" + story.getId())
                 .header("Authorization", "Bearer " + userData.tokens().token())
-                .header("X-Idempotency-Key", UUID.randomUUID().toString())
+                .header("X-Idempotency-Key",traceId )
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -71,7 +89,17 @@ public class StoryControllerTest {
 
         assertThat(response.data()).isNull();
         assertThat(response.status()).isTrue();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
+    }
+
+    @Test
+    void shouldReturnForbBecauseIdempotencyKeyMissedDeleteStory() throws Exception {
+        ResponseUserTest userData = this.helper.createUser();
+        StoryDTO story = this.helper.createStory(userData);
+
+        MvcResult result = mockMvc.perform(delete(this.URL + "/" + story.getId())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+        ).andExpect(status().isBadRequest()).andReturn();
     }
 
     @Test

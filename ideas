@@ -1,0 +1,51 @@
+@Entity
+@Table(name = "story_highlights")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+public class StoryHighlightModel extends BaseEntity {
+
+    @Column(nullable = false, length = 100)
+    private String title;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserModel user;
+
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoryHighlightItemModel> items;
+}
+
+
+@Entity
+@Table(
+    name = "story_highlight_items",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_highlight_story", columnNames = {"highlight_id", "story_id"})
+    }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
+@EqualsAndHashCode(callSuper = true)
+public class StoryHighlightItemModel extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "highlight_id", nullable = false)
+    private StoryHighlightModel highlight;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "story_id", nullable = false)
+    private StoryModel story;
+
+    @Column(name = "position")
+    private Integer position; // Para ordenar os stories dentro do destaque
+}

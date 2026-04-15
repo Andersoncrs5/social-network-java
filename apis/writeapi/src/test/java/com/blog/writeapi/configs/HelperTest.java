@@ -84,6 +84,29 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public void createStoryView(
+            StoryDTO storyDTO,
+            ResponseUserTest userTest
+    ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
+
+        MvcResult result = mockMvc.perform(post("/v1/story-view/" + storyDTO.getId())
+                .header("Authorization", "Bearer " + userTest.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
+        assertThat(response.status()).isEqualTo(true);
+
+        assertThat(response.data()).isNull();
+    }
+
     public StoryDTO createStory(ResponseUserTest userData) throws Exception {
         try {
             Path path = Paths.get("src/test/java/com/blog/writeapi/utils/resources/foto.png");

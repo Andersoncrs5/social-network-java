@@ -22,8 +22,7 @@ public class StoryExpirationWorker {
     private final StoryRepository storyRepository;
     private final IStoryService service;
 
-    @Scheduled(fixedDelay = 1800000)
-    @Transactional
+    @Scheduled(cron = "0 0 0,12 * * *")    @Transactional
     public void cleanupExpiredStories() {
         OffsetDateTime now = OffsetDateTime.now();
         int pageSize = 100;

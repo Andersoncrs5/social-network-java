@@ -5,7 +5,6 @@ audit_logs
 search_index
 content_flags
 shares
-stories
 direct_messages
 mentions
 
@@ -25,7 +24,6 @@ poll_questions & poll_options
 poll_votes
 ip_blacklist / rate_limits
 api_keys
-story_views
 story_reactions
 story_highlights
 tag_reports

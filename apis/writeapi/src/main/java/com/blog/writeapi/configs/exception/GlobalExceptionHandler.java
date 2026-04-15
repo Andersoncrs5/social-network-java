@@ -151,6 +151,18 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(ConflictRuleException.class)
+    public ResponseEntity<@NonNull ResponseHttp<Void>> handleConflictRuleException(ConflictRuleException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseHttp<>(
+                null,
+                ex.getMessage(),
+                UUID.randomUUID().toString(),
+                0,
+                false,
+                OffsetDateTime.now()
+        ));
+    }
+
     @ExceptionHandler(ModelNotFoundException.class)
     public ResponseEntity<@NonNull ResponseHttp<Void>> handleModelNotFoundException(ModelNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(

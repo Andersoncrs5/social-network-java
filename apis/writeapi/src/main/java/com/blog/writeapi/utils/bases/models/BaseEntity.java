@@ -1,5 +1,6 @@
 package com.blog.writeapi.utils.bases.models;
 
+import com.blog.writeapi.configs.snowflakeid.SnowflakeContext;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -31,4 +32,11 @@ public abstract class BaseEntity {
     @LastModifiedDate
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
+
+    @PrePersist
+    protected void ensureId() {
+        if (this.id == null) {
+            this.id = SnowflakeContext.nextId();
+        }
+    }
 }

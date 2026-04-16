@@ -48,7 +48,7 @@ public class CommentModel extends BaseEntity {
     @JoinColumn(name = "post_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private PostModel post;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false, columnDefinition = "BIGINT UNSIGNED")
     private UserModel author;
 

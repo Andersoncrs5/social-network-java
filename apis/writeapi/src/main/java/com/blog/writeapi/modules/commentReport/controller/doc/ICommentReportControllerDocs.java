@@ -17,14 +17,16 @@ public interface ICommentReportControllerDocs {
     ResponseEntity<?> create(
             @RequestBody @Valid CreateCommentReportDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('USER_ROLE')")
     ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('MODERATOR_ROLE')")
@@ -32,6 +34,7 @@ public interface ICommentReportControllerDocs {
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdateCommentReportDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

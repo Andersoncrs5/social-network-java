@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "CommentReaction", description = "Endpoints for managing user reactions on comments")
 public interface CommentReactionControllerDocs {
@@ -62,6 +63,7 @@ public interface CommentReactionControllerDocs {
     ResponseEntity<?> toggle(
             @Valid @RequestBody CreateCommentReactionDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

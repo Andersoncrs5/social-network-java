@@ -22,6 +22,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,13 +51,15 @@ public class CommentFavoriteControllerTest {
 
     @Test
     void shouldAddCommentFavorited() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + comment.id() + "/toggle")
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -65,7 +69,7 @@ public class CommentFavoriteControllerTest {
         ResponseHttp<CommentFavoriteDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data().comment().id()).isEqualTo(comment.id());
         assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
@@ -73,15 +77,17 @@ public class CommentFavoriteControllerTest {
 
     @Test
     void shouldRemoveCommentFavorited() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
 
-        CommentFavoriteDTO commentFavoriteDTO = this.helper.addCommentWithFavorite(userData, post, comment);
+        this.helper.addCommentWithFavorite(userData, post, comment);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + comment.id() + "/toggle")
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -91,18 +97,21 @@ public class CommentFavoriteControllerTest {
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data()).isNull();
     }
 
     @Test
     void shouldReturnNotFoundCommentFavorited() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + 746574365734654836L + "/toggle")
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 

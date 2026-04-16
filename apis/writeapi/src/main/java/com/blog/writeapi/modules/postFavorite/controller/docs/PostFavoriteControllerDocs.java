@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "PostFavorite", description = "Endpoints for managing post favorite")
 public interface PostFavoriteControllerDocs {
@@ -57,7 +58,8 @@ public interface PostFavoriteControllerDocs {
             @Parameter(description = "The Snowflake ID of the comment", example = "1998780200074176609")
             @PathVariable @IsId Long postId,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
 }

@@ -28,6 +28,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,6 +58,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldCreateReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -76,6 +79,7 @@ public class CommentReportControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -84,6 +88,7 @@ public class CommentReportControllerTest {
         ResponseHttp<CommentReportDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNotNull();
@@ -99,6 +104,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldReturnConflictBecauseReportAlready() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -121,6 +127,7 @@ public class CommentReportControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isConflict()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -136,6 +143,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldReturnNotFoundBecauseComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest2 = this.helper.createUser();
 
         CreateCommentReportDTO dto = new CreateCommentReportDTO(
@@ -148,6 +156,7 @@ public class CommentReportControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -163,6 +172,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldDeleteReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -177,6 +187,7 @@ public class CommentReportControllerTest {
 
         MvcResult result = mockMvc.perform(delete(this.URL + "/" + commentReportDTO.id())
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -184,6 +195,7 @@ public class CommentReportControllerTest {
 
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -192,10 +204,12 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldReturnNotFoundCommentDeleteReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest2 = this.helper.createUser();
 
         MvcResult result = mockMvc.perform(delete(this.URL + "/" + 1998780200074176609L)
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -203,6 +217,7 @@ public class CommentReportControllerTest {
 
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank();
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(false);
 
@@ -211,6 +226,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldReturnForbBecauseAnotherUserTriedDelete() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
         ResponseUserTest userTest3 = this.helper.createUser();
@@ -226,6 +242,7 @@ public class CommentReportControllerTest {
 
         MvcResult result = mockMvc.perform(delete(this.URL + "/" + commentReportDTO.id())
                 .header("Authorization", "Bearer " + userTest3.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isForbidden()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -241,6 +258,8 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldUpdateReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -261,6 +280,7 @@ public class CommentReportControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userModerator.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -268,6 +288,7 @@ public class CommentReportControllerTest {
 
         ResponseHttp<CommentReportDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -280,6 +301,7 @@ public class CommentReportControllerTest {
 
     @Test
     void shouldReturnNotFoundWhenUpdateReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userModerator = this.helper.loginUserInModerator();
 
         UpdateCommentReportDTO dto = new UpdateCommentReportDTO(
@@ -292,6 +314,7 @@ public class CommentReportControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userModerator.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();

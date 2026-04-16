@@ -25,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,6 +64,7 @@ public class CommentVoteControllerTest {
 
     @Test
     void shouldAddedVoteUpInComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO commentDTO = this.helper.createComment(userData, post, null);
@@ -74,8 +77,9 @@ public class CommentVoteControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -107,6 +111,8 @@ public class CommentVoteControllerTest {
 
     @Test
     void shouldChangeTheValueOfVoteInComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO commentDTO = this.helper.createComment(userData, post, null);
@@ -120,8 +126,9 @@ public class CommentVoteControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -140,10 +147,12 @@ public class CommentVoteControllerTest {
 
     @Test
     void shouldRemoveVoteInComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO commentDTO = this.helper.createComment(userData, post, null);
-        CommentVoteDTO voteDTO = this.helper.addCommentVoteInComment(userData, commentDTO, VoteTypeEnum.UPVOTE);
+        this.helper.addCommentVoteInComment(userData, commentDTO, VoteTypeEnum.UPVOTE);
 
         ToggleCommentVoteDTO dto = new ToggleCommentVoteDTO(
                 commentDTO.id(),
@@ -153,8 +162,9 @@ public class CommentVoteControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 

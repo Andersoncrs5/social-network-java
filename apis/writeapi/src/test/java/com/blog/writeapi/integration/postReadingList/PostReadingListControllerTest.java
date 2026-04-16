@@ -20,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,11 +53,13 @@ public class PostReadingListControllerTest {
 
     @Test
     void shouldAddedPostInReadingList() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         PostDTO post = this.helper.createPost(userTest);
 
         MvcResult result = mockMvc.perform(post(this.URL + "toggle/" + post.id())
                         .header("Authorization", "Bearer " + userTest.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -64,6 +68,7 @@ public class PostReadingListControllerTest {
         ResponseHttp<Void> response =
                 objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.traceId()).isNotBlank();
@@ -71,12 +76,14 @@ public class PostReadingListControllerTest {
 
     @Test
     void shouldRemovedPostInReadingList() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         PostDTO post = this.helper.createPost(userTest);
         this.helper.addedPostToReading(userTest, post.id());
 
         MvcResult result = mockMvc.perform(post(this.URL + "toggle/" + post.id())
                         .header("Authorization", "Bearer " + userTest.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -85,6 +92,7 @@ public class PostReadingListControllerTest {
         ResponseHttp<Void> response =
                 objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.traceId()).isNotBlank();
@@ -92,10 +100,12 @@ public class PostReadingListControllerTest {
 
     @Test
     void shouldReturnNotFoundInEndpointToggle() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
 
         MvcResult result = mockMvc.perform(post(this.URL + "toggle/" + userTest.userDTO().id())
                         .header("Authorization", "Bearer " + userTest.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();

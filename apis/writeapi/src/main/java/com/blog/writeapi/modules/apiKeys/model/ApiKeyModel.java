@@ -29,19 +29,18 @@ import java.time.OffsetDateTime;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ApiKeyModel extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "key_hash")
     private String keyHash;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "service_name")
     private String serviceName;
 
     @Column(nullable = false)
     private boolean active = true;
 
+    @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
-    private OffsetDateTime lastUsedAt;
 
-    String hashKey() {
-        return org.apache.commons.codec.digest.DigestUtils.sha256Hex(this.keyHash);
-    }
+    @Column(name = "last_used_at")
+    private OffsetDateTime lastUsedAt;
 }

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.pinnedPost.controller.provider;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.pinnedPost.controller.docs.IPinnedPostControllerDocs;
 import com.blog.writeapi.modules.pinnedPost.dto.CreatePinnedPostDTO;
@@ -15,10 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -35,9 +33,11 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
     private final PinnedPostMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> delete(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PinnedPostModel pinned = service.findByIdSimple(id);
 
@@ -52,7 +52,7 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
             .body(new ResponseHttp<>(
                 null,
                 "Pinned removed",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -61,9 +61,11 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
     }
 
     @Override
+    @Idempotent
     public ResponseEntity<?> create(
             @RequestBody CreatePinnedPostDTO dto,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PinnedPostModel model = this.service.create(principal.getId(), dto);
 
@@ -72,7 +74,7 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
             .body(new ResponseHttp<>(
                     mapper.toDTO(model),
                     "post pinned!",
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     true,
                     OffsetDateTime.now()
@@ -81,10 +83,12 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
     }
 
     @Override
+    @Idempotent
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody UpdatePinnedPostDTO dto,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PinnedPostModel pinned = this.service.findByIdSimple(id);
 
@@ -95,16 +99,16 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
         PinnedPostModel updated = this.service.update(pinned, dto);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ResponseHttp<>(
-                                mapper.toDTO(updated),
-                                "post pinned updated!",
-                                UUID.randomUUID().toString(),
-                                1,
-                                true,
-                                OffsetDateTime.now()
-                        )
-                );
+            .status(HttpStatus.OK)
+            .body(new ResponseHttp<>(
+                    mapper.toDTO(updated),
+                    "post pinned updated!",
+                    idempotencyKey,
+                    1,
+                    true,
+                    OffsetDateTime.now()
+                )
+            );
     }
 
 }

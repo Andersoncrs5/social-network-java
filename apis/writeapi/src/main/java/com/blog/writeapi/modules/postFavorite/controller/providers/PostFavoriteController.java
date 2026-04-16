@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postFavorite.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postFavorite.controller.docs.PostFavoriteControllerDocs;
 import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,10 +42,12 @@ public class PostFavoriteController implements PostFavoriteControllerDocs {
     private final PostFavoriteMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> toggle(
             @PathVariable @IsId Long postId,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel user = principal.getUser();
         PostModel post = this.iPostService.getByIdSimple(postId);
@@ -56,7 +60,7 @@ public class PostFavoriteController implements PostFavoriteControllerDocs {
             ResponseHttp<Object> res = new ResponseHttp<>(
                     null,
                     "Post removed the favorites with successfully",
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     true,
                     OffsetDateTime.now()
@@ -71,7 +75,7 @@ public class PostFavoriteController implements PostFavoriteControllerDocs {
             new ResponseHttp<>(
                 this.mapper.toDTO(model),
                 "Post added with favorites with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

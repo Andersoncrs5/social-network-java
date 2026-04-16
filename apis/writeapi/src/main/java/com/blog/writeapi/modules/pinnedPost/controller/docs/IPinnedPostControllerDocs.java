@@ -12,19 +12,22 @@ public interface IPinnedPostControllerDocs {
     @DeleteMapping("{id}")
     ResponseEntity<?> delete(
             @PathVariable Long id,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @PostMapping
     ResponseEntity<?> create(
             @Valid @RequestBody CreatePinnedPostDTO dto,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @PatchMapping("{id}")
     ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody UpdatePinnedPostDTO dto,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

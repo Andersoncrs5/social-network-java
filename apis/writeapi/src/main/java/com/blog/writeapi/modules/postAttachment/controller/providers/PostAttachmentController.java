@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postAttachment.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
@@ -40,10 +41,12 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
     private final PostAttachmentMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> create(
             @Valid @ModelAttribute CreatePostAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel user = principal.getUser();
         PostModel post = this.postService.getByIdSimple(dto.getPostId());
@@ -54,7 +57,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
                     null,
                     "Error the sent the file",
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     false,
                     OffsetDateTime.now()
@@ -64,7 +67,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
                 mapper.toDTO(optional.get()),
                 "File sent!",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -75,7 +78,8 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         Long userId = principal.getId();
         PostAttachmentModel attachment = this.service.getByIdSimple(id);
@@ -86,7 +90,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
             return new ResponseEntity<>(new ResponseHttp<>(
                     null,
                     "Error the sent the attachment",
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     false,
                     OffsetDateTime.now()
@@ -96,7 +100,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
         return new ResponseEntity<>(new ResponseHttp<>(
                 null,
                 "Attachment deleted",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -108,7 +112,8 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
             @PathVariable @IsId Long id,
             @RequestBody UpdatePostAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         Long userId = principal.getId();
         PostAttachmentModel attachment = this.service.getByIdSimple(id);
@@ -122,7 +127,7 @@ public class PostAttachmentController implements PostAttachmentControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 mapper.toDTO(updated),
                 "Attachment updated!",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

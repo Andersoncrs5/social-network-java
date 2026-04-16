@@ -17,10 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Followers", description = "Operations related to the social graph (Follow/Unfollow)")
 public interface FollowersControllerDocs {
@@ -51,7 +48,8 @@ public interface FollowersControllerDocs {
             @Parameter(description = "Snowflake ID of the user to be followed/unfollowed", example = "1543216789012345")
             @PathVariable @IsId Long followingId,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @Operation(
@@ -75,6 +73,7 @@ public interface FollowersControllerDocs {
             @PathVariable @IsId Long id,
             @RequestBody @Valid UpdateFollowersDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

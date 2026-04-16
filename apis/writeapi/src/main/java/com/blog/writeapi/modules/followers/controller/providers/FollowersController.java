@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.followers.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.followers.controller.docs.FollowersControllerDocs;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
@@ -20,10 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -39,14 +37,15 @@ public class FollowersController implements FollowersControllerDocs {
 
     private final IUserService userService;
     private final IFollowersService service;
-    private final ITokenService tokenService;
     private final FollowersMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> toggle(
         @PathVariable Long followingId,
         HttpServletRequest request,
-        @AuthenticationPrincipal UserPrincipal principal
+        @AuthenticationPrincipal UserPrincipal principal,
+        @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         Long followId = principal.getId();
 
@@ -65,7 +64,7 @@ public class FollowersController implements FollowersControllerDocs {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,
                 "Unfollow with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -77,7 +76,7 @@ public class FollowersController implements FollowersControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
             mapper.toDTO(model),
             "Follow with successfully",
-            UUID.randomUUID().toString(),
+            idempotencyKey,
             1,
             true,
             OffsetDateTime.now()
@@ -85,11 +84,13 @@ public class FollowersController implements FollowersControllerDocs {
     }
 
     @Override
+    @Idempotent
     public ResponseEntity<?> update(
             @PathVariable Long id,
             @RequestBody UpdateFollowersDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         Long userID = principal.getId();
         FollowersModel follow = this.service.getByIdSimple(id);
@@ -103,7 +104,7 @@ public class FollowersController implements FollowersControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 mapper.toDTO(updated),
                 "Follow updated with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

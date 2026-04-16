@@ -20,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,6 +53,7 @@ public class FollowersControllerTest {
 
     @Test
     void shouldReturnFollowUpdateAllFields() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest followData = this.helper.createUser();
         ResponseUserTest followingData = this.helper.createUser();
 
@@ -65,10 +68,9 @@ public class FollowersControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + followersDTO.id())
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
-                .andExpect(status().isOk())
-                .andReturn();
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<FollowersDTO>> typeRef = new TypeReference<>() {};
@@ -77,7 +79,7 @@ public class FollowersControllerTest {
 
         assertThat(response.status()).isTrue();
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
 
         assertThat(response.data()).isNotNull();
         assertThat(response.data().id()).isEqualTo(followersDTO.id());
@@ -90,6 +92,7 @@ public class FollowersControllerTest {
 
     @Test
     void shouldReturnForbBecauseAnotherUserTriedUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
 
         ResponseUserTest followData = this.helper.createUser();
         ResponseUserTest usrData = this.helper.createUser();
@@ -106,13 +109,16 @@ public class FollowersControllerTest {
         this.mockMvc.perform(patch(this.URL + "/" + followersDTO.id())
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + usrData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + usrData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldReturnNotFoundTheUpdateFollow() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest followData = this.helper.createUser();
         ResponseUserTest followingData = this.helper.createUser();
 
@@ -127,8 +133,9 @@ public class FollowersControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + (followersDTO.id() + 1 ) )
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -146,14 +153,15 @@ public class FollowersControllerTest {
 
     @Test
     void shouldFollowUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest followData = this.helper.createUser();
         ResponseUserTest followingData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + followingData.userDTO().id() + "/toggle")
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
-                .andExpect(status().isCreated())
-                .andReturn();
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<FollowersDTO>> typeRef = new TypeReference<>() {};
@@ -163,7 +171,7 @@ public class FollowersControllerTest {
         assertThat(response.data()).isNotNull();
         assertThat(response.status()).isTrue();
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
 
         assertThat(response.data().id()).isNotZero().isPositive();
         assertThat(response.data().follower().id()).isEqualTo(followData.userDTO().id());
@@ -176,16 +184,17 @@ public class FollowersControllerTest {
 
     @Test
     void shouldUnfollowUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest followData = this.helper.createUser();
         ResponseUserTest followingData = this.helper.createUser();
 
-        FollowersDTO followersDTO = this.helper.followUser(followData, followingData);
+        this.helper.followUser(followData, followingData);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + followingData.userDTO().id() + "/toggle")
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
-                .andExpect(status().isOk())
-                .andReturn();
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
@@ -194,18 +203,21 @@ public class FollowersControllerTest {
 
         assertThat(response.status()).isTrue();
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
 
         assertThat(response.data()).isNull();
     }
 
     @Test
     void shouldReturnUserNotFound() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest followData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(post(this.URL+"/1998780200074176109/toggle")
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -222,11 +234,14 @@ public class FollowersControllerTest {
 
     @Test
     void shouldReturnBadRequestBecauseFollowYourself() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest followData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + followData.userDTO().id() + "/toggle")
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isBadRequest())
                 .andReturn();
 

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postReaction.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postReaction.controller.docs.PostReactionControllerDocs;
 import com.blog.writeapi.modules.postReaction.dtos.CreatePostReactionDTO;
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,11 +46,13 @@ public class PostReactionController implements PostReactionControllerDocs {
     private final IReactionService reactionService;
     private final PostReactionMapper mapper;
 
+    @Idempotent
     @Override
     public ResponseEntity<ResponseHttp<PostReactionDTO>> toggle(
             @Valid @RequestBody CreatePostReactionDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel user = principal.getUser();
         PostModel post = this.postService.getByIdSimple(dto.postId());
@@ -58,24 +62,24 @@ public class PostReactionController implements PostReactionControllerDocs {
 
         if (optional.isPresent() && Objects.equals(optional.get().getReaction().getId(), reaction.getId())) {
             this.service.delete(optional.get());
-            return ResponseEntity.ok(createResponse(null, "Reaction removed successfully"));
+            return ResponseEntity.ok(createResponse(null, "Reaction removed successfully", idempotencyKey));
         }
 
         if (optional.isPresent()) {
             optional.get().setReaction(reaction);
             PostReactionModel updated = this.service.updateSimple(optional.get());
-            return ResponseEntity.ok(createResponse(this.mapper.toDTO(updated), "Reaction changed successfully"));
+            return ResponseEntity.ok(createResponse(this.mapper.toDTO(updated), "Reaction changed successfully", idempotencyKey));
         }
 
         PostReactionModel model = this.service.create(post, reaction, user);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createResponse(this.mapper.toDTO(model), "Reaction applied successfully"));
+                .body(createResponse(this.mapper.toDTO(model), "Reaction applied successfully", idempotencyKey));
     }
-    private <T> ResponseHttp<T> createResponse(T data, String message) {
+    private <T> ResponseHttp<T> createResponse(T data, String message, String idempotencyKey) {
         return new ResponseHttp<>(
                 data,
                 message,
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

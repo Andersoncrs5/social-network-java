@@ -20,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,12 +50,14 @@ public class PostFavoriteControllerTest {
     // TOGGLE
     @Test
     void shouldAddPostWithFavorite() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + post.id())
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -63,7 +67,7 @@ public class PostFavoriteControllerTest {
         ResponseHttp<PostFavoriteDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isEqualTo(traceId).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().post().id()).isEqualTo(post.id());
@@ -72,13 +76,14 @@ public class PostFavoriteControllerTest {
 
     @Test
     void shouldRemovePostWithFavorite() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         this.helper.addPostWithFavorite(userData, post);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + post.id())
                         .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        ).header("X-Idempotency-Key", traceId))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -88,7 +93,7 @@ public class PostFavoriteControllerTest {
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isEqualTo(traceId).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();
@@ -96,11 +101,12 @@ public class PostFavoriteControllerTest {
 
     @Test
     void shouldReturnNotFoundPostWithFavorite() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + 4675764357265767545L)
                         .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        ).header("X-Idempotency-Key", traceId))
                 .andExpect(status().isNotFound())
                 .andReturn();
 

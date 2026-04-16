@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentReportType.controller.provider;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.commentReport.service.provider.CommentReportService;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,14 +39,15 @@ public class CommentReportTypeController implements CommentReportTypeControllerD
 
     private final CommentReportService commentReportService;
     private final ReportTypeService reportTypeService;
-    private final ITokenService tokenService;
     private final CommentReportTypeService service;
 
     @Override
+    @Idempotent
     public ResponseEntity<ResponseHttp<Void>> toggle(
             @RequestBody @Valid CreateCommentReportTypeDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         CommentReportModel commentReport = this.commentReportService.findByIdSimple(dto.reportId());
         ReportTypeModel reportType = this.reportTypeService.getByIdSimple(dto.typeId());
@@ -60,7 +63,7 @@ public class CommentReportTypeController implements CommentReportTypeControllerD
         return ResponseEntity.status(status).body(new ResponseHttp<>(
                 null,
                 message,
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

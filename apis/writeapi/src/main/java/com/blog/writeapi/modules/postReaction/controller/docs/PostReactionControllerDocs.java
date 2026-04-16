@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "PostReaction", description = "Endpoints for managing user reactions (emojis) on posts")
 public interface PostReactionControllerDocs {
@@ -63,7 +64,8 @@ public interface PostReactionControllerDocs {
     ResponseEntity<ResponseHttp<PostReactionDTO>> toggle(
             @Valid @RequestBody CreatePostReactionDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
 }

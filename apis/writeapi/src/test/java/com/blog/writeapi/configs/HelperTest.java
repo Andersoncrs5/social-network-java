@@ -249,8 +249,11 @@ public class HelperTest {
             Long postId
     ) {
         try {
+            var traceId = java.util.UUID.randomUUID().toString();
+
             MvcResult result = mockMvc.perform(post("/v1/post-reading-list/toggle/" + postId)
                     .header("Authorization", "Bearer " + userTest.tokens().token())
+                    .header("X-Idempotency-Key", traceId)
             ).andExpect(status().isCreated()).andReturn();
 
             String json = result.getResponse().getContentAsString();
@@ -260,8 +263,8 @@ public class HelperTest {
                     objectMapper.readValue(json, typeRef);
 
             assertThat(response.message()).isNotBlank();
+            assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
             assertThat(response.status()).isEqualTo(true);
-            assertThat(response.traceId()).isNotBlank();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -271,6 +274,7 @@ public class HelperTest {
             ResponseUserTest userData,
             PostDTO post
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         CreatePinnedPostDTO dto = new CreatePinnedPostDTO(
                 post.id(),
                 1
@@ -280,6 +284,7 @@ public class HelperTest {
                 .header("Authorization", "Bearer " + userData.tokens().token())
                 .content(objectMapper.writeValueAsString(dto))
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -287,6 +292,7 @@ public class HelperTest {
 
         ResponseHttp<PinnedPostDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -396,6 +402,7 @@ public class HelperTest {
             ResponseUserTest userTest2,
             ReportTypeDTO reportTypeDTO
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
 
         CreateCommentReportTypeDTO dto = new CreateCommentReportTypeDTO(
                 commentReportDTO.id(),
@@ -406,6 +413,7 @@ public class HelperTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -414,6 +422,7 @@ public class HelperTest {
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();
@@ -435,6 +444,7 @@ public class HelperTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .header("Authorization", "Bearer " + userTest2.tokens().token())
+                    .header("X-Idempotency-Key", UUID.randomUUID().toString())
             ).andExpect(status().isCreated()).andReturn();
 
             String json = result.getResponse().getContentAsString();
@@ -690,10 +700,11 @@ public class HelperTest {
     }
 
     public FollowersDTO followUser(ResponseUserTest followData, ResponseUserTest followingData) throws Exception {
-
+        var traceId = UUID.randomUUID().toString();
         MvcResult result = this.mockMvc.perform(post("/v1/follow/" + followingData.userDTO().id() + "/toggle")
-                        .header("Authorization", "Bearer " + followData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + followData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -705,7 +716,7 @@ public class HelperTest {
         assertThat(response.data()).isNotNull();
         assertThat(response.status()).isTrue();
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
 
         assertThat(response.data().id()).isNotZero().isPositive();
         assertThat(response.data().follower().id()).isEqualTo(followData.userDTO().id());
@@ -771,6 +782,7 @@ public class HelperTest {
             CommentDTO comment,
             ReactionDTO reactionDTO
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         CreateCommentReactionDTO dto = new CreateCommentReactionDTO(
                 comment.id(),
                 reactionDTO.id()
@@ -780,6 +792,7 @@ public class HelperTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andReturn();
 
@@ -788,6 +801,7 @@ public class HelperTest {
         ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().comment().id()).isEqualTo(comment.id());
@@ -802,6 +816,7 @@ public class HelperTest {
             PostDTO post,
             ReactionDTO reactionDTO
     ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
 
         CreatePostReactionDTO dto = new CreatePostReactionDTO(
                 post.id(),
@@ -812,6 +827,7 @@ public class HelperTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -820,6 +836,7 @@ public class HelperTest {
         TypeReference<ResponseHttp<PostReactionDTO>> typeRef = new TypeReference<>() {};
         ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -836,6 +853,7 @@ public class HelperTest {
             CommentDTO commentDTO,
             VoteTypeEnum type
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ToggleCommentVoteDTO dto = new ToggleCommentVoteDTO(
                 commentDTO.id(),
                 type
@@ -844,8 +862,8 @@ public class HelperTest {
         MvcResult result = this.mockMvc.perform(post("/v1/comment-vote")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -853,6 +871,8 @@ public class HelperTest {
         TypeReference<ResponseHttp<CommentVoteDTO>> typeRef = new TypeReference<>() {};
 
         ResponseHttp<CommentVoteDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
 
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
@@ -936,11 +956,13 @@ public class HelperTest {
     }
 
     public CommentFavoriteDTO addCommentWithFavorite(ResponseUserTest userData, PostDTO post, CommentDTO comment) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String URL = "/v1/comment-favorite";
 
         MvcResult result = this.mockMvc.perform(post(URL + "/" + comment.id() + "/toggle")
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -950,7 +972,7 @@ public class HelperTest {
         ResponseHttp<CommentFavoriteDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data().comment().id()).isEqualTo(comment.id());
         assertThat(response.data().user().id()).isEqualTo(userData.userDTO().id());
@@ -959,9 +981,12 @@ public class HelperTest {
     }
 
     public void addPostWithFavorite(ResponseUserTest userData, PostDTO post) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
+
         MvcResult result = this.mockMvc.perform(post("/v1/post-favorite/" + post.id())
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -972,6 +997,7 @@ public class HelperTest {
 
         assertThat(response.message()).isNotBlank();
         assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().post().id()).isEqualTo(post.id());
@@ -980,6 +1006,7 @@ public class HelperTest {
     }
 
     public CommentDTO createComment(ResponseUserTest userData, PostDTO post, Long parentID) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         CreateCommentDTO dto = new CreateCommentDTO(
                 "content",
                 post.id(),
@@ -989,8 +1016,9 @@ public class HelperTest {
         MvcResult result = this.mockMvc.perform(post("/v1/comment")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -999,6 +1027,7 @@ public class HelperTest {
 
         ResponseHttp<CommentDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -1047,6 +1076,7 @@ public class HelperTest {
     }
 
     public PostCategoriesDTO addCategoryToPost(ResponseUserTest userData, CategoryDTO categoryDTO, PostDTO postDTO) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String URL = "/v1/post-category";
 
         CreatePostCategoriesDTO dto = new CreatePostCategoriesDTO(
@@ -1060,8 +1090,9 @@ public class HelperTest {
         MvcResult result = this.mockMvc.perform(post(URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -1070,6 +1101,7 @@ public class HelperTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -1174,7 +1206,7 @@ public class HelperTest {
 
     public TagDTO createTag(ResponseUserTest userData) throws Exception {
         String URL = "/v1/tag";
-        String chars = this.generateChars();
+        String chars = generateChars();
 
         var dto = new CreateTagDTO(
                 "software engineer " + chars,

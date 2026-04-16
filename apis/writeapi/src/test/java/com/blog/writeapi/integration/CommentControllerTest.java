@@ -1,5 +1,6 @@
 package com.blog.writeapi.integration;
 
+import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
@@ -54,13 +55,15 @@ public class CommentControllerTest {
     // DELETE
     @Test
     void shouldDeleteComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + comment.id())
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -70,6 +73,7 @@ public class CommentControllerTest {
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();
@@ -77,6 +81,8 @@ public class CommentControllerTest {
 
     @Test
     void shouldReturnForbDeleteComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
 
@@ -84,19 +90,23 @@ public class CommentControllerTest {
         CommentDTO comment = this.helper.createComment(userData, post, null);
 
         this.mockMvc.perform(delete(this.URL + "/" + comment.id())
-                        .header("Authorization", "Bearer " + userData2.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
 
     @Test
     void shouldReturnNotFoundDeleteComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + 456374657396476397L)
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -114,6 +124,8 @@ public class CommentControllerTest {
     // CREATE
     @Test
     void shouldCreateComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
 
@@ -126,8 +138,9 @@ public class CommentControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -148,6 +161,8 @@ public class CommentControllerTest {
 
     @Test
     void shouldCreateCommentOnComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
@@ -161,8 +176,9 @@ public class CommentControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -172,6 +188,7 @@ public class CommentControllerTest {
         ResponseHttp<CommentDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().id()).isNotNegative().isNotZero();
@@ -184,6 +201,7 @@ public class CommentControllerTest {
     //UPDATE
     @Test
     void shouldUpdateCommentAllField() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
@@ -205,6 +223,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -213,6 +232,7 @@ public class CommentControllerTest {
         ResponseHttp<CommentDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().id()).isEqualTo(comment.id());
@@ -223,6 +243,7 @@ public class CommentControllerTest {
 
     @Test
     void shouldUpdateCommentNoField() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
@@ -235,6 +256,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -242,6 +264,7 @@ public class CommentControllerTest {
 
         ResponseHttp<CommentDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -253,6 +276,7 @@ public class CommentControllerTest {
 
     @Test
     void shouldReturnNotFoundUpdateComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         CommentDTO comment = this.helper.createComment(userData, post, null);
@@ -265,6 +289,7 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();

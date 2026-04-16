@@ -18,7 +18,8 @@ public interface ICommentAttachmentController {
     ResponseEntity<?> create(
             @Valid @ModelAttribute CreateCommentAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @DeleteMapping("{id}")
@@ -26,7 +27,8 @@ public interface ICommentAttachmentController {
     ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @PatchMapping("{id}")
@@ -35,6 +37,7 @@ public interface ICommentAttachmentController {
             @PathVariable @IsId Long id,
             @RequestBody UpdateCommentAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

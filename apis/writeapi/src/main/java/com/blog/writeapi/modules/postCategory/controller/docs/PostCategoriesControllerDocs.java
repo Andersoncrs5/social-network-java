@@ -37,7 +37,10 @@ public interface PostCategoriesControllerDocs {
     @ApiResponse(responseCode = "409",
             description = "Conflict: This category is already linked to this post",
             content = @Content(mediaType = "application/json"))
-    ResponseEntity<?> create(@Valid @RequestBody CreatePostCategoriesDTO dto, HttpServletRequest request);
+    ResponseEntity<?> create(
+            @Valid @RequestBody CreatePostCategoriesDTO dto, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    );
 
     @DeleteMapping("/{id}")
     @Operation(
@@ -55,7 +58,10 @@ public interface PostCategoriesControllerDocs {
     @ApiResponse(responseCode = "404",
             description = "Association ID not found",
             content = @Content(mediaType = "application/json"))
-    ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request);
+    ResponseEntity<?> del(
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    );
 
     @GetMapping("/{id}")
     @Operation(
@@ -71,7 +77,10 @@ public interface PostCategoriesControllerDocs {
     @ApiResponse(responseCode = "404",
             description = "Association not found",
             content = @Content(mediaType = "application/json"))
-    ResponseEntity<?> get(@PathVariable @IsId Long id, HttpServletRequest request);
+    ResponseEntity<?> get(
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    );
 
     @PatchMapping("/{id}")
     @Operation(
@@ -93,6 +102,7 @@ public interface PostCategoriesControllerDocs {
     ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostCategoriesDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

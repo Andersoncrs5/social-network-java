@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -74,6 +75,7 @@ public class PostAttachmentControllerTest {
 
     @Test
     void shouldReturnNotFoundCreateNewFile() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO postDTO = this.helper.createPost(userData);
 
@@ -91,9 +93,9 @@ public class PostAttachmentControllerTest {
                         .param("contentType", "image/png")
                         .param("isPublic", "true")
                         .param("isVisible", "true")
-                        .header("Authorization", "Bearer " + userData.tokens().token()))
-                .andExpect(status().isNotFound())
-                .andReturn();
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         ResponseHttp<Object> response = objectMapper.readValue(json, new TypeReference<>() {});
@@ -104,6 +106,7 @@ public class PostAttachmentControllerTest {
 
     @Test
     void shouldDeleteAtt() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO postDTO = this.helper.createPost(userData);
 
@@ -111,14 +114,14 @@ public class PostAttachmentControllerTest {
 
         this.mockMvc.perform(delete(this.URL + "/" + attachmentDTO.getId())
                 .header("Authorization", "Bearer " + userData.tokens().token())
-        )
-                .andExpect(status().isOk())
+                .header("X-Idempotency-Key", traceId)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is(true)))
                 .andExpect(jsonPath("$.message", is("Attachment deleted")));
     }
 
     @Test
     void shouldReturnNotFoundDeleteAtt() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO postDTO = this.helper.createPost(userData);
 
@@ -126,6 +129,7 @@ public class PostAttachmentControllerTest {
 
         this.mockMvc.perform(delete(this.URL + "/" + (attachmentDTO.getId() + 1))
                         .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", is(false)))
@@ -134,6 +138,7 @@ public class PostAttachmentControllerTest {
 
     @Test
     void shouldReturn401DeleteAtt() throws Exception{
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData1 = this.helper.createUser();
         PostDTO postDTO = this.helper.createPost(userData);
@@ -142,6 +147,7 @@ public class PostAttachmentControllerTest {
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + attachmentDTO.getId())
                 .header("Authorization", "Bearer " + userData1.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isForbidden()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -153,6 +159,8 @@ public class PostAttachmentControllerTest {
 
     @Test
     void shouldUpdateAllFields() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO postDTO = this.helper.createPost(userData);
 
@@ -168,6 +176,7 @@ public class PostAttachmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -183,9 +192,11 @@ public class PostAttachmentControllerTest {
         assertThat(response.data().getIsVisible()).isEqualTo(dto.isVisible());
 
         assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isEqualTo(traceId);
     }
 
     private PostAttachmentDTO upload(ResponseUserTest userData, PostDTO postDTO) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         Path path = Paths.get("src/test/java/com/blog/writeapi/utils/resources/foto.png");
         byte[] content = Files.readAllBytes(path);
 
@@ -203,7 +214,8 @@ public class PostAttachmentControllerTest {
                         .param("contentType", "image/png")
                         .param("isPublic", "true")
                         .param("isVisible", "true")
-                        .header("Authorization", "Bearer " + userData.tokens().token()))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -217,6 +229,7 @@ public class PostAttachmentControllerTest {
         assertThat(response.data().getContentType()).isEqualTo("image/png");
         assertThat(response.data().getFileSize()).isEqualTo(filePart.getBytes().length);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.status()).isTrue();
 
         return response.data();

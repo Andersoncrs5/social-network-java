@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "Comment Report Assignment", description = "Endpoints for managing types and categories assigned to a comment report")
 public interface CommentReportTypeControllerDocs {
@@ -72,6 +73,7 @@ public interface CommentReportTypeControllerDocs {
     ResponseEntity<ResponseHttp<Void>> toggle(
             @RequestBody @Valid CreateCommentReportTypeDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

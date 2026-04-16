@@ -24,10 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -42,15 +39,14 @@ public class CommentReportController implements ICommentReportControllerDocs {
 
     private final ICommentReportService service;
     private final ICommentService commentService;
-    private final IUserService userService;
-    private final ITokenService tokenService;
     private final CommentReportMapper mapper;
 
     @Override
     public ResponseEntity<?> create(
             @RequestBody @Valid CreateCommentReportDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(dto.commentId());
@@ -69,7 +65,7 @@ public class CommentReportController implements ICommentReportControllerDocs {
                     new ResponseHttp<>(
                         this.mapper.toDTO(model),
                         "Report created with successfully",
-                        UUID.randomUUID().toString(),
+                        idempotencyKey,
                         1,
                         true,
                         OffsetDateTime.now()
@@ -81,7 +77,8 @@ public class CommentReportController implements ICommentReportControllerDocs {
     public ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         CommentReportModel report = this.service.findByIdSimple(id);
 
@@ -94,7 +91,7 @@ public class CommentReportController implements ICommentReportControllerDocs {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,
                 "Report deleted with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -106,7 +103,8 @@ public class CommentReportController implements ICommentReportControllerDocs {
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdateCommentReportDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel moderator = principal.getUser();
 
@@ -120,7 +118,7 @@ public class CommentReportController implements ICommentReportControllerDocs {
                 new ResponseHttp<>(
                     this.mapper.toDTO(reportUpdated),
                     "Report updated with successfully",
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     true,
                     OffsetDateTime.now()

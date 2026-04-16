@@ -24,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,6 +54,8 @@ public class PostReactionControllerTest {
 
     @Test
     void shouldCreateNewReactionToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
@@ -68,6 +72,7 @@ public class PostReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -77,6 +82,7 @@ public class PostReactionControllerTest {
         ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().id()).isNotNegative().isNotZero();
@@ -88,6 +94,7 @@ public class PostReactionControllerTest {
 
     @Test
     void shouldDeleteNewReactionToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ResponseUserTest userData = this.helper.createUser();
 
@@ -95,7 +102,7 @@ public class PostReactionControllerTest {
 
         PostDTO post = this.helper.createPost(userData);
         ReactionDTO reactionDTO = this.helper.createReaction(superAdm);
-        PostReactionDTO postReactionDTO = this.helper.toggleReactionToPost(userData2, post, reactionDTO);
+        this.helper.toggleReactionToPost(userData2, post, reactionDTO);
 
         CreatePostReactionDTO dto = new CreatePostReactionDTO(
                 post.id(),
@@ -106,6 +113,7 @@ public class PostReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -115,6 +123,7 @@ public class PostReactionControllerTest {
         ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();
@@ -123,6 +132,7 @@ public class PostReactionControllerTest {
 
     @Test
     void shouldUpdateNewReactionToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ResponseUserTest userData = this.helper.createUser();
 
@@ -143,6 +153,8 @@ public class PostReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -151,6 +163,7 @@ public class PostReactionControllerTest {
         TypeReference<ResponseHttp<PostReactionDTO>> typeRef = new TypeReference<>() {};
         ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 

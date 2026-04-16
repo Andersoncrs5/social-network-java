@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentView.controller.provider;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.api.metadata.ClientMetadataDTO;
 import com.blog.writeapi.configs.api.metadata.HttpRequestUtils;
 import com.blog.writeapi.configs.security.UserPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,27 +34,29 @@ public class CommentViewController implements ICommentViewControllerDocs {
     private final HttpRequestUtils httpRequest;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> create(
             @IsId @PathVariable Long commentId,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         ClientMetadataDTO metadataDTO = this.httpRequest.extractMetadata(request);
 
         this.service.recordView(principal.getId(), commentId, metadataDTO);
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(
-                    new ResponseHttp<>(
-                        null,
-                        "View added successfully",
-                        UUID.randomUUID().toString(),
-                        1,
-                        true,
-                        OffsetDateTime.now()
-                    )
-                );
+            .status(HttpStatus.CREATED)
+            .body(
+                new ResponseHttp<>(
+                    null,
+                    "View added successfully",
+                    idempotencyKey,
+                    1,
+                    true,
+                    OffsetDateTime.now()
+                )
+            );
     }
 
 }

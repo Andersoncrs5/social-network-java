@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "CommentFavorite", description = "Endpoints for managing comment favorite")
 public interface CommentFavoriteControllerDocs {
@@ -52,6 +53,7 @@ public interface CommentFavoriteControllerDocs {
                     content = @Content(mediaType = "application/json"))
     })
     ResponseEntity<?> toggle(
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey,
             @Parameter(description = "The ID of the comment", example = "1998780200074176609")
             @PathVariable @IsId Long commentID,
             HttpServletRequest request,

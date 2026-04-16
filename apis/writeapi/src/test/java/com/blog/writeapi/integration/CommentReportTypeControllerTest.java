@@ -25,6 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,6 +56,7 @@ public class CommentReportTypeControllerTest {
 
     @Test
     void shouldCreate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ReportTypeDTO reportTypeDTO = this.helper.createReportType(superAdm);
 
@@ -74,6 +77,7 @@ public class CommentReportTypeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -82,6 +86,7 @@ public class CommentReportTypeControllerTest {
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();
@@ -89,6 +94,7 @@ public class CommentReportTypeControllerTest {
 
     @Test
     void shouldRemove() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ReportTypeDTO reportTypeDTO = this.helper.createReportType(superAdm);
 
@@ -110,6 +116,7 @@ public class CommentReportTypeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -117,6 +124,7 @@ public class CommentReportTypeControllerTest {
 
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -125,6 +133,7 @@ public class CommentReportTypeControllerTest {
 
     @Test
     void shouldReturnNotFoundBecauseCommentReport() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
         ReportTypeDTO reportTypeDTO = this.helper.createReportType(superAdm);
 
@@ -139,6 +148,7 @@ public class CommentReportTypeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -155,6 +165,7 @@ public class CommentReportTypeControllerTest {
     @Test
     void shouldReturnNotFoundBecauseReportType() throws Exception {
 
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userTest = this.helper.createUser();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -172,6 +183,7 @@ public class CommentReportTypeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
                 .header("Authorization", "Bearer " + userTest2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();

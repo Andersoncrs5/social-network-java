@@ -23,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +42,6 @@ public class PinnedPostControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired private PinnedPostRepository repository;
     @Autowired private PostRepository postRepository;
 
     @Autowired
@@ -53,6 +54,8 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldCreatePinnedToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
 
@@ -63,6 +66,7 @@ public class PinnedPostControllerTest {
 
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isCreated()).andReturn();
@@ -73,6 +77,7 @@ public class PinnedPostControllerTest {
         ResponseHttp<PinnedPostDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().id()).isNotNull().isPositive();
@@ -84,6 +89,8 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnConflictUserAlreadyMarkedPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         PinnedPostDTO pinnedPostDTO = this.helper.markPostWithPinned(userData, post);
@@ -97,6 +104,7 @@ public class PinnedPostControllerTest {
                         .header("Authorization", "Bearer " + userData.tokens().token())
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isConflict()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -112,6 +120,8 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnConflictUserAlreadyMarkedPostWithOrderEquals() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         PostDTO post2 = this.helper.createPost(userData);
@@ -126,6 +136,7 @@ public class PinnedPostControllerTest {
                         .header("Authorization", "Bearer " + userData.tokens().token())
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isConflict()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -141,6 +152,8 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnNotFoundBecausePostNotFoundCreatePinnedToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
 
         CreatePinnedPostDTO dto = new CreatePinnedPostDTO(
@@ -152,6 +165,7 @@ public class PinnedPostControllerTest {
                         .header("Authorization", "Bearer " + userData.tokens().token())
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -167,12 +181,15 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldDeletePinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         PinnedPostDTO pinnedPostDTO = this.helper.markPostWithPinned(userData, post);
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + pinnedPostDTO.id())
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -180,6 +197,7 @@ public class PinnedPostControllerTest {
 
         ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -188,6 +206,7 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnForbBecauseAnotherUsrDeletePinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
 
@@ -196,6 +215,7 @@ public class PinnedPostControllerTest {
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + pinnedPostDTO.id())
                 .header("Authorization", "Bearer " + userData2.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isForbidden()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -211,10 +231,12 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnNotFoundDeletePinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + userData.userDTO().id())
                 .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -230,6 +252,7 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnNotFoundPatchPinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         UpdatePinnedPostDTO dto = new UpdatePinnedPostDTO(
@@ -240,6 +263,7 @@ public class PinnedPostControllerTest {
                 .header("Authorization", "Bearer " + userData.tokens().token())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -255,6 +279,7 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldPatchPinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         PostDTO post = this.helper.createPost(userData);
         PinnedPostDTO pinnedPostDTO = this.helper.markPostWithPinned(userData, post);
@@ -267,6 +292,7 @@ public class PinnedPostControllerTest {
                 .header("Authorization", "Bearer " + userData.tokens().token())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -274,6 +300,7 @@ public class PinnedPostControllerTest {
 
         ResponseHttp<PinnedPostDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -286,6 +313,7 @@ public class PinnedPostControllerTest {
 
     @Test
     void shouldReturnForbPatchPinned() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
 
@@ -300,6 +328,7 @@ public class PinnedPostControllerTest {
                 .header("Authorization", "Bearer " + userData2.tokens().token())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto))
+                .header("X-Idempotency-Key", traceId)
         ).andExpect(status().isForbidden()).andReturn();
 
         String json = result.getResponse().getContentAsString();

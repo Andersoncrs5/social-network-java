@@ -21,6 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +52,7 @@ public class CommentViewControllerTest {
 
     @Test
     void shouldCreatePostView() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
 
@@ -57,9 +60,9 @@ public class CommentViewControllerTest {
         CommentDTO comment = this.helper.createComment(userData, post, null);
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + comment.id())
-                        .header("Authorization", "Bearer " + userData2.tokens().token()
-                        ))
-                .andExpect(status().isCreated()).andReturn();
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
@@ -67,6 +70,7 @@ public class CommentViewControllerTest {
         ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.data()).isNull();
         assertThat(response.status()).isEqualTo(true);
     }
@@ -77,6 +81,7 @@ public class CommentViewControllerTest {
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + 1998780203274176609L)
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", UUID.randomUUID().toString())
         ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -88,5 +93,4 @@ public class CommentViewControllerTest {
         assertThat(response.data()).isNull();
         assertThat(response.status()).isEqualTo(false);
     }
-
 }

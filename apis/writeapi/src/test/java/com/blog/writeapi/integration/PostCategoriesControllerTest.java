@@ -1,5 +1,6 @@
 package com.blog.writeapi.integration;
 
+import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.category.dtos.CategoryDTO;
@@ -59,12 +60,13 @@ public class PostCategoriesControllerTest {
     // CREATE
     @Test
     void shouldReturnConflictBecauseCategoryAlreadyAdded() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
         CategoryDTO categoryDTO = this.helper.createCategory(superAdmData, null);
         PostDTO postDTO = this.helper.createPost(userData);
-        PostCategoriesDTO postCategoriesDTO = this.helper.addCategoryToPost(userData, categoryDTO, postDTO);
+        this.helper.addCategoryToPost(userData, categoryDTO, postDTO);
 
         CreatePostCategoriesDTO dto = new CreatePostCategoriesDTO(
                 postDTO.id(),
@@ -77,15 +79,16 @@ public class PostCategoriesControllerTest {
         this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isConflict())
                 .andReturn();
-
     }
 
     @Test
     void shouldAddedCategoryToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -103,8 +106,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -113,6 +117,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -126,6 +131,7 @@ public class PostCategoriesControllerTest {
     // DELETE
     @Test
     void shouldRemoveCategoryOfPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -134,16 +140,16 @@ public class PostCategoriesControllerTest {
         PostCategoriesDTO postCategoriesDTO = this.helper.addCategoryToPost(userData, categoryDTO, postDTO);
 
         MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + postCategoriesDTO.id())
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
-                .andExpect(status().isOk())
-                .andReturn();
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
 
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data()).isNull();
@@ -152,6 +158,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnForbWhenRemoveCategoryOfPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
@@ -161,16 +168,15 @@ public class PostCategoriesControllerTest {
         PostCategoriesDTO postCategoriesDTO = this.helper.addCategoryToPost(userData, categoryDTO, postDTO);
 
         this.mockMvc.perform(delete(this.URL + "/" + postCategoriesDTO.id())
-                        .header("Authorization", "Bearer " + userData2.tokens().token()
-                        ))
-                .andExpect(status().isForbidden())
-                .andReturn();
-
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                ).andExpect(status().isForbidden()).andReturn();
     }
 
     // GET
     @Test
     void shouldReturnPostCategoryWhenGetById() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -179,8 +185,9 @@ public class PostCategoriesControllerTest {
         PostCategoriesDTO postCategoriesDTO = this.helper.addCategoryToPost(userData, categoryDTO, postDTO);
 
         MvcResult result = this.mockMvc.perform(get(this.URL + "/" + postCategoriesDTO.id())
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -189,6 +196,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -200,11 +208,13 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnNullWhenGetById() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         MvcResult result = this.mockMvc.perform(get(this.URL + "/" + 111111111111111111L)
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -220,6 +230,7 @@ public class PostCategoriesControllerTest {
     // UPDATE
     @Test
     void shouldReturnPostCategoryUpdatedWithAllFieldsWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -236,8 +247,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -246,6 +258,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -258,6 +271,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnPostCategoryUpdatedJustFieldsDisplayWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -274,8 +288,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -284,6 +299,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -295,6 +311,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnPostCategoryUpdatedJustFieldsTrueWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -311,8 +328,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -321,6 +339,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -332,6 +351,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnPostCategoryUpdatedJustFieldsActiveWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -348,8 +368,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -359,6 +380,7 @@ public class PostCategoriesControllerTest {
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data().id()).isEqualTo(postCategoriesDTO.id());
@@ -369,6 +391,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnPostCategoryUpdatedNoFieldsWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
 
@@ -385,8 +408,9 @@ public class PostCategoriesControllerTest {
         MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -395,6 +419,7 @@ public class PostCategoriesControllerTest {
 
         ResponseHttp<PostCategoriesDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -406,6 +431,7 @@ public class PostCategoriesControllerTest {
 
     @Test
     void shouldReturnForbWhenExecEndpointUpdate() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
         ResponseUserTest userData2 = this.helper.createUser();
         ResponseUserTest superAdmData = this.helper.loginSuperAdm();
@@ -423,8 +449,9 @@ public class PostCategoriesControllerTest {
         this.mockMvc.perform(patch(this.URL + "/" + postCategoriesDTO.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData2.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden())
                 .andReturn();
     }

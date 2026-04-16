@@ -1,12 +1,12 @@
 package com.blog.writeapi.modules.postReadingList.controller.provider;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postReadingList.controller.docs.IPostReadingListControllerDocs;
 import com.blog.writeapi.modules.postReadingList.model.PostReadingListModel;
 import com.blog.writeapi.modules.postReadingList.service.interfaces.IPostReadingListService;
 import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.enums.global.ToggleEnum;
-import com.blog.writeapi.utils.mappers.PostReadingMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -28,13 +28,14 @@ import java.util.UUID;
 @RequestMapping("/v1/post-reading-list")
 public class PostReadingListController implements IPostReadingListControllerDocs {
 
-    private final PostReadingMapper mapper;
     private final IPostReadingListService service;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> toggle(
             @PathVariable Long postId,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         ResultToggle<PostReadingListModel> toggle = this.service.toggle(principal.getId(), postId);
 
@@ -47,7 +48,7 @@ public class PostReadingListController implements IPostReadingListControllerDocs
         return ResponseEntity.status(status).body(new ResponseHttp<>(
                 null,
                 message,
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()

@@ -19,7 +19,8 @@ public interface PostAttachmentControllerDocs {
     ResponseEntity<?> create(
             @Valid @RequestBody CreatePostAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @DeleteMapping("{id}")
@@ -27,7 +28,8 @@ public interface PostAttachmentControllerDocs {
     ResponseEntity<?> delete(
             @PathVariable @IsId Long id,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @PatchMapping("{id}")
@@ -36,6 +38,7 @@ public interface PostAttachmentControllerDocs {
             @PathVariable @IsId Long id,
             @RequestBody UpdatePostAttachmentDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 }

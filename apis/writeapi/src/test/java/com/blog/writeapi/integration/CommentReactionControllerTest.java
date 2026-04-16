@@ -1,5 +1,6 @@
 package com.blog.writeapi.integration;
 
+import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
@@ -57,6 +58,8 @@ public class CommentReactionControllerTest {
 
     @Test
     void shouldCreateNewReactionToComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
 
         ResponseUserTest userData = this.helper.createUser();
@@ -75,6 +78,7 @@ public class CommentReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -83,6 +87,7 @@ public class CommentReactionControllerTest {
         TypeReference<ResponseHttp<CommentReactionDTO>> typeRef = new TypeReference<>() {};
         ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -93,6 +98,8 @@ public class CommentReactionControllerTest {
 
     @Test
     void shouldDeleteReactionToComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
 
         ResponseUserTest userData = this.helper.createUser();
@@ -112,6 +119,7 @@ public class CommentReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -120,6 +128,7 @@ public class CommentReactionControllerTest {
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
         ResponseHttp<Object> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 
@@ -128,6 +137,8 @@ public class CommentReactionControllerTest {
 
     @Test
     void shouldUpdateReactionInComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
         ResponseUserTest superAdm = this.helper.loginSuperAdm();
 
         ResponseUserTest userData = this.helper.createUser();
@@ -149,6 +160,7 @@ public class CommentReactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 )
                 .andExpect(status().isOk())
                 .andReturn();
@@ -157,6 +169,7 @@ public class CommentReactionControllerTest {
         TypeReference<ResponseHttp<CommentReactionDTO>> typeRef = new TypeReference<>() {};
         ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
 

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postCategory.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.modules.postCategory.controller.docs.PostCategoriesControllerDocs;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
 import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
@@ -21,10 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -42,7 +40,12 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     private final PostCategoriesMapper mapper;
 
     @Override
-    public ResponseEntity<?> create(@Valid @RequestBody CreatePostCategoriesDTO dto, HttpServletRequest request) {
+    @Idempotent
+    public ResponseEntity<?> create(
+            @Valid @RequestBody CreatePostCategoriesDTO dto,
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    ) {
         PostModel post = this.postService.getByIdSimple(dto.postId());
         CategoryModel category = this.categoryService.getByIdSimple(dto.categoryId());
 
@@ -52,7 +55,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
                 new ResponseHttp<>(
                         null,
                         "Category already was added!",
-                        UUID.randomUUID().toString(),
+                        idempotencyKey,
                         1,
                         false,
                         OffsetDateTime.now()
@@ -68,7 +71,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
             new ResponseHttp<>(
                 mapperDTO,
                 "Category added with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -78,7 +81,10 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
 
     @Override
     @IsPostCategoryAuthor
-    public ResponseEntity<?> del(@PathVariable @IsId Long id, HttpServletRequest request) {
+    public ResponseEntity<?> del(
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    ) {
         PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
 
         this.service.delete(postCategoriesModel);
@@ -87,7 +93,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
             new ResponseHttp<>(
                 null,
                 "Category removed with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -96,7 +102,10 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     }
 
     @Override
-    public ResponseEntity<?> get(@PathVariable @IsId Long id, HttpServletRequest request) {
+    public ResponseEntity<?> get(
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+    ) {
         PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
 
         PostCategoriesDTO dto = this.mapper.toDTO(postCategoriesModel);
@@ -104,7 +113,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
         ResponseHttp<PostCategoriesDTO> res = new ResponseHttp<>(
                 dto,
                 "Resource found with successfully",
-                UUID.randomUUID().toString(),
+                idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
@@ -118,7 +127,8 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostCategoriesDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
 
@@ -127,12 +137,12 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
         PostCategoriesDTO mapperDTO = this.mapper.toDTO(update);
 
         ResponseHttp<PostCategoriesDTO> res = new ResponseHttp<>(
-                mapperDTO,
-                "Resource updated with successfully",
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
+            mapperDTO,
+            "Resource updated with successfully",
+            idempotencyKey,
+            1,
+            true,
+            OffsetDateTime.now()
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(res);

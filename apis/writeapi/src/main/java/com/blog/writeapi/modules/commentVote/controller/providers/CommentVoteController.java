@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.commentVote.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.commentVote.controller.docs.CommentVoteControllerDocs;
 import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
@@ -21,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,16 +38,16 @@ import java.util.UUID;
 public class CommentVoteController implements CommentVoteControllerDocs {
 
     private final ICommentVoteService service;
-    private final IUserService userService;
     private final ICommentService commentService;
-    private final ITokenService tokenService;
     private final CommentVoteMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> toggle(
             @Valid @RequestBody ToggleCommentVoteDTO dto,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(dto.commentID());
@@ -54,7 +56,7 @@ public class CommentVoteController implements CommentVoteControllerDocs {
 
         if (voteOpt.isPresent() && voteOpt.get().getType() == dto.type()) {
             this.service.delete(voteOpt.get());
-            return ResponseEntity.ok(createResponse(null, "Comment vote removed successfully"));
+            return ResponseEntity.ok(createResponse(null, "Comment vote removed successfully", idempotencyKey));
         }
 
         CommentVoteModel result;
@@ -71,15 +73,15 @@ public class CommentVoteController implements CommentVoteControllerDocs {
         }
 
         return ResponseEntity.status(status).body(
-                createResponse(this.mapper.toDTO(result), message)
+                createResponse(this.mapper.toDTO(result), message, idempotencyKey)
         );
     }
 
-    private <T> ResponseHttp<T> createResponse(T data, String message) {
+    private <T> ResponseHttp<T> createResponse(T data, String message, String traceID) {
         return new ResponseHttp<>(
                 data,
                 message,
-                UUID.randomUUID().toString(),
+                traceID,
                 1,
                 true,
                 OffsetDateTime.now()

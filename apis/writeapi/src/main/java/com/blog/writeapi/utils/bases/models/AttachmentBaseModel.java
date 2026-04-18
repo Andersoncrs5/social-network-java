@@ -18,10 +18,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 public abstract class AttachmentBaseModel extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "storage_key")
     private String storageKey;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "file_name")
     private String fileName;
 
     private String contentType;

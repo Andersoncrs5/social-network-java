@@ -102,4 +102,9 @@ public class StoryService implements IStoryService {
         } while (expiredPage.hasNext());
     }
 
+    public void toggleStoryHighlight(StoryModel model) {
+        model.setHighlight(!model.isHighlight());
+        repository.save(model);
+    }
+
 }

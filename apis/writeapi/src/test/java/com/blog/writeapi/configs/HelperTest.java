@@ -1,6 +1,7 @@
 package com.blog.writeapi.configs;
 
 import cn.hutool.core.lang.UUID;
+import com.blog.writeapi.modules.StoryHighlightItem.dto.CreateStoryHighlightItemDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
 import com.blog.writeapi.modules.apiKeys.dto.CreateApiKeyDTO;
@@ -87,6 +88,34 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public void createStoryHighlightItem(
+            StoryHighlightDTO storyHighlightDTO,
+            StoryDTO storyDTO,
+            ResponseUserTest userData
+    ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
+
+        var dto = new CreateStoryHighlightItemDTO(
+                storyHighlightDTO.getId(),
+                storyDTO.getId()
+        );
+
+        MvcResult result = this.mockMvc.perform(post("/v1/story-highlight-item/toggle")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto))
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        ResponseHttp<Void> response = objectMapper.readValue(json, new TypeReference<>() {});
+
+        assertThat(response.data()).isNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
+    }
+
     public StoryHighlightDTO createStoryHighlight(
             ResponseUserTest userData
     ) throws Exception {
@@ -99,7 +128,7 @@ public class HelperTest {
 
         var request = multipart(URL)
                 .file(filePart)
-                .param("title", "Título de Exemplo")
+                .param("title", "Título de Exemplo" + generateChars() + generateChars())
                 .param("isPublic", "true")
                 .param("isVisible", "true")
                 .param("fileName", "pochita.png")

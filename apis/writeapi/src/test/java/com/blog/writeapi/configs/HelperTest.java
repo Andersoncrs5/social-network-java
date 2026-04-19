@@ -40,6 +40,7 @@ import com.blog.writeapi.modules.reportPost.dto.PostReportDTO;
 import com.blog.writeapi.modules.reportType.dto.CreateReportTypeDTO;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
 import com.blog.writeapi.modules.stories.dto.StoryDTO;
+import com.blog.writeapi.modules.storyHighlight.dto.StoryHighlightDTO;
 import com.blog.writeapi.modules.storyReaction.dto.StoryReactionDTO;
 import com.blog.writeapi.modules.storyReaction.dto.ToggleStoryReactionDTO;
 import com.blog.writeapi.modules.tag.dtos.CreateTagDTO;
@@ -85,6 +86,60 @@ public class HelperTest {
 
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
+
+    public StoryHighlightDTO createStoryHighlight(
+            ResponseUserTest userData
+    ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
+
+        final String URL = "/v1/story-highlight";
+        MockMultipartFile filePart = this.loadFile();
+
+        assertThat(filePart.getContentType()).isNotNull();
+
+        var request = multipart(URL)
+                .file(filePart)
+                .param("title", "Título de Exemplo")
+                .param("isPublic", "true")
+                .param("isVisible", "true")
+                .param("fileName", "pochita.png")
+                .param("contentType", filePart.getContentType())
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        ResponseHttp<StoryHighlightDTO> response = objectMapper.readValue(json, new TypeReference<>() {});
+
+        assertThat(response.data()).isNotNull();
+        assertThat(response.status()).isTrue();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
+
+        assertThat(response.data().getStorageKey()).isNotBlank();
+        assertThat(response.data().getUser().id()).isEqualTo(userData.userDTO().id());
+
+        return response.data();
+    }
+
+    public MockMultipartFile loadFile() throws Exception {
+
+        Path path = Paths.get("src/test/java/com/blog/writeapi/utils/resources/foto.png");
+        byte[] content = Files.readAllBytes(path);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "foto.png",
+                "image/png",
+                content
+        );
+
+        assertThat(file.getContentType()).isNotBlank();
+
+        return file;
+    }
 
     public StoryReactionDTO createStoryReaction(
             ResponseUserTest userTest,

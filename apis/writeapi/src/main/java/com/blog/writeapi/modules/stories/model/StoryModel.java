@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.stories.model;
 
+import com.blog.writeapi.modules.StoryHighlightItem.model.StoryHighlightItemModel;
 import com.blog.writeapi.modules.storyReaction.model.StoryReactionModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.bases.models.AttachmentBaseModel;
@@ -14,7 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "stories", indexes = {
-        @Index(name = "idx_story_user_expiry", columnList = "user_id, expires_at")
+        @Index(name = "idx_story_user_expiry", columnList = "user_id, expires_at"),
+        @Index(name = "idx_story_user_is_highlight", columnList = "is_highlight")
 })
 @Setter
 @Getter
@@ -34,6 +36,10 @@ public class StoryModel extends AttachmentBaseModel {
     @Builder.Default
     private boolean isArchived = false;
 
+    @Builder.Default
+    @Column(name = "is_highlight")
+    private boolean isHighlight = false;
+
     @Column(length = 500)
     private String caption;
 
@@ -49,4 +55,7 @@ public class StoryModel extends AttachmentBaseModel {
     @Builder.Default
     private List<StoryReactionModel> storyReactions = new ArrayList<>();
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StoryHighlightItemModel> items;
 }

@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.user.models;
 
+import com.blog.writeapi.modules.StoryHighlightItem.model.StoryHighlightItemModel;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.pinnedPost.model.PinnedPostModel;
@@ -239,5 +240,9 @@ public class UserModel extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<StoryHighlightModel> storyHighlights = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StoryHighlightItemModel> items;
 
 }

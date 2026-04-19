@@ -1,10 +1,14 @@
 package com.blog.writeapi.modules.storyHighlight.model;
 
+import com.blog.writeapi.modules.StoryHighlightItem.model.StoryHighlightItemModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.bases.models.AttachmentBaseModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Entity
 @Table(
@@ -27,6 +31,7 @@ public class StoryHighlightModel extends AttachmentBaseModel {
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
 
-//    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<StoryHighlightItemModel> items;
+    @JsonIgnore
+    @OneToMany(mappedBy = "highlight", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<StoryHighlightItemModel> items;
 }

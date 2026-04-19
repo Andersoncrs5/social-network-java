@@ -14,4 +14,5 @@ public interface IStoryService {
     StoryModel findById(@IsId Long id);
     void archiveExpiredStories();
     void archiveExpiredStoriesPageable();
+    void toggleStoryHighlight(StoryModel model);
 }

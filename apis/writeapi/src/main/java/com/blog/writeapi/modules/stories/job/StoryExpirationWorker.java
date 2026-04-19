@@ -39,7 +39,7 @@ public class StoryExpirationWorker {
                     try {
                         service.delete(story);
                     } catch (Exception e) {
-                        log.error("Erro ao deletar story {}: {}", story.getId(), e.getMessage());
+                        log.error("Error the to delete story {}: {}", story.getId(), e.getMessage());
                     }
                 });
             } else {

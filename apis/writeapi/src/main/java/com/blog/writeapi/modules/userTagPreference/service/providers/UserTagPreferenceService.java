@@ -7,7 +7,11 @@ import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel
 import com.blog.writeapi.modules.userTagPreference.repository.UserTagPreferenceRepository;
 import com.blog.writeapi.modules.userTagPreference.service.docs.IUserTagPreferenceService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -37,13 +41,29 @@ public class UserTagPreferenceService implements IUserTagPreferenceService {
             @IsModelInitialized UserModel user,
             @IsModelInitialized TagModel tag
     ) {
+        if (!tag.getIsActive()) throw new BusinessRuleException("Tag is unactive");
+
         UserTagPreferenceModel model = new UserTagPreferenceModel().toBuilder()
                 .id(this.snowflake.nextId())
                 .tag(tag)
                 .user(user)
                 .build();
 
-        return repository.save(model);
+        try {
+            return repository.save(model);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("");
+
+            if (message.contains("uk_user_tag_preferences")) {
+                throw new UniqueConstraintViolationException("This item has already been added to this highlight.");
+            }
+
+            throw new BusinessRuleException("Database integrity error: " + message);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error creating report association.");
+        }
     }
 
 

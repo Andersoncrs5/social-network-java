@@ -1,15 +1,15 @@
 package com.blog.writeapi.modules.postVote.controller.providers;
 
 import com.blog.writeapi.configs.security.UserPrincipal;
+import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.postVote.controller.docs.PostVoteControllerDocs;
 import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
-import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postVote.models.PostVoteModel;
-import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.postVote.service.docs.IPostVoteService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.PostVoteMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,10 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
-
 @Slf4j
 @Validated
 @RestController
@@ -37,8 +33,6 @@ public class PostVoteController implements PostVoteControllerDocs {
 
     private final IPostVoteService service;
     private final IPostService postService;
-    private final ITokenService tokenService;
-    private final IUserService userService;
     private final PostVoteMapper mapper;
 
     @Override
@@ -50,37 +44,24 @@ public class PostVoteController implements PostVoteControllerDocs {
         PostModel post = this.postService.getByIdSimple(dto.postID());
         UserModel user = principal.getUser();
 
-        Optional<PostVoteModel> voteOpt = this.service.findByUserAndPost(user, post);
+        ResultToggle<PostVoteModel> toggle = this.service.toggle(user, post, dto);
 
-        if (voteOpt.isPresent() && voteOpt.get().getType() == dto.type()) {
-            this.service.delete(voteOpt.get());
-            return ResponseEntity.ok(createResponse(null, "Vote removed successfully"));
-        }
+        String message = switch (toggle.result()) {
+            case UPDATED -> "Vote updated";
+            case REMOVED -> "Vote removed successfully";
+            case ADDED -> "Vote applied successfully";
+        };
 
-        PostVoteModel result;
-        String message = "Vote applied successfully";
-        HttpStatus status = HttpStatus.OK;
+        HttpStatus status = (toggle.result() == ToggleEnum.ADDED)
+                ? HttpStatus.CREATED
+                : HttpStatus.OK;
 
-        if (voteOpt.isPresent()) {
-            voteOpt.get().setType(dto.type());
-            result = this.service.updateSimple(voteOpt.get());
-        } else {
-            result = this.service.create(dto, user, post);
-            status = HttpStatus.CREATED;
-        }
+        var responseDto = toggle.body().map(this.mapper::toDTO).orElse(null);
 
-        return ResponseEntity.status(status).body(createResponse(this.mapper.toDTO(result), message));
+        return ResponseEntity.status(status)
+                .body(ResponseHttp.success(responseDto, message));
     }
 
-    private <T> ResponseHttp<T> createResponse(T data, String message) {
-        return new ResponseHttp<>(
-                data,
-                message,
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
-        );
-    }
+
 
 }

@@ -16,4 +16,9 @@ public interface PostCategoriesRepository extends JpaRepository<@NonNull PostCat
     Boolean existsByPostAndCategory(@IsModelInitialized PostModel post, @IsModelInitialized CategoryModel category);
 
     Optional<PostCategoriesModel> findByPrimaryTrueAndPost(@IsModelInitialized PostModel post);
+
+    Boolean existsByPostIdAndCategoryId(
+            @IsId Long postId, @IsId
+            Long categoryId
+    );
 }

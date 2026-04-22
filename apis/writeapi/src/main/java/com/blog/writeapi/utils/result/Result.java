@@ -50,6 +50,10 @@ public class Result<T> {
         return failure(HttpStatus.CONFLICT, "Resource.Conflict", message);
     }
 
+    public static <T> Result<T> forb(String message) {
+        return failure(HttpStatus.FORBIDDEN, "Resource.Forbidden", message);
+    }
+
     public static <T> Result<T> badRequest(String message) {
         return failure(HttpStatus.BAD_REQUEST, "Invalid.Input", message);
     }

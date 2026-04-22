@@ -9,6 +9,8 @@ import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
 import com.blog.writeapi.modules.commentFavorite.service.docs.ICommentFavoriteService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.CommentFavoriteMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,26 +50,21 @@ public class CommentFavoriteController implements CommentFavoriteControllerDocs 
         UserModel user = principal.getUser();
         CommentModel comment = this.commentService.getByIdSimple(commentID);
 
-        Optional<CommentFavoriteModel> favorite = this.service.findByCommentIdAndUserId(comment, user);
+        ResultToggle<CommentFavoriteModel> toggle = this.service.toggle(user, comment);
 
-        if (favorite.isPresent()) {
-            this.service.remove(favorite.get());
+        String message = (toggle.result() == ToggleEnum.ADDED)
+                ? "Comment added to favorites successfully"
+                : "Comment removed from favorites successfully";
 
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
-                    null,
-                    "Comment removed from favorites successfully",
-                    idempotencyKey,
-                    1,
-                    true,
-                    OffsetDateTime.now()
-            ));
-        }
+        HttpStatus status = (toggle.result() == ToggleEnum.ADDED)
+                ? HttpStatus.CREATED
+                : HttpStatus.OK;
 
-        CommentFavoriteModel add = this.service.add(user, comment);
+        Object data = toggle.body().map(this.mapper::toDTO).orElse(null);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
-                this.mapper.toDTO(add),
-                "Comment added to favorites successfully",
+        return ResponseEntity.status(status).body(new ResponseHttp<>(
+                data,
+                message,
                 idempotencyKey,
                 1,
                 true,

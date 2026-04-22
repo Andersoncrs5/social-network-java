@@ -48,6 +48,12 @@ public class PostReadingListService implements IPostReadingListService {
         PostModel post = this.gateway.findPostById(postId);
         UserModel user = this.gateway.findUserById(userId);
 
+        if (!user.getId().equals(post.getAuthor().getId())) {
+            if (this.gateway.isBlocked(user.getId(), post.getAuthor().getId())) {
+                throw new BusinessRuleException("You cannot add a post from a blocked user to your reading list.");
+            }
+        }
+
         PostReadingListModel read = new PostReadingListModel().toBuilder()
                 .id(generator.nextId())
                 .user(user)
@@ -57,17 +63,17 @@ public class PostReadingListService implements IPostReadingListService {
         try {
             return repository.save(read);
         } catch (DataIntegrityViolationException e) {
-            String message = e.getMostSpecificCause().getMessage();
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("").toLowerCase();
 
-            if (message != null && message.contains("uk_post_user_reading_list")) {
-                throw new UniqueConstraintViolationException(
-                        "This post already has this type assigned."
-                );
+            if (message.contains("uk_post_user_reading_list")) {
+                throw new UniqueConstraintViolationException("This post is already in your reading list.");
             }
 
-            throw new BusinessRuleException("Database integrity error: " + message);
+            throw new BusinessRuleException("Database integrity error: " + e.getMostSpecificCause().getMessage());
         } catch (Exception e) {
-            throw new InternalServerErrorException("Error creating report association.");
+            throw new InternalServerErrorException("Error adding post to reading list.");
         }
     }
 

@@ -12,11 +12,6 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(
         name = "story_highlight_items",
-        indexes = {
-                @Index(name = "idx_story_highlight_item_title", columnList = "title"),
-                @Index(name = "idx_story_highlight_item_storage_key", columnList = "storage_key", unique = true),
-                @Index(name = "idx_story_highlight_item_file_name", columnList = "file_name", unique = true),
-        },
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_story_highlight_items_user_story_highlight",

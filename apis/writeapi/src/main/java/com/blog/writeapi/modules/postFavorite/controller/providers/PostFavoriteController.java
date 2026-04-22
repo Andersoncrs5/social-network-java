@@ -2,16 +2,15 @@ package com.blog.writeapi.modules.postFavorite.controller.providers;
 
 import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
-import com.blog.writeapi.modules.postFavorite.controller.docs.PostFavoriteControllerDocs;
-import com.blog.writeapi.modules.postFavorite.dtos.PostFavoriteDTO;
-import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
 import com.blog.writeapi.modules.post.models.PostModel;
-import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.modules.postFavorite.service.docs.IPostFavoriteService;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.modules.postFavorite.controller.docs.PostFavoriteControllerDocs;
+import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
+import com.blog.writeapi.modules.postFavorite.service.docs.IPostFavoriteService;
+import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.PostFavoriteMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -52,35 +49,28 @@ public class PostFavoriteController implements PostFavoriteControllerDocs {
         UserModel user = principal.getUser();
         PostModel post = this.iPostService.getByIdSimple(postId);
 
-        Optional<PostFavoriteModel> favor = this.service.getByPostAndUser(post, user);
+        ResultToggle<PostFavoriteModel> toggle = this.service.toggle(post, user);
 
-        if (favor.isPresent()) {
-            this.service.delete(favor.get());
+        String message = (toggle.result() == ToggleEnum.ADDED)
+                ? "Post added to favorites successfully"
+                : "Post removed from favorites successfully";
 
-            ResponseHttp<Object> res = new ResponseHttp<>(
-                    null,
-                    "Post removed the favorites with successfully",
-                    idempotencyKey,
-                    1,
-                    true,
-                    OffsetDateTime.now()
-            );
+        HttpStatus status = (toggle.result() == ToggleEnum.ADDED)
+                ? HttpStatus.CREATED
+                : HttpStatus.OK;
 
-            return ResponseEntity.status(HttpStatus.OK).body(res);
-        }
+        Object data = toggle.body().map(this.mapper::toDTO).orElse(null);
 
-        PostFavoriteModel model = this.service.create(post, user);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            new ResponseHttp<>(
-                this.mapper.toDTO(model),
-                "Post added with favorites with successfully",
+        ResponseHttp<Object> response = new ResponseHttp<>(
+                data,
+                message,
                 idempotencyKey,
                 1,
                 true,
                 OffsetDateTime.now()
-            )
         );
+
+        return ResponseEntity.status(status).body(response);
     }
 
 

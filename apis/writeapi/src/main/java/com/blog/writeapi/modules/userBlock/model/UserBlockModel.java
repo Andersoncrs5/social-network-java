@@ -29,10 +29,10 @@ public class UserBlockModel extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocker_id", nullable = false)
-    private UserModel blocker; // Quem deu o block
+    private UserModel blocker;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_id", nullable = false)
-    private UserModel blocked; // Quem foi bloqueado
+    private UserModel blocked;
 
 }

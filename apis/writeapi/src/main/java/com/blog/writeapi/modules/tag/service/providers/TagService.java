@@ -9,7 +9,10 @@ import com.blog.writeapi.modules.tag.service.docs.ITagService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.global.slugConstraint.SlugConstraint;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.TagMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,9 +79,28 @@ public class TagService implements ITagService {
         TagModel model = this.mapper.toModel(dto);
         model.setId(generator.nextId());
 
-        TagModel save = this.repository.save(model);
-        log.info("Tag saved is: {}", save);
-        return save;
+        try {
+            TagModel save = this.repository.save(model);
+            log.info("Tag saved is: {}", save);
+            return save;
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("").toLowerCase();
+
+            if (message.contains("idx_tag_name")) {
+                throw new UniqueConstraintViolationException("The tag name '" + dto.name() + "' is already in use.");
+            }
+
+            if (message.contains("idx_tag_slug")) {
+                throw new UniqueConstraintViolationException("The slug '" + dto.slug() + "' is already in use.");
+            }
+
+            throw new BusinessRuleException("Database integrity error: " + e.getMostSpecificCause().getMessage());
+        } catch (Exception e) {
+            log.error("Unexpected error creating tag: ", e);
+            throw new InternalServerErrorException("An unexpected error occurred while creating the tag.");
+        }
     }
 
     @Override

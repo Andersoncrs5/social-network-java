@@ -9,10 +9,13 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.FollowersMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -83,7 +86,22 @@ public class FollowersService implements IFollowersService {
                 .follower(follower)
                 .build();
 
-        return this.repository.save(follow);
+        try {
+            return this.repository.save(follow);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("").toLowerCase();
+
+            if (message.contains("uk_followers")) {
+                throw new UniqueConstraintViolationException("You are already following this user.");
+            }
+
+            throw new BusinessRuleException("Database integrity error: " + message);
+        } catch (Exception e) {
+            log.error("Error creating follow relationship: ", e);
+            throw new InternalServerErrorException("Error processing follow request.");
+        }
     }
 
     @Override
@@ -93,7 +111,14 @@ public class FollowersService implements IFollowersService {
     ) {
         this.mapper.merge(dto, follow);
 
-        return this.repository.save(follow);
+        try {
+            return this.repository.save(follow);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessRuleException("Cannot update follow status due to data integrity violation.");
+        } catch (Exception e) {
+            log.error("Error updating follow relationship: ", e);
+            throw new InternalServerErrorException("Error updating follow status.");
+        }
     }
 
 }

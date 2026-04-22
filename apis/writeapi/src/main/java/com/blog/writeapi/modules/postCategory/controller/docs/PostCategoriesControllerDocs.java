@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.postCategory.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
 import com.blog.writeapi.modules.postCategory.dtos.UpdatePostCategoriesDTO;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 public interface PostCategoriesControllerDocs {
@@ -39,6 +41,7 @@ public interface PostCategoriesControllerDocs {
             content = @Content(mediaType = "application/json"))
     ResponseEntity<?> create(
             @Valid @RequestBody CreatePostCategoriesDTO dto, HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
@@ -60,6 +63,7 @@ public interface PostCategoriesControllerDocs {
             content = @Content(mediaType = "application/json"))
     ResponseEntity<?> del(
             @PathVariable @IsId Long id, HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
@@ -79,6 +83,7 @@ public interface PostCategoriesControllerDocs {
             content = @Content(mediaType = "application/json"))
     ResponseEntity<?> get(
             @PathVariable @IsId Long id, HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
@@ -102,6 +107,7 @@ public interface PostCategoriesControllerDocs {
     ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostCategoriesDTO dto,
+            @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );

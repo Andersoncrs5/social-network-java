@@ -11,6 +11,8 @@ import com.blog.writeapi.modules.commentReaction.service.docs.ICommentReactionSe
 import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.reaction.service.docs.IReactionService;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.CommentReactionMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -54,33 +52,19 @@ public class CommentReactionController implements CommentReactionControllerDocs 
         CommentModel comment = commentService.getByIdSimple(dto.commentID());
         ReactionModel reaction = this.reactionService.getByIdSimple(dto.reactionID());
 
-        var optional = this.service.findByUserAndComment(user, comment);
+        ResultToggle<CommentReactionModel> toggle = this.service.toggle(comment, reaction, user);
 
-        if (optional.isPresent() && Objects.equals(optional.get().getReaction().getId(), reaction.getId())) {
-            this.service.delete(optional.get());
-            return ResponseEntity.ok(createResponse(null, "Reaction removed successfully", idempotencyKey));
-        }
+        String message = switch (toggle.result()) {
+            case REMOVED -> "Reaction removed successfully";
+            case UPDATED -> "Reaction changed successfully";
+            case ADDED -> "Reaction applied successfully";
+        };
 
-        if (optional.isPresent()) {
-            optional.get().setReaction(reaction);
-            var updated = this.service.updateSimple(optional.get());
-            return ResponseEntity.ok(createResponse(this.mapper.toDTO(updated), "Reaction changed successfully", idempotencyKey));
-        }
+        HttpStatus status = (toggle.result() == ToggleEnum.ADDED) ? HttpStatus.CREATED : HttpStatus.OK;
+        var data = toggle.body().map(this.mapper::toDTO).orElse(null);
 
-        CommentReactionModel model = this.service.create(comment, reaction, user);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createResponse(this.mapper.toDTO(model), "Reaction applied successfully", idempotencyKey));
+        return ResponseEntity.status(status)
+                .body(ResponseHttp.success(data, message, idempotencyKey));
     }
 
-    private <T> ResponseHttp<T> createResponse(T data, String message, String idempotencyKey) {
-        return new ResponseHttp<>(
-                data,
-                message,
-                idempotencyKey,
-                1,
-                true,
-                OffsetDateTime.now()
-        );
-    }
 }

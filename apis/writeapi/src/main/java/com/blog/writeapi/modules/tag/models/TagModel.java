@@ -14,24 +14,22 @@ import java.util.List;
 
 @Entity
 @Table(name = "tags", indexes = {
-        @Index(name = "idx_tag_name", columnList = "name"),
-        @Index(name = "idx_tag_slug", columnList = "slug"),
+        @Index(name = "idx_tag_name", columnList = "name", unique = true),
+        @Index(name = "idx_tag_slug", columnList = "slug", unique = true),
         @Index(name = "idx_tag_active", columnList = "is_active"),
         @Index(name = "idx_tag_trending", columnList = "posts_count, last_used_at")
 })
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder(toBuilder = true)
-@ToString
+@SuperBuilder(toBuilder = true) @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class TagModel extends BaseEntity {
 
-    @Column(nullable = false, unique = true, length = 70)
+    @Column(nullable = false, length = 70)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 80)
+    @Column(nullable = false, length = 80)
     private String slug;
 
     @Column(length = 200)
@@ -54,10 +52,12 @@ public class TagModel extends BaseEntity {
     private OffsetDateTime lastUsedAt;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostTagModel> tags;
 
     @JsonIgnore
+    @ToString.Exclude
     @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserTagPreferenceModel> userTagPreferences;
 }

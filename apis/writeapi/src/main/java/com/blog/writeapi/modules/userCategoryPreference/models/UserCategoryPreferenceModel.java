@@ -27,12 +27,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @SuperBuilder(toBuilder = true)
 public class UserCategoryPreferenceModel extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false, updatable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserModel user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id", nullable = false, updatable = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false, updatable = false)
     private CategoryModel category;
 
     private Double interestScore;

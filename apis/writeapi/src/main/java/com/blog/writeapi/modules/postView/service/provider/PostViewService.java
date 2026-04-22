@@ -3,6 +3,7 @@ package com.blog.writeapi.modules.postView.service.provider;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.configs.api.metadata.ClientMetadataDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postView.gateway.PostViewModuleGateway;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.postView.repository.PostViewRepository;
 import com.blog.writeapi.modules.postView.service.interfaces.IPostViewService;
@@ -17,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,6 +27,7 @@ public class PostViewService implements IPostViewService {
 
     private final PostViewRepository repository;
     private final Snowflake generator;
+    private final PostViewModuleGateway gateway;
 
     @Override
     public boolean existsByUserAndPost(
@@ -34,38 +37,35 @@ public class PostViewService implements IPostViewService {
         return this.repository.existsByUserAndPost(user, post);
     }
 
-    @Override
-    public PostViewModel create(
-            @IsModelInitialized UserModel user,
-            @IsModelInitialized PostModel post,
-            ClientMetadataDTO metadata,
-            LocalDate today
-    ) {
+    public PostViewModel create(UserModel user, PostModel post, ClientMetadataDTO metadata, LocalDate today) {
+        if (!user.getId().equals(post.getAuthor().getId()) && this.gateway.isBlocked(user.getId(), post.getAuthor().getId())) {
+            throw new BusinessRuleException("You cannot react to a story from a blocked user.");
+        }
 
         PostViewModel view = PostViewModel.builder()
-            .id(generator.nextId())
-            .post(post)
-            .user(user)
-            .ipAddress(metadata.ipAddress())
-            .userAgent(metadata.userAgent())
-            .fingerprint(metadata.fingerprint())
-            .viewedAtDate(today)
-            .bot(metadata.isBot())
-            .build();
+                .id(generator.nextId())
+                .post(post)
+                .user(user)
+                .ipAddress(metadata.ipAddress())
+                .userAgent(metadata.userAgent())
+                .fingerprint(metadata.fingerprint())
+                .viewedAtDate(today)
+                .bot(metadata.isBot())
+                .build();
 
         try {
             return this.repository.save(view);
         } catch (DataIntegrityViolationException e) {
-            String message = e.getMostSpecificCause().getMessage();
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("").toLowerCase();
 
-            if (message != null && message.contains("uk_post_view_daily")) {
-                throw new UniqueConstraintViolationException(
-                        "User already view this post"
-                );
+            if (message.contains("uk_post_view_daily")) {
+                throw new UniqueConstraintViolationException("User already view this post");
             }
-
             throw new BusinessRuleException("Database integrity error: " + message);
         } catch (Exception e) {
+            log.error("Error creating post view: ", e);
             throw new InternalServerErrorException("Error creating report association.");
         }
     }

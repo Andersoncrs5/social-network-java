@@ -34,4 +34,8 @@ public interface IPostCategoriesService {
             @NotNull UpdatePostCategoriesDTO dto,
             @IsModelInitialized PostCategoriesModel model
     );
+    Boolean existsByPostIdAndCategoryId(
+            @IsId Long postId,
+            @IsId Long categoryId
+    );
 }

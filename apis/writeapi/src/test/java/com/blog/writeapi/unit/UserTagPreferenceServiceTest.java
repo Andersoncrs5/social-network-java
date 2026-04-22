@@ -6,6 +6,8 @@ import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.userTagPreference.repository.UserTagPreferenceRepository;
 import com.blog.writeapi.modules.userTagPreference.service.providers.UserTagPreferenceService;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
+import org.springframework.dao.DataIntegrityViolationException;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class UserTagPreferenceServiceTest {
@@ -110,5 +114,35 @@ public class UserTagPreferenceServiceTest {
         verify(generator, times(1)).nextId();
         verify(repository, times(1)).save(any(UserTagPreferenceModel.class));
     }
+
+    @Test
+    void shouldThrowUniqueConstraintViolationExceptionWhenAlreadyExists() {
+        var rootCause = new RuntimeException("uk_user_tag_preferences");
+        var dataIntegrityException = new DataIntegrityViolationException("Duplicado", rootCause);
+
+        when(this.generator.nextId()).thenReturn(this.preference.getId());
+        when(repository.save(any(UserTagPreferenceModel.class)))
+                .thenThrow(dataIntegrityException);
+
+        UniqueConstraintViolationException exception = assertThrows(
+                UniqueConstraintViolationException.class,
+                () -> service.create(user, tag)
+        );
+
+        assertThat(exception.getMessage()).contains("This item has already been added");
+
+        verify(generator, times(1)).nextId();
+        verify(repository, times(1)).save(any(UserTagPreferenceModel.class));
+    }
+    
+    @Test
+    void shouldThrowBusinessRuleExceptionWhenTagIsInactive() {
+        TagModel inactiveTag = this.tag.toBuilder().isActive(false).build();
+
+        assertThrows(BusinessRuleException.class, () -> service.create(user, inactiveTag));
+
+        verifyNoInteractions(repository);
+    }
+
 
 }

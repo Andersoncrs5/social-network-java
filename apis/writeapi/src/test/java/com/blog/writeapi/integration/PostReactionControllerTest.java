@@ -174,4 +174,74 @@ public class PostReactionControllerTest {
 
     }
 
+    @Test
+    void shouldReturnNotFoundPostCreateNewReactionToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
+        ResponseUserTest superAdm = this.helper.loginSuperAdm();
+        ResponseUserTest userData2 = this.helper.createUser();
+
+        ReactionDTO reactionDTO = this.helper.createReaction(superAdm);
+
+        CreatePostReactionDTO dto = new CreatePostReactionDTO(
+                reactionDTO.id(),
+                reactionDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank().containsIgnoringCase("post");
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+
+        assertThat(response.data()).isNull();
+    }
+
+    @Test
+    void shouldReturnNotFoundReactionCreateNewReactionToPost() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
+        ResponseUserTest userData = this.helper.createUser();
+        ResponseUserTest userData2 = this.helper.createUser();
+
+        PostDTO post = this.helper.createPost(userData);
+
+        CreatePostReactionDTO dto = new CreatePostReactionDTO(
+                post.id(),
+                post.id()
+        );
+
+        MvcResult result = mockMvc.perform(post(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<PostReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<PostReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.message()).isNotBlank().containsIgnoringCase("reaction");
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+
+        assertThat(response.data()).isNull();
+
+    }
+
+
 }

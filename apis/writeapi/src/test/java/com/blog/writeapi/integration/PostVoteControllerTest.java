@@ -67,8 +67,8 @@ public class PostVoteControllerTest {
         MvcResult result = this.mockMvc.perform(post(this.URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + userData.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + userData.tokens().token())
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 

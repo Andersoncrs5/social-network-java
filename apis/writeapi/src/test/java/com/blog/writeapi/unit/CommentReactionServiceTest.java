@@ -1,6 +1,7 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.commentReaction.gateway.CommentReactionModuleGateway;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.modules.comment.models.CommentModel;
@@ -10,21 +11,28 @@ import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.commentReaction.repository.CommentReactionRepository;
 import com.blog.writeapi.modules.commentReaction.service.providers.CommentReactionService;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentReactionServiceTest {
     @Mock private Snowflake generator;
+    @Mock private CommentReactionModuleGateway gateway;
     @Mock private CommentReactionRepository repository;
 
     @InjectMocks private CommentReactionService service;
@@ -91,6 +99,50 @@ public class CommentReactionServiceTest {
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
             .build();
+
+    @Test
+    @DisplayName("Should throw BusinessRuleException when user is blocked by comment author")
+    void shouldThrowBusinessRuleException_WhenUserIsBlocked() {
+        UserModel otherUser = UserModel.builder().id(999L).build();
+        CommentModel commentFromOther = comment.toBuilder().author(otherUser).build();
+
+        when(gateway.isBlocked(user.getId(), otherUser.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.create(commentFromOther, reaction, user))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("You cannot react to a comment from a blocked user.");
+
+        verify(gateway).isBlocked(user.getId(), otherUser.getId());
+        verifyNoInteractions(repository, generator);
+    }
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when reaction to comment already exists")
+    void shouldThrowUniqueConstraintViolationException_WhenDuplicated() {
+        when(generator.nextId()).thenReturn(commentReaction.getId());
+
+        var exception = new DataIntegrityViolationException("Conflict", new RuntimeException("uk_comment_user_reaction"));
+        when(repository.save(any(CommentReactionModel.class))).thenThrow(exception);
+
+        assertThatThrownBy(() -> service.create(comment, reaction, user))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessage("You have already reacted to this comment.");
+
+        verify(repository).save(any(CommentReactionModel.class));
+    }
+
+    @Test
+    @DisplayName("Should throw InternalServerErrorException on unexpected error")
+    void shouldThrowInternalServerErrorException_WhenGenericError() {
+        when(generator.nextId()).thenReturn(commentReaction.getId());
+        when(repository.save(any())).thenThrow(new RuntimeException("Unexpected error"));
+
+        assertThatThrownBy(() -> service.create(comment, reaction, user))
+                .isInstanceOf(InternalServerErrorException.class)
+                .hasMessage("Error applying reaction to this comment.");
+
+        verify(repository).save(any());
+    }
 
     @Test
     void shouldCreateNewCommentReactionModel() {

@@ -130,9 +130,9 @@ public class StoryHighlightItemServiceTest {
         verifyNoMoreInteractions(repository, gateway);
 
         InOrder order = inOrder(repository, gateway);
-        order.verify(gateway).findUserById(user.getId());
-        order.verify(gateway).findStoryById(story.getId());
         order.verify(gateway).findHighlightById(highlight.getId());
+        order.verify(gateway).findStoryById(story.getId());
+        order.verify(gateway).findUserById(user.getId());
         order.verify(repository).existsByStoryIdAndHighlightIdAndUserId(story.getId(), highlight.getId(), user.getId());
         order.verify(repository).save(any());
         order.verify(gateway).toggleStoryHighlight(any());
@@ -161,9 +161,9 @@ public class StoryHighlightItemServiceTest {
         verifyNoMoreInteractions(repository, gateway);
 
         InOrder order = inOrder(repository, gateway);
-        order.verify(gateway).findUserById(user.getId());
-        order.verify(gateway).findStoryById(story.getId());
         order.verify(gateway).findHighlightById(highlight.getId());
+        order.verify(gateway).findStoryById(story.getId());
+        order.verify(gateway).findUserById(user.getId());
         order.verify(repository).existsByStoryIdAndHighlightIdAndUserId(story.getId(), highlight.getId(), user.getId());
     }
 
@@ -181,7 +181,7 @@ public class StoryHighlightItemServiceTest {
 
         Result<StoryHighlightItemModel> result = this.service.create(user.getId(), dto);
 
-        assertThat(result.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(result.getStatus()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(result.isFailure()).isTrue();
 
         verify(gateway, times(1)).findUserById(user.getId());
@@ -193,9 +193,9 @@ public class StoryHighlightItemServiceTest {
         verifyNoMoreInteractions(repository, gateway);
 
         InOrder order = inOrder(repository, gateway);
-        order.verify(gateway).findUserById(user.getId());
-        order.verify(gateway).findStoryById(story.getId());
         order.verify(gateway).findHighlightById(highlight.getId());
+        order.verify(gateway).findStoryById(story.getId());
+        order.verify(gateway).findUserById(user.getId());
         order.verify(repository).existsByStoryIdAndHighlightIdAndUserId(story.getId(), highlight.getId(), user.getId());
         order.verify(repository).save(any());
 
@@ -226,6 +226,55 @@ public class StoryHighlightItemServiceTest {
         verifyNoMoreInteractions(repository);
     }
 
+    @Test
+    void shouldReturnConflictBecauseHighlightIsNotYour() {
+        UserModel user1 = new UserModel().toBuilder().id(1998780222122222221L).build();
+        StoryHighlightModel highlight1 = new StoryHighlightModel().toBuilder().id(1998780111111111111L).user(user1).build();
 
+        when(gateway.findHighlightById(highlight1.getId())).thenReturn(highlight1);
+
+        Result<StoryHighlightItemModel> result = this.service.create(user.getId(), new CreateStoryHighlightItemDTO(
+                highlight1.getId(),
+                story.getId()
+        ));
+
+        assertThat(result.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError().message()).isNotBlank().containsIgnoringCase("This highlight is not your.");
+        verify(gateway, times(0)).findUserById(anyLong());
+        verify(gateway, never()).findStoryById(story.getId());
+        verify(gateway, times(1)).findHighlightById(highlight1.getId());
+        verify(repository, never()).existsByStoryIdAndHighlightIdAndUserId(story.getId(), highlight.getId(), user.getId());
+        verify(repository, never()).save(any());
+        verify(gateway, never()).toggleStoryHighlight(any());
+        verifyNoMoreInteractions(repository, gateway);
+    }
+
+    @Test
+    void shouldReturnForbBecauseStoryNotIsYour() {
+        UserModel user1 = new UserModel().toBuilder().id(1998780222122222221L).build();
+        StoryModel story1 = new StoryModel().toBuilder().id(1998222222122222221L)
+                .user(user1)
+                .build();
+
+        when(gateway.findHighlightById(highlight.getId())).thenReturn(highlight);
+        when(gateway.findStoryById(story1.getId())).thenReturn(story1);
+
+        Result<StoryHighlightItemModel> result = this.service.create(user.getId(), new CreateStoryHighlightItemDTO(
+                highlight.getId(),
+                story1.getId()
+        ));
+        assertThat(result.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError().message()).isNotBlank().containsIgnoringCase("This story is not your!");
+
+        verify(gateway, times(0)).findUserById(anyLong());
+        verify(gateway, times(1)).findStoryById(story1.getId());
+        verify(gateway, times(1)).findHighlightById(highlight.getId());
+        verify(repository, never()).existsByStoryIdAndHighlightIdAndUserId(story.getId(), highlight.getId(), user.getId());
+        verify(repository, never()).save(any());
+        verify(gateway, never()).toggleStoryHighlight(any());
+        verifyNoMoreInteractions(repository, gateway);
+    }
 
 }

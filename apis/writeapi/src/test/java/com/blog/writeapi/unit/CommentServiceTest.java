@@ -11,6 +11,7 @@ import com.blog.writeapi.modules.comment.repository.CommentRepository;
 import com.blog.writeapi.modules.comment.service.providers.CommentService;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
+import com.blog.writeapi.utils.result.Result;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,6 +99,29 @@ public class CommentServiceTest {
 
         verifyNoMoreInteractions(repository);
         verify(this.repository, times(1)).delete(this.comment);
+    }
+
+    // DELETE: deleteByID
+    @Test
+    void shouldDeleteByIdComment() {
+        when(repository.deleteByID(anyLong())).thenReturn(1);
+
+        Result<Void> result = this.service.deleteByID(comment.getId());
+        assertThat(result.isSuccess()).isTrue();
+
+        verify(repository, times(1)).deleteByID(anyLong());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void shouldFailTheDeleteCommentById() {
+        when(repository.deleteByID(anyLong())).thenReturn(0);
+
+        Result<Void> result = this.service.deleteByID(comment.getId());
+        assertThat(result.isFailure()).isTrue();
+
+        verify(repository, times(1)).deleteByID(anyLong());
+        verifyNoMoreInteractions(repository);
     }
 
     // METHOD: getByIdSimple

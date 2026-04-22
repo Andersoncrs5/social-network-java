@@ -6,6 +6,8 @@ import com.blog.writeapi.modules.tag.dtos.UpdateTagDTO;
 import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.modules.tag.repository.TagRepository;
 import com.blog.writeapi.modules.tag.service.providers.TagService;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.TagMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -30,6 +33,8 @@ public class TagServiceTest {
 
     @InjectMocks private TagService service;
 
+    CreateTagDTO dto = new CreateTagDTO("springBoot", "spring-boot", "AnyDesc", true, true, true);
+
     TagModel tag = new TagModel().toBuilder()
             .id(1998780200074176609L)
             .name("springBoot")
@@ -44,6 +49,49 @@ public class TagServiceTest {
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
             .build();
+
+    @Test
+    void shouldCreateTagSuccessfully() {
+        when(mapper.toModel(dto)).thenReturn(tag);
+        when(generator.nextId()).thenReturn(tag.getId());
+        when(repository.save(any(TagModel.class))).thenReturn(tag);
+
+        TagModel result = service.create(dto);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(tag.getId());
+        assertThat(result.getName()).isEqualTo(tag.getName());
+
+        verify(mapper, times(1)).toModel(dto);
+        verify(generator, times(1)).nextId();
+        verify(repository, times(1)).save(any(TagModel.class));
+    }
+
+    @Test
+    void shouldThrowUniqueConstraintExceptionWhenNameExists() {
+        when(mapper.toModel(dto)).thenReturn(tag);
+        when(generator.nextId()).thenReturn(tag.getId());
+
+        var rootCause = new RuntimeException("idx_tag_name");
+        when(repository.save(any(TagModel.class)))
+                .thenThrow(new DataIntegrityViolationException("Conflict", rootCause));
+
+        assertThrows(UniqueConstraintViolationException.class, () -> service.create(dto));
+
+        verify(repository, times(1)).save(any(TagModel.class));
+    }
+
+    @Test
+    void shouldThrowInternalServerErrorExceptionOnGenericError() {
+        when(mapper.toModel(dto)).thenReturn(tag);
+        when(generator.nextId()).thenReturn(tag.getId());
+        when(repository.save(any(TagModel.class)))
+                .thenThrow(new RuntimeException("Unexpected error"));
+
+        assertThrows(InternalServerErrorException.class, () -> service.create(dto));
+
+        verify(repository, times(1)).save(any(TagModel.class));
+    }
 
     @Test
     void shouldGetTag() {

@@ -80,6 +80,27 @@ public class PostShareServiceTest {
             .build();
 
     @Test
+    @DisplayName("Should throw BusinessRuleException when user is blocked by the post author")
+    void shouldThrowBusinessRuleException_WhenUserIsBlocked() {
+        UserModel author = UserModel.builder().id(999L).build();
+        PostModel postWithDifferentAuthor = post.toBuilder().author(author).build();
+
+        when(gateway.findUserById(user.getId())).thenReturn(user);
+        when(gateway.findPostById(post.getId())).thenReturn(postWithDifferentAuthor);
+
+        when(gateway.isBlocked(user.getId(), author.getId())).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                service.create(user.getId(), post.getId(), share.getPlatform())
+        )
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("You cannot share a post from a blocked user.");
+
+        verify(repository, never()).save(any());
+        verify(gateway).isBlocked(user.getId(), author.getId());
+    }
+
+    @Test
     @DisplayName("Should create a PostShareModel successfully")
     void shouldCreatePostShareModel() {
         // Arrange

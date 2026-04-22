@@ -97,6 +97,70 @@ public class CommentReactionControllerTest {
     }
 
     @Test
+    void shouldReturnNotFoundBecauseReactionCreateNewReactionToComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
+        ResponseUserTest superAdm = this.helper.loginSuperAdm();
+
+        ResponseUserTest userData2 = this.helper.createUser();
+
+        ReactionDTO reactionDTO = this.helper.createReaction(superAdm);
+
+        CreateCommentReactionDTO dto = new CreateCommentReactionDTO(
+                (reactionDTO.id() + 1),
+                reactionDTO.id()
+        );
+
+        MvcResult result = mockMvc.perform(post(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
+                .andExpect(status().isNotFound()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CommentReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+    }
+
+    @Test
+    void shouldReturnNotFoundBecauseCommentCreateNewReactionToComment() throws Exception {
+        var traceId = UUID.randomUUID().toString();
+
+        ResponseUserTest userData = this.helper.createUser();
+        ResponseUserTest userData2 = this.helper.createUser();
+
+        PostDTO post = this.helper.createPost(userData);
+        CommentDTO comment = this.helper.createComment(userData, post, null);
+
+        CreateCommentReactionDTO dto = new CreateCommentReactionDTO(
+                comment.id(),
+                (comment.id() + 1)
+        );
+
+        MvcResult result = mockMvc.perform(post(this.URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto))
+                        .header("Authorization", "Bearer " + userData2.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
+                .andExpect(status().isNotFound()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<CommentReactionDTO>> typeRef = new TypeReference<>() {};
+        ResponseHttp<CommentReactionDTO> response = objectMapper.readValue(json, typeRef);
+
+        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isEqualTo(false);
+    }
+
+    @Test
     void shouldDeleteReactionToComment() throws Exception {
         var traceId = UUID.randomUUID().toString();
 

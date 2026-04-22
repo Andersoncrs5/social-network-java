@@ -17,7 +17,6 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 
 import java.util.Optional;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -48,6 +47,7 @@ public class UserServiceTest {
             this.user.getEmail(),
             this.user.getPassword()
     );
+
 
     @Test
     void shouldGetUserById() {

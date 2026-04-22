@@ -8,10 +8,9 @@ import com.blog.writeapi.modules.storyReaction.model.StoryReactionModel;
 import com.blog.writeapi.modules.storyReaction.repository.StoryReactionRepository;
 import com.blog.writeapi.modules.storyReaction.service.provider.StoryReactionService;
 import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.enums.attachment.AttachmentTypeEnum;
-import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +27,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -110,6 +110,28 @@ public class StoryReactionServiceTest {
         this.userId = user.getId();
         this.storyId = story.getId();
         this.reactionId = reaction.getId();
+    }
+
+    @Test
+    void shouldThrowBusinessRuleExceptionWhenUserIsBlocked() {
+        UserModel storyOwner = new UserModel();
+        storyOwner.setId(999L);
+        story.setUser(storyOwner);
+
+        Long actingUserId = 123L;
+
+        when(gateway.findReactionById(reactionId)).thenReturn(reaction);
+        when(gateway.findStoryById(storyId)).thenReturn(story);
+        when(gateway.findUserById(actingUserId)).thenReturn(user);
+
+        when(gateway.isBlocked(actingUserId, storyOwner.getId())).thenReturn(true);
+
+        assertThrows(BusinessRuleException.class, () ->
+                service.create(actingUserId, storyId, reactionId)
+        );
+
+        verify(gateway).isBlocked(actingUserId, storyOwner.getId());
+        verify(repository, never()).save(any());
     }
 
     @Test

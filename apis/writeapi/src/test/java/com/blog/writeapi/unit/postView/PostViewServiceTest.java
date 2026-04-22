@@ -3,6 +3,7 @@ package com.blog.writeapi.unit.postView;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.configs.api.metadata.ClientMetadataDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
+import com.blog.writeapi.modules.postView.gateway.PostViewModuleGateway;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.postView.repository.PostViewRepository;
 import com.blog.writeapi.modules.postView.service.provider.PostViewService;
@@ -10,6 +11,7 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -29,6 +31,9 @@ public class PostViewServiceTest {
 
     @Mock
     private Snowflake generator;
+
+    @Mock
+    private PostViewModuleGateway gateway;
 
     @Mock
     private PostViewRepository repository;
@@ -70,6 +75,81 @@ public class PostViewServiceTest {
             view.getUserAgent(),
             view.getFingerprint()
     );
+
+    @Test
+    @DisplayName("Should throw BusinessRuleException when user is blocked")
+    void shouldThrowBusinessRuleException_WhenUserIsBlocked() {
+        UserModel author = UserModel.builder().id(999L).build();
+        PostModel postWithDifferentAuthor = post.toBuilder().author(author).build();
+
+        when(gateway.isBlocked(user.getId(), author.getId())).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                service.create(user, postWithDifferentAuthor, metadataDTO, LocalDate.now())
+        )
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("You cannot react to a story from a blocked user.");
+
+        verify(repository, never()).save(any());
+        verify(gateway).isBlocked(user.getId(), author.getId());
+    }
+
+    @Test
+    void shouldCreatePostView() {
+        when(generator.nextId())
+                .thenReturn(view.getId());
+        when(repository.save(any()))
+                .thenReturn(view);
+
+        PostViewModel model = this.service.create(user, post, metadataDTO, view.getViewedAtDate());
+
+        assertThat(model.getId()).isEqualTo(view.getId());
+
+        verify(repository, times(1)).save(any());
+        verify(generator, times(1)).nextId();
+
+        InOrder order = inOrder(repository, generator);
+
+        order.verify(generator).nextId();
+        order.verify(repository).save(any());
+    }
+
+    @Test
+    void shouldThrowUniqueConstraintViolationExceptionWhenDailyLimitReached() {
+        Exception rootCause = new RuntimeException("Duplicate entry for key 'uk_post_view_daily'");
+
+        DataIntegrityViolationException springException =
+                new DataIntegrityViolationException("Conflict", rootCause);
+
+        when(repository.save(any(PostViewModel.class)))
+                .thenThrow(springException);
+
+        when(generator.nextId()).thenReturn(view.getId());
+
+        assertThatThrownBy(() ->
+                this.service.create(user, post, metadataDTO, view.getViewedAtDate())
+        )
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessageContaining("User already view this post");
+
+        verify(repository, times(1)).save(any());
+    }
+
+    @Test
+    void shouldThrowBusinessRuleExceptionOnOtherDataIntegrityErrors() {
+        Exception rootCause = new RuntimeException("Generic database error");
+        DataIntegrityViolationException springException =
+                new DataIntegrityViolationException("Conflict", rootCause);
+
+        when(repository.save(any())).thenThrow(springException);
+        when(generator.nextId()).thenReturn(view.getId());
+
+        assertThatThrownBy(() ->
+                this.service.create(user, post, metadataDTO, view.getViewedAtDate())
+        )
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Database integrity error");
+    }
 
     @Test
     void shouldReturnTrueWhenExistsByUserAndPost() {
@@ -131,65 +211,8 @@ public class PostViewServiceTest {
 
         this.service.delete(view);
 
-        verifyNoMoreInteractions(repository);
         verify(repository, times(1)).delete(view);
-    }
-
-    @Test
-    void shouldCreatePostView() {
-        when(generator.nextId())
-                .thenReturn(view.getId());
-        when(repository.save(any()))
-                .thenReturn(view);
-
-        PostViewModel model = this.service.create(user, post, metadataDTO, view.getViewedAtDate());
-
-        assertThat(model.getId()).isEqualTo(view.getId());
-
-        verify(repository, times(1)).save(any());
-        verify(generator, times(1)).nextId();
-
-        InOrder order = inOrder(repository, generator);
-
-        order.verify(generator).nextId();
-        order.verify(repository).save(any());
-    }
-
-    @Test
-    void shouldThrowUniqueConstraintViolationExceptionWhenDailyLimitReached() {
-        Exception rootCause = new RuntimeException("Duplicate entry for key 'uk_post_view_daily'");
-
-        DataIntegrityViolationException springException =
-                new DataIntegrityViolationException("Conflict", rootCause);
-
-        when(repository.save(any(PostViewModel.class)))
-                .thenThrow(springException);
-
-        when(generator.nextId()).thenReturn(view.getId());
-
-        assertThatThrownBy(() ->
-                this.service.create(user, post, metadataDTO, view.getViewedAtDate())
-        )
-                .isInstanceOf(UniqueConstraintViolationException.class)
-                .hasMessageContaining("User already view this post");
-
-        verify(repository, times(1)).save(any());
-    }
-
-    @Test
-    void shouldThrowBusinessRuleExceptionOnOtherDataIntegrityErrors() {
-        Exception rootCause = new RuntimeException("Generic database error");
-        DataIntegrityViolationException springException =
-                new DataIntegrityViolationException("Conflict", rootCause);
-
-        when(repository.save(any())).thenThrow(springException);
-        when(generator.nextId()).thenReturn(view.getId());
-
-        assertThatThrownBy(() ->
-                this.service.create(user, post, metadataDTO, view.getViewedAtDate())
-        )
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("Database integrity error");
+        verifyNoMoreInteractions(repository);
     }
 
 }

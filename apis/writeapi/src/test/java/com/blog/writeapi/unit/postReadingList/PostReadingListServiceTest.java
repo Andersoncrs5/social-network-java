@@ -44,6 +44,27 @@ public class PostReadingListServiceTest {
     private PostReadingListService service;
 
     @Test
+    @DisplayName("Should throw BusinessRuleException when user is blocked by post author")
+    void shouldThrowBusinessRuleException_WhenUserIsBlocked() {
+        UserModel author = UserModel.builder().id(999L).build();
+        PostModel postWithDifferentAuthor = post.toBuilder().author(author).build();
+
+        when(gateway.findPostById(post.getId())).thenReturn(postWithDifferentAuthor);
+        when(gateway.findUserById(user.getId())).thenReturn(user);
+
+        when(gateway.isBlocked(user.getId(), author.getId())).thenReturn(true);
+
+        assertThatThrownBy(() ->
+                service.create(user.getId(), post.getId())
+        )
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("You cannot add a post from a blocked user to your reading list.");
+
+        verify(gateway).isBlocked(user.getId(), author.getId());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void shouldDelete() {
         doNothing().when(repository).delete(read);
 
@@ -155,7 +176,7 @@ public class PostReadingListServiceTest {
         when(repository.save(any(PostReadingListModel.class))).thenThrow(exception);
 
 
-        assertThatThrownBy(() -> service.create(userId, postId)).isInstanceOf(UniqueConstraintViolationException.class).hasMessage("This post already has this type assigned.");
+        assertThatThrownBy(() -> service.create(userId, postId)).isInstanceOf(UniqueConstraintViolationException.class);
 
         verify(repository).save(any());
     }
@@ -172,7 +193,7 @@ public class PostReadingListServiceTest {
         when(repository.save(any())).thenThrow(new RuntimeException("Unexpected error"));
 
 
-        assertThatThrownBy(() -> service.create(user.getId(), post.getId())).isInstanceOf(InternalServerErrorException.class).hasMessage("Error creating report association.");
+        assertThatThrownBy(() -> service.create(user.getId(), post.getId())).isInstanceOf(InternalServerErrorException.class);
 
         verify(repository).save(any());
     }

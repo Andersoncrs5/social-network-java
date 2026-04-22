@@ -5,17 +5,22 @@ import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.followers.repository.FollowersRepository;
 import com.blog.writeapi.modules.followers.service.providers.FollowersService;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +64,34 @@ public class FollowersServiceTest {
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
             .build();
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when already following")
+    void shouldThrowUniqueConstraintViolationException_WhenFollowAlreadyExists() {
+        when(generator.nextId()).thenReturn(model.getId());
+
+        var exception = new DataIntegrityViolationException("Conflict", new RuntimeException("uk_followers"));
+        when(repository.save(any(FollowersModel.class))).thenThrow(exception);
+
+        assertThatThrownBy(() -> service.create(follower, following))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessage("You are already following this user.");
+
+        verify(repository).save(any(FollowersModel.class));
+    }
+
+    @Test
+    @DisplayName("Should throw InternalServerErrorException on generic database error")
+    void shouldThrowInternalServerErrorException_WhenGenericErrorOccurs() {
+        when(generator.nextId()).thenReturn(model.getId());
+        when(repository.save(any(FollowersModel.class))).thenThrow(new RuntimeException("Unexpected DB error"));
+
+        assertThatThrownBy(() -> service.create(follower, following))
+                .isInstanceOf(InternalServerErrorException.class)
+                .hasMessage("Error processing follow request.");
+
+        verify(repository).save(any(FollowersModel.class));
+    }
 
     @Test
     void shouldDeleteUFollowBecauseFollowExists() {

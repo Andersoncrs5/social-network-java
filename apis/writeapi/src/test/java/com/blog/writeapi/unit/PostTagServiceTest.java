@@ -9,17 +9,23 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.postTag.repository.PostTagRepository;
 import com.blog.writeapi.modules.postTag.service.providers.PostTagService;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PostTagMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -163,6 +169,66 @@ public class PostTagServiceTest {
 
         verify(generator, times(1)).nextId();
         verify(repository, times(1)).save(any(PostTagModel.class));
+    }
+
+    @Test
+    void shouldThrowBusinessRuleExceptionWhenTagIsInactive() {
+        CreatePostTagDTO dto = new CreatePostTagDTO(post.getId(), tag.getId(), true, true);
+        TagModel inactiveTag = tag.toBuilder().isActive(false).build();
+
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () ->
+                service.create(dto, post, inactiveTag, user.getId())
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("Tag is inactive");
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+
+        verifyNoInteractions(repository, generator, mapper);
+    }
+
+    @Test
+    void shouldThrowBusinessRuleExceptionWhenUserIsNotAuthor() {
+        CreatePostTagDTO dto = new CreatePostTagDTO(post.getId(), tag.getId(), true, true);
+        Long otherUserId = 9999L;
+
+        BusinessRuleException exception = assertThrows(BusinessRuleException.class, () ->
+                service.create(dto, post, tag, otherUserId)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("You are not the author of this post");
+        assertThat(exception.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
+
+        verifyNoInteractions(repository, generator, mapper);
+    }
+
+    @Test
+    void shouldThrowUniqueConstraintViolationWhenPostTagAlreadyExists() {
+        CreatePostTagDTO dto = new CreatePostTagDTO(post.getId(), tag.getId(), true, true);
+        when(mapper.toModel(dto)).thenReturn(new PostTagModel());
+        when(generator.nextId()).thenReturn(postTag.getId());
+
+        var rootCause = new RuntimeException("uk_post_tag");
+        when(repository.save(any(PostTagModel.class)))
+                .thenThrow(new DataIntegrityViolationException("Conflict", rootCause));
+
+        assertThrows(UniqueConstraintViolationException.class, () ->
+                service.create(dto, post, tag, user.getId())
+        );
+
+        verify(repository, times(1)).save(any(PostTagModel.class));
+    }
+
+    @Test
+    void shouldThrowInternalServerErrorWhenGenericErrorOccurs() {
+        CreatePostTagDTO dto = new CreatePostTagDTO(post.getId(), tag.getId(), true, true);
+        when(mapper.toModel(dto)).thenReturn(new PostTagModel());
+        when(generator.nextId()).thenReturn(postTag.getId());
+        when(repository.save(any(PostTagModel.class)))
+                .thenThrow(new RuntimeException("Unexpected DB error"));
+
+        assertThrows(InternalServerErrorException.class, () ->
+                service.create(dto, post, tag, user.getId())
+        );
     }
 
 }

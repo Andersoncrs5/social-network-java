@@ -47,6 +47,12 @@ public class StoryReactionService implements IStoryReactionService {
         StoryModel story = this.gateway.findStoryById(storyId);
         UserModel user = this.gateway.findUserById(userId);
 
+        if (!story.getUser().getId().equals(userId)) {
+            if (this.gateway.isBlocked(userId, story.getUser().getId())) {
+                throw new BusinessRuleException("You cannot react to a story from a blocked user.");
+            }
+        }
+
         StoryReactionModel model = new StoryReactionModel().toBuilder()
                 .id(snowflake.nextId())
                 .story(story)

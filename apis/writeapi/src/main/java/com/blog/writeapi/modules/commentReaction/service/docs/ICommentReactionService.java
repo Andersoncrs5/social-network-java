@@ -5,6 +5,7 @@ import com.blog.writeapi.modules.commentReaction.models.CommentReactionModel;
 import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.classes.ResultToggle;
 
 import java.util.Optional;
 
@@ -20,4 +21,9 @@ public interface ICommentReactionService {
     );
     void delete(@IsModelInitialized CommentReactionModel model);
     CommentReactionModel updateSimple(@IsModelInitialized CommentReactionModel model);
+    ResultToggle<CommentReactionModel> toggle(
+            @IsModelInitialized CommentModel comment,
+            @IsModelInitialized ReactionModel reaction,
+            @IsModelInitialized UserModel user
+    );
 }

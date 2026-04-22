@@ -32,14 +32,6 @@ public class StoryHighlightItemService implements IStoryHighlightItemService {
     private final StoryHighlightItemRepository repository;
     private final StoryHighlightItemModuleGateway gateway;
 
-    public Optional<StoryHighlightItemModel> findByStoryIdAndHighlightIdAndUserId(
-            @IsId Long storyId,
-            @IsId Long highlightId,
-            @IsId Long userId
-    ) {
-        return repository.findByStoryIdAndHighlightIdAndUserId(storyId, highlightId, userId);
-    }
-
     public Result<StoryHighlightItemModel> create(
             @IsId Long userId,
             CreateStoryHighlightItemDTO dto
@@ -49,8 +41,12 @@ public class StoryHighlightItemService implements IStoryHighlightItemService {
         if (!Objects.equals(highlight.getUser().getId(), userId))
             return Result.conflict("This highlight is not your.");
 
-        var user = gateway.findUserById(userId);
         var story = gateway.findStoryById(dto.storyId());
+
+        if (!Objects.equals(story.getUser().getId(), userId))
+            return Result.forb("This story is not your!");
+
+        var user = gateway.findUserById(userId);
 
         if (repository.existsByStoryIdAndHighlightIdAndUserId(dto.storyId(), dto.highlightId(), userId)) {
             return Result.conflict("This item has already been added to this highlight.");

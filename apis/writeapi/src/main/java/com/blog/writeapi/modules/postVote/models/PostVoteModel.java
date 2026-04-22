@@ -19,7 +19,6 @@ import lombok.experimental.SuperBuilder;
         }, indexes = {
                 @Index(name = "idx_post_vote_user_id", columnList = "user_id"),
                 @Index(name = "idx_post_vote_post_id", columnList = "post_id"),
-
         }
 )
 @Setter
@@ -29,11 +28,11 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class PostVoteModel extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private PostModel post;
 

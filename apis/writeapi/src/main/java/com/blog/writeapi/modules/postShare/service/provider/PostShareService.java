@@ -65,6 +65,12 @@ public class PostShareService implements IPostShareService {
         UserModel user = this.gateway.findUserById(userId);
         PostModel post = this.gateway.findPostById(postId);
 
+        if (!user.getId().equals(post.getAuthor().getId())) {
+            if (this.gateway.isBlocked(user.getId(), post.getAuthor().getId())) {
+                throw new BusinessRuleException("You cannot share a post from a blocked user.");
+            }
+        }
+
         PostShareModel model = new PostShareModel().toBuilder()
                 .id(generator.nextId())
                 .user(user)

@@ -38,7 +38,7 @@ public class UserReportModel extends ReportBase {
             nullable = false,
             columnDefinition = "BIGINT UNSIGNED"
     )
-    private UserModel reportedUser; // O alvo da denúncia
+    private UserModel reportedUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

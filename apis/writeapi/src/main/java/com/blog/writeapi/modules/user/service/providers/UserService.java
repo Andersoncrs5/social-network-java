@@ -9,10 +9,14 @@ import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +84,25 @@ public class UserService implements IUserService {
 
         UserModel userSaved = repository.save(user);
         this.gateway.createUserSettings(userSaved.getId());
-        return userSaved;
+        try {
+            return userSaved;
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.ofNullable(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("").toLowerCase();
+
+            if (message.contains("idx_username")) {
+                throw new UniqueConstraintViolationException("The username is already in use.");
+            }
+
+            if (message.contains("idx_email")) {
+                throw new UniqueConstraintViolationException("The email address is already registered.");
+            }
+
+            throw new BusinessRuleException("Error of integration in db: " + e.getMostSpecificCause().getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Erro ao processar criação de usuário.");
+        }
     }
 
     @Override

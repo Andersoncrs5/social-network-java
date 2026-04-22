@@ -6,16 +6,15 @@ import com.blog.writeapi.modules.comment.dtos.CommentDTO;
 import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
 import com.blog.writeapi.modules.comment.dtos.UpdateCommentDTO;
 import com.blog.writeapi.modules.comment.models.CommentModel;
-import com.blog.writeapi.modules.post.models.PostModel;
-import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.comment.service.docs.ICommentService;
+import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.comment.isAuthorComment.IsAuthorComment;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
+import com.blog.writeapi.utils.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -47,20 +45,15 @@ public class CommentController implements CommentControllerDocs {
             HttpServletRequest request,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        CommentModel comment = this.service.getByIdSimple(id);
+        Result<Void> result = this.service.deleteByID(id);
 
-        this.service.delete(comment);
+        if (result.isFailure())
+            return ResponseEntity.status(result.getStatus())
+                    .body(ResponseHttp.error(result.getError().message(), idempotencyKey));
 
-        ResponseHttp<Object> res = new ResponseHttp<>(
-            null,
-                "Comment deleted with successfully",
-                idempotencyKey,
-                1,
-                true,
-                OffsetDateTime.now()
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ResponseHttp.success("Comment deleted with successfully", idempotencyKey));
     }
 
     @Override

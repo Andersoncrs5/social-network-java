@@ -40,29 +40,26 @@ import java.util.List;
 
 @Entity
 @Table(name = "users", indexes = {
-        @Index(name = "idx_username", columnList = "username"),
-        @Index(name = "idx_email", columnList = "email")
+        @Index(name = "idx_username", columnList = "username", unique = true),
+        @Index(name = "idx_email", columnList = "email", unique = true),
 })
 @EntityListeners(AuditingEntityListener.class)
-@Setter
-@Getter
-@ToString
+@Setter @Getter @ToString(callSuper = true)
 @SuperBuilder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserModel extends BaseEntity {
 
     @Column(length = 100, nullable = false)
     protected String name;
 
-    @Column(length = 100, unique = true, nullable = false)
+    @Column(length = 100, nullable = false)
     private String username;
 
     @Column(length = 600)
     private String bannerUrl;
 
-    @Column(length = 150, unique = true, nullable = false)
+    @Column(length = 150, nullable = false)
     private String email;
 
     @Column(length = 300, nullable = false)

@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postCategory.controller.providers;
 
 import com.blog.writeapi.configs.api.idempotent.Idempotent;
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.postCategory.controller.docs.PostCategoriesControllerDocs;
 import com.blog.writeapi.modules.postCategory.dtos.CreatePostCategoriesDTO;
 import com.blog.writeapi.modules.postCategory.dtos.PostCategoriesDTO;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,12 +46,10 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     public ResponseEntity<?> create(
             @Valid @RequestBody CreatePostCategoriesDTO dto,
             HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        PostModel post = this.postService.getByIdSimple(dto.postId());
-        CategoryModel category = this.categoryService.getByIdSimple(dto.categoryId());
-
-        Boolean exists = this.service.existsByPostAndCategory(post, category);
+        Boolean exists = this.service.existsByPostIdAndCategoryId(dto.postId(), dto.categoryId());
         if (exists) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                 new ResponseHttp<>(
@@ -62,6 +62,9 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
                 )
             );
         }
+
+        PostModel post = this.postService.getByIdSimple(dto.postId());
+        CategoryModel category = this.categoryService.getByIdSimple(dto.categoryId());
 
         PostCategoriesModel categoriesModel = this.service.create(dto, post, category);
 
@@ -83,6 +86,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     @IsPostCategoryAuthor
     public ResponseEntity<?> del(
             @PathVariable @IsId Long id, HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
@@ -104,6 +108,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     @Override
     public ResponseEntity<?> get(
             @PathVariable @IsId Long id, HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         PostCategoriesModel postCategoriesModel = this.service.getByIdSimple(id);
@@ -127,6 +132,7 @@ public class PostCategoriesController implements PostCategoriesControllerDocs {
     public ResponseEntity<?> update(
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostCategoriesDTO dto,
+            @AuthenticationPrincipal UserPrincipal principal,
             HttpServletRequest request,
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {

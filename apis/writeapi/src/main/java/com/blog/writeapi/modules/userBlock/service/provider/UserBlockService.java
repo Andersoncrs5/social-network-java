@@ -39,10 +39,21 @@ public class UserBlockService implements IUserBlockService {
         return this.repository.findByBlockerIdAndBlockedId(blockerId, blockedId);
     }
 
+    public boolean isBlocked(
+            @IsId Long blockerId,
+            @IsId Long blockedId
+    ) {
+        return repository.existsByBlockerIdAndBlockedId(blockerId, blockedId);
+    }
+
     public UserBlockModel create(
             @IsId Long blockerId,
             @IsId Long blockedId
     ) {
+        if (Objects.equals(blockedId, blockerId)) {
+            throw new BusinessRuleException("You cannot to block yourself", HttpStatus.FORBIDDEN);
+        }
+
         UserModel blocked = this.gateway.findByUserId(blockedId);
         UserModel blocker = this.gateway.findByUserId(blockerId);
 
@@ -87,6 +98,10 @@ public class UserBlockService implements IUserBlockService {
             @IsId Long blockerId,
             @IsId Long blockedId
     ) {
+        if (Objects.equals(blockedId, blockerId)) {
+            throw new BusinessRuleException("You cannot to block yourself", HttpStatus.FORBIDDEN);
+        }
+
         UserModel blocked = this.gateway.findByUserId(blockedId);
         UserModel blocker = this.gateway.findByUserId(blockerId);
 

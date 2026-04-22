@@ -13,4 +13,8 @@ public interface IUserBlockService {
             @IsId Long blockerId,
             @IsId Long blockedId
     );
+    boolean isBlocked(
+            @IsId Long blockerId,
+            @IsId Long blockedId
+    );
 }

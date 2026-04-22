@@ -13,6 +13,8 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.reaction.service.docs.IReactionService;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.PostReactionMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.services.interfaces.ITokenService;
@@ -58,32 +60,20 @@ public class PostReactionController implements PostReactionControllerDocs {
         PostModel post = this.postService.getByIdSimple(dto.postId());
         ReactionModel reaction = this.reactionService.getByIdSimple(dto.reactionId());
 
-        Optional<PostReactionModel> optional = this.service.findByPostAndUser(post, user);
+        ResultToggle<PostReactionModel> toggle = this.service.toggle(post, reaction, user);
 
-        if (optional.isPresent() && Objects.equals(optional.get().getReaction().getId(), reaction.getId())) {
-            this.service.delete(optional.get());
-            return ResponseEntity.ok(createResponse(null, "Reaction removed successfully", idempotencyKey));
-        }
+        String message = switch (toggle.result()) {
+            case REMOVED -> "Reaction removed successfully";
+            case UPDATED -> "Reaction changed successfully";
+            case ADDED -> "Reaction applied successfully";
+        };
 
-        if (optional.isPresent()) {
-            optional.get().setReaction(reaction);
-            PostReactionModel updated = this.service.updateSimple(optional.get());
-            return ResponseEntity.ok(createResponse(this.mapper.toDTO(updated), "Reaction changed successfully", idempotencyKey));
-        }
+        HttpStatus status = (toggle.result() == ToggleEnum.ADDED) ? HttpStatus.CREATED : HttpStatus.OK;
+        var responseDto = toggle.body().map(this.mapper::toDTO).orElse(null);
 
-        PostReactionModel model = this.service.create(post, reaction, user);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(createResponse(this.mapper.toDTO(model), "Reaction applied successfully", idempotencyKey));
-    }
-    private <T> ResponseHttp<T> createResponse(T data, String message, String idempotencyKey) {
-        return new ResponseHttp<>(
-                data,
-                message,
-                idempotencyKey,
-                1,
-                true,
-                OffsetDateTime.now()
-        );
+        return ResponseEntity
+                .status(status)
+                .body(ResponseHttp.success(responseDto, message, idempotencyKey));
     }
 
 }

@@ -1,7 +1,9 @@
 # Simple Social Media — CQRS Distributed Architecture
 
-    A high-performance social media backend designed with a focus on scalability, fault tolerance, and modern distributed     system patterns. This project demonstrates the implementation of CQRS (Command Query Responsibility Segregation) to     handle heavy write loads and high-speed read requirements independently.
+![Architecture](docs/diagram.png)
 
+    A high-performance social media backend designed with a focus on scalability, fault tolerance, and modern distributed     system patterns. This project demonstrates the implementation of CQRS (Command Query Responsibility Segregation) to     handle heavy write loads and high-speed read requirements independently.
+    
 ## Project Status
 
 Ongoing Development

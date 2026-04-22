@@ -8,12 +8,10 @@ import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.followers.service.interfaces.IFollowersService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.user.service.docs.IUserService;
-import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.ResourceOwnerMismatchException;
 import com.blog.writeapi.utils.mappers.FollowersMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -93,11 +90,12 @@ public class FollowersController implements FollowersControllerDocs {
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
         Long userID = principal.getId();
-        FollowersModel follow = this.service.getByIdSimple(id);
 
-        if (!Objects.equals(follow.getFollower().getId(), userID)) {
+        if (!Objects.equals(id, userID)) {
             throw new ResourceOwnerMismatchException("You cannot to do this action");
         }
+
+        FollowersModel follow = this.service.getByIdSimple(id);
 
         FollowersModel updated = this.service.update(follow, dto);
 

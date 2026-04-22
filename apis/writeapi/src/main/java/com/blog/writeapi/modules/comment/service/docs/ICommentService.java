@@ -7,10 +7,12 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.result.Result;
 
 import java.util.Optional;
 
 public interface ICommentService {
+    Result<Void> deleteByID(@IsId Long id);
     Optional<CommentModel> getById(@IsId Long id);
     void delete(@IsModelInitialized CommentModel comment);
     CommentModel getByIdSimple(@IsId Long id);

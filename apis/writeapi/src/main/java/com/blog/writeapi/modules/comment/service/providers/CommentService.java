@@ -13,6 +13,7 @@ import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
+import com.blog.writeapi.utils.result.Result;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,18 @@ public class CommentService implements ICommentService {
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized CommentModel comment) {
         this.repository.delete(comment);
+    }
+
+    @Override
+    @Retry(name = "delete-retry")
+    @Transactional
+    public Result<Void> deleteByID(@IsId Long id) {
+        int result = this.repository.deleteByID(id);
+
+        if (result == 0)
+            return Result.notFound("Comment not found");
+
+        return Result.success(null);
     }
 
     @Override

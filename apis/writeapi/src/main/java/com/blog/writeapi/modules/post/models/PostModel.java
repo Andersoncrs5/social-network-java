@@ -26,7 +26,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "posts", indexes = {
-        @Index(name = "idx_post_slug", columnList = "slug"),
+        @Index(name = "idx_post_slug", columnList = "slug", unique = true),
         @Index(name = "idx_post_status", columnList = "status"),
         @Index(name = "idx_post_author", columnList = "author_id"),
         @Index(name = "idx_post_parent", columnList = "parent_id"),
@@ -44,7 +44,7 @@ public class PostModel extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false, unique = true, length = 500)
+    @Column(nullable = false, length = 500)
     private String slug;
 
     @Column(columnDefinition = "TEXT")

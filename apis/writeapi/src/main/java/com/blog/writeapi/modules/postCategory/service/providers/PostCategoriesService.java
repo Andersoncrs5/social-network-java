@@ -41,6 +41,15 @@ public class PostCategoriesService implements IPostCategoriesService {
 
     @Override
     @Transactional(readOnly = true)
+    public Boolean existsByPostIdAndCategoryId(
+            @IsId Long postId,
+            @IsId Long categoryId
+    ){
+        return this.repository.existsByPostIdAndCategoryId(postId, categoryId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean existsByPostIdAndPrimaryTrue(@IsId Long postId) {
         return this.repository.existsByPostIdAndPrimaryTrue(postId);
     }

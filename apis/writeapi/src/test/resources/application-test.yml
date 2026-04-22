@@ -1,11 +1,14 @@
 server:
-  port: 8889 # Porta diferente para evitar conflitos se o app principal estiver rodando
+  port: 8889
+
+rate-limit:
+  enabled: false
 
 resilience4j:
   circuitbreaker:
-    enabled: false # Desativa todos os Circuit Breakers por padrão nos testes
+    enabled: false
   retry:
-    enabled: false # Desativa os Retries para os testes serem determinísticos
+    enabled: false
 
 spring:
   sql:
@@ -18,7 +21,7 @@ spring:
   jpa:
     defer-datasource-initialization: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:

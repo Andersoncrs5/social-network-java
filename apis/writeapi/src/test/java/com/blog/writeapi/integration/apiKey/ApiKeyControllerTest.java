@@ -34,7 +34,6 @@ public class ApiKeyControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private ApiKeyRepository repository;
 
     @Autowired
     private HelperTest helper;

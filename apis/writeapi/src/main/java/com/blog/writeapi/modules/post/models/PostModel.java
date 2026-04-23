@@ -63,7 +63,7 @@ public class PostModel extends BaseEntity {
     @Column(name = "is_featured")
     private Boolean isFeatured = false;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
 

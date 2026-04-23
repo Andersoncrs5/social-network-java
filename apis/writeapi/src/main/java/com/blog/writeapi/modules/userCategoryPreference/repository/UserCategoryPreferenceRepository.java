@@ -9,12 +9,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface UserCategoryPreferenceRepository extends JpaRepository<UserCategoryPreferenceModel, Long> {
-    Boolean existsByUserAndCategory(
-            @IsModelInitialized UserModel user,
-            @IsModelInitialized CategoryModel category
-    );
     Optional<UserCategoryPreferenceModel> findByUserAndCategory(
             @IsModelInitialized UserModel user,
             @IsModelInitialized CategoryModel category
     );
+
+    Optional<UserCategoryPreferenceModel> findByUserIdAndCategoryId(Long userId, Long categoryId);
 }

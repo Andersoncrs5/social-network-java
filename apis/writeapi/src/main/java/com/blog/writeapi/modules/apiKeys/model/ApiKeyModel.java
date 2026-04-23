@@ -18,18 +18,15 @@ import java.time.OffsetDateTime;
 @Table(
         name = "api_keys",
         indexes = {
-            @Index(name = "idx_api_key_hash", columnList = "key_hash")
+            @Index(name = "idx_api_key_hash", columnList = "key_hash", unique = true)
         }
 )
-@Setter
-@Getter
-@SuperBuilder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter @Getter @SuperBuilder(toBuilder = true)
+@NoArgsConstructor @AllArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ApiKeyModel extends BaseEntity {
 
-    @Column(nullable = false, unique = true, name = "key_hash")
+    @Column(nullable = false, name = "key_hash")
     private String keyHash;
 
     @Column(nullable = false, name = "service_name")

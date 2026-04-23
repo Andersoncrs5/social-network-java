@@ -3,16 +3,20 @@ package com.blog.writeapi.modules.userTagPreference.service.providers;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.modules.userTagPreference.gateway.UserTagPreferenceModuleGateway;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
 import com.blog.writeapi.modules.userTagPreference.repository.UserTagPreferenceRepository;
 import com.blog.writeapi.modules.userTagPreference.service.docs.IUserTagPreferenceService;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -21,6 +25,7 @@ import java.util.Optional;
 public class UserTagPreferenceService implements IUserTagPreferenceService {
 
     private final UserTagPreferenceRepository repository;
+    private final UserTagPreferenceModuleGateway gateway;
     private final Snowflake snowflake;
 
     @Override
@@ -66,6 +71,25 @@ public class UserTagPreferenceService implements IUserTagPreferenceService {
         }
     }
 
+    @Override
+    @Transactional
+    public ResultToggle<UserTagPreferenceModel> toggle(
+            @IsId Long userId,
+            @IsId Long tagId
+    ) {
+        Optional<UserTagPreferenceModel> optional = repository.findByUserIdAndTagId(userId, tagId);
 
+        if (optional.isPresent()) {
+            this.delete(optional.get());
+            return ResultToggle.removed();
+        }
+
+        UserModel user = this.gateway.findUserById(userId);
+        TagModel tag = this.gateway.findTagById(tagId);
+
+        UserTagPreferenceModel model = this.create(user, tag);
+
+        return ResultToggle.added(model);
+    }
 
 }

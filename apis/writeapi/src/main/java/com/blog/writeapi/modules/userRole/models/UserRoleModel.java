@@ -2,12 +2,11 @@ package com.blog.writeapi.modules.userRole.models;
 
 import com.blog.writeapi.modules.role.models.RoleModel;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.bases.models.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "user_roles", indexes = {
@@ -16,16 +15,12 @@ import java.time.OffsetDateTime;
         @Index(name = "uk_user_role", columnList = "user_id, role_id", unique = true)
 })
 @EntityListeners(AuditingEntityListener.class)
-@Setter
-@Getter
-@Builder(toBuilder = true)
+@Setter @Getter
+@SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRoleModel {
-
-    @Id
-    @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
-    private Long id;
+@EqualsAndHashCode(callSuper = false)
+public class UserRoleModel extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
@@ -34,8 +29,5 @@ public class UserRoleModel {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false, updatable = false)
     private RoleModel role;
-
-    @CreatedDate
-    private OffsetDateTime createdAt;
 
 }

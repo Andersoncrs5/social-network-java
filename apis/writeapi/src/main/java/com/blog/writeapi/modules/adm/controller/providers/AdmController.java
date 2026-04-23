@@ -1,32 +1,30 @@
 package com.blog.writeapi.modules.adm.controller.providers;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.adm.controller.docs.AdmControllerDocs;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
-import com.blog.writeapi.modules.role.models.RoleModel;
-import com.blog.writeapi.modules.role.service.docs.IRoleService;
-import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
+import com.blog.writeapi.modules.adm.service.docs.IAdmService;
 import com.blog.writeapi.modules.userRole.models.UserRoleModel;
-import com.blog.writeapi.modules.userRole.service.docs.IUserRoleService;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.res.ResponseHttp;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
+import com.blog.writeapi.utils.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Validated
@@ -35,151 +33,133 @@ import java.util.UUID;
 @RequestMapping("/v1/adm")
 public class AdmController implements AdmControllerDocs {
 
-    private final IUserRoleService userRoleService;
-    private final IUserService userService;
-    private final IRoleService roleService;
-    private final ITokenService tokenService;
+    private final IAdmService service;
 
     @Override
     public ResponseEntity<?> addRoleToUser(
             @RequestBody @Valid ToggleRoleDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        RoleModel role = roleService.findByNameSimple(dto.roleName());
-        UserModel user = this.userService.GetByIdSimple(dto.userId());
-
-        if (
-                role.getName().equals("SUPER_ADM_ROLE") ||
-                role.getName().equals("ADM_ROLE")
-        ) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
-                    null,
-                    "You have not permission to add role " + role.getName(),
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
+        if (Objects.equals(dto.userId(), principal.getId())) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseHttp.error(
+                        "You cannot toggle your own administrative role." , idempotencyKey)
+                    );
         }
 
-        if (this.userRoleService.existsByUserAndRole(user, role))
+        Result<UserRoleModel> result = this.service.addRoleToUser(dto);
+
+        if (result.isFailure())
         {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseHttp<>(
-                    null,
-                    "Role: "  + role.getName() + " already added to user: " + user.getName() ,
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
+            return ResponseEntity
+                .status(result.getStatus())
+                .body(
+                    ResponseHttp
+                        .error(
+                            result.getError().message(), idempotencyKey
+                        )
+                );
         }
 
-        this.userRoleService.create(user, role);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
-                null,
-                "Role: " + role.getName() + " added to user " + user.getName(),
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
-        ));
+        return ResponseEntity
+            .status(result.getStatus())
+            .body(
+                ResponseHttp
+                    .success(
+                        "Role added with successfully", idempotencyKey
+                    )
+            );
     }
 
     @Override
-    public ResponseEntity<?> removeRoleToUser(
+    public ResponseEntity<ResponseHttp<?>> removeRoleToUser(
             @RequestBody @Valid ToggleRoleDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        RoleModel role = roleService.findByNameSimple(dto.roleName());
-        UserModel user = this.userService.GetByIdSimple(dto.userId());
-
-        if (
-                role.getName().equals("SUPER_ADM_ROLE") ||
-                        role.getName().equals("ADM_ROLE")
-        ) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseHttp<>(
-                    null,
-                    "You have not permission to add role " + role.getName(),
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
+        if (Objects.equals(dto.userId(), principal.getId())) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ResponseHttp.error(
+                            "You cannot toggle your own administrative role." , idempotencyKey)
+                    );
         }
 
-        Optional<UserRoleModel> modelOptional = this.userRoleService.getByUserAndRole(user, role);
+        Result<Void> result = this.service.removeRoleToUser(dto);
 
-        if (modelOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseHttp<>(
-                    null,
-                    "User: "  + user.getUsername() + " have not role: " + role.getName(),
-                    UUID.randomUUID().toString(),
-                    1,
-                    false,
-                    OffsetDateTime.now()
-            ));
+        if (result.isFailure())
+        {
+            return ResponseEntity
+                .status(result.getStatus())
+                .body(
+                    ResponseHttp
+                        .error(
+                            result.getError().message(), idempotencyKey
+                        )
+                );
         }
 
-        this.userRoleService.delete(modelOptional.get());
-
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
-                null,
-                "Role: "  + role.getName() + " removed of user: " + user.getName() ,
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
-        ));
+        return ResponseEntity
+            .status(result.getStatus())
+            .body(
+                ResponseHttp
+                    .success(
+                            "Role added with successfully", idempotencyKey
+                    )
+            );
     }
 
     @Override
-    @Transactional
-    public ResponseEntity<?> toggleRoleAdmInUser(
+    public ResponseEntity<ResponseHttp<Object>> toggleRoleAdmInUser(
             @RequestBody @Valid ToggleRoleAdmDTO dto,
-            HttpServletRequest request
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        Long userId = this.tokenService.extractUserIdFromRequest(request);
 
-        RoleModel role = this.roleService.findByNameSimple("ADM_ROLE");
-        UserModel user = this.userService.GetByIdSimple(dto.userId());
-
-        if (Objects.equals(userId, user.getId())) {
+        if (Objects.equals(principal.getId(), dto.userId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseHttp<>(
                     null,
                     "You cannot toggle your own administrative role." ,
-                    UUID.randomUUID().toString(),
+                    idempotencyKey,
                     1,
                     false,
                     OffsetDateTime.now()
             ));
         }
 
-        Optional<UserRoleModel> optional = this.userRoleService.getByUserAndRole(user, role);
+        ResultToggle<UserRoleModel> result = this.service.toggleRoleAdmInUser(
+                new ToggleRoleDTO(
+                        "ADM_ROLE",
+                        dto.userId()
+                ),
+                principal.getId()
+        );
 
-        if (optional.isPresent()) {
-            this.userRoleService.delete(optional.get());
-
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
-                    null,
-                    "Role: "  + role.getName() + " removed to user: " + user.getName() ,
-                    UUID.randomUUID().toString(),
-                    1,
-                    true,
-                    OffsetDateTime.now()
-            ));
+        if (result.result().equals(ToggleEnum.REMOVED))
+        {
+            return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                    ResponseHttp
+                        .success(
+                            null,"Role 'ADM_ROLE' was removed", idempotencyKey
+                        )
+                );
         }
 
-        this.userRoleService.create(user, role);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
-                null,
-                "Role: "  + role.getName() + " added to user: " + user.getName() ,
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
-        ));
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(
+                ResponseHttp
+                    .success(
+                            null, "Role 'ADM_ROLE' was added", idempotencyKey
+                    )
+            );
     }
+
 
 }

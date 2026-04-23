@@ -1,5 +1,6 @@
 package com.blog.writeapi.integration;
 
+import cn.hutool.core.lang.UUID;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.tag.dtos.TagDTO;
@@ -45,6 +46,7 @@ public class UserTagPreferenceControllerTest {
 
     @Test
     void shouldCreatePreferenceIntoUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         ResponseUserTest master = helper.loginSuperAdm();
@@ -52,8 +54,9 @@ public class UserTagPreferenceControllerTest {
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + tag.id() + "/toggle")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + userData.tokens().token()
-                )).andExpect(status().isCreated()).andReturn();
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<UserTagPreferenceDTO>> typeRef = new TypeReference<>() {};
@@ -61,6 +64,7 @@ public class UserTagPreferenceControllerTest {
         ResponseHttp<UserTagPreferenceDTO> response =
                 objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data().id()).isNotZero().isPositive().isNotNull();
@@ -70,6 +74,7 @@ public class UserTagPreferenceControllerTest {
 
     @Test
     void shouldRemovePreferenceIntoUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         ResponseUserTest master = helper.loginSuperAdm();
@@ -78,8 +83,9 @@ public class UserTagPreferenceControllerTest {
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + tag.id() + "/toggle")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + userData.tokens().token()
-                )).andExpect(status().isOk()).andReturn();
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
@@ -88,12 +94,14 @@ public class UserTagPreferenceControllerTest {
                 objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data()).isNull();
     }
 
     @Test
     void shouldReturnNotFoundWhenCreatePreferenceIntoUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
 
         ResponseUserTest master = helper.loginSuperAdm();
@@ -101,8 +109,9 @@ public class UserTagPreferenceControllerTest {
 
         MvcResult result = this.mockMvc.perform(post(this.URL + "/" + (tag.id() + 1) + "/toggle")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + userData.tokens().token()
-                )).andExpect(status().isNotFound()).andReturn();
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isNotFound()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
@@ -110,6 +119,7 @@ public class UserTagPreferenceControllerTest {
         ResponseHttp<Object> response =
                 objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank();
         assertThat(response.message()).isNotBlank();
         assertThat(response.traceId()).isNotBlank();
         assertThat(response.status()).isEqualTo(false);

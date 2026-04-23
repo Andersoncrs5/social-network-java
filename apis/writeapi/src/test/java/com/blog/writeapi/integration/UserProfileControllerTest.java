@@ -5,13 +5,11 @@ import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.userProfile.dtos.UpdateUserProfileDTO;
 import com.blog.writeapi.modules.userProfile.dtos.UserProfileDTO;
 import com.blog.writeapi.utils.enums.profile.ProfileVisibilityEnum;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,15 +42,7 @@ public class UserProfileControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private HelperTest helper;
-
-    @BeforeEach
-    void setup() {
-        this.userRepository.deleteAll();
-    }
 
     @Test
     void shouldUpdateAllFieldsOfProfile() throws Exception {

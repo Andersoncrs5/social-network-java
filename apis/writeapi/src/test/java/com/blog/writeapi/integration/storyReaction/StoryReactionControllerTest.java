@@ -6,7 +6,6 @@ import com.blog.writeapi.modules.reaction.dtos.ReactionDTO;
 import com.blog.writeapi.modules.stories.dto.StoryDTO;
 import com.blog.writeapi.modules.storyReaction.dto.StoryReactionDTO;
 import com.blog.writeapi.modules.storyReaction.dto.ToggleStoryReactionDTO;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -39,8 +38,6 @@ public class StoryReactionControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired private UserRepository userRepository;
 
     @Autowired
     private HelperTest helper;

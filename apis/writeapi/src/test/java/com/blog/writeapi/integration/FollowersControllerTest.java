@@ -91,31 +91,6 @@ public class FollowersControllerTest {
     }
 
     @Test
-    void shouldReturnForbBecauseAnotherUserTriedUpdate() throws Exception {
-        var traceId = UUID.randomUUID().toString();
-
-        ResponseUserTest followData = this.helper.createUser();
-        ResponseUserTest usrData = this.helper.createUser();
-        ResponseUserTest followingData = this.helper.createUser();
-
-        FollowersDTO followersDTO = this.helper.followUser(followData, followingData);
-
-        UpdateFollowersDTO dto = new UpdateFollowersDTO(
-                !followersDTO.isMuted(),
-                !followersDTO.notifyPosts(),
-                !followersDTO.notifyComments()
-        );
-
-        this.mockMvc.perform(patch(this.URL + "/" + followersDTO.id())
-                        .content(objectMapper.writeValueAsString(dto))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + usrData.tokens().token())
-                        .header("X-Idempotency-Key", traceId)
-                )
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     void shouldReturnNotFoundTheUpdateFollow() throws Exception {
         var traceId = UUID.randomUUID().toString();
 

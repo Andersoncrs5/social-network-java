@@ -249,9 +249,7 @@ public class PostControllerTest {
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + userData.tokens().token())
                         .header("X-Idempotency-Key", traceId)
-                )
-                .andExpect(status().isOk())
-                .andReturn();
+                ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<PostDTO>> typeRef = new TypeReference<>() {};

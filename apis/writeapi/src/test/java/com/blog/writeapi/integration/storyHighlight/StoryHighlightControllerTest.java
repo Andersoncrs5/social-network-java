@@ -2,10 +2,8 @@ package com.blog.writeapi.integration.storyHighlight;
 
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
-import com.blog.writeapi.modules.stories.repository.StoryRepository;
 import com.blog.writeapi.modules.storyHighlight.dto.StoryHighlightDTO;
 import com.blog.writeapi.modules.storyHighlight.repository.StoryHighlightRepository;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,7 +22,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -38,15 +37,12 @@ public class StoryHighlightControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @Autowired private StoryHighlightRepository repository;
-    @Autowired private StoryRepository storyRepository;
-    @Autowired private UserRepository userRepository;
 
     @Autowired private HelperTest helper;
 
     @BeforeEach
     void setup () {
         this.repository.deleteAll();
-        this.userRepository.deleteAll();
     }
 
     @Test

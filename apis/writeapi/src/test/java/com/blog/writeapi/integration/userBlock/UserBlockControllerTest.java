@@ -2,12 +2,10 @@ package com.blog.writeapi.integration.userBlock;
 
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,15 +28,9 @@ public class UserBlockControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private UserRepository repository;
 
     @Autowired
     private HelperTest helper;
-
-    @BeforeEach
-    void setup () {
-        this.repository.deleteAll();
-    }
 
     @Test
     void shouldAddUserWithBlocked() throws Exception {

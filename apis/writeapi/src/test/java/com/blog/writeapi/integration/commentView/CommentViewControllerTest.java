@@ -3,15 +3,11 @@ package com.blog.writeapi.integration.commentView;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.comment.dtos.CommentDTO;
-import com.blog.writeapi.modules.comment.repository.CommentRepository;
-import com.blog.writeapi.modules.commentView.repository.CommentViewRepository;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
-import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,19 +32,9 @@ public class CommentViewControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private PostRepository postRepository;
-    @Autowired private CommentRepository commentRepository;
-    @Autowired private CommentViewRepository repository;
 
     @Autowired
     private HelperTest helper;
-
-    @BeforeEach
-    void setup () {
-        this.repository.deleteAll();
-        this.commentRepository.deleteAll();
-        this.postRepository.deleteAll();
-    }
 
     @Test
     void shouldCreatePostView() throws Exception {

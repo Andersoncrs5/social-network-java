@@ -5,7 +5,6 @@ import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.stories.dto.StoryDTO;
 import com.blog.writeapi.modules.stories.repository.StoryRepository;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,7 +37,6 @@ public class StoryControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired private StoryRepository repository;
-    @Autowired private UserRepository userRepository;
 
     @Autowired
     private HelperTest helper;
@@ -46,7 +44,6 @@ public class StoryControllerTest {
     @BeforeEach
     void setup () {
         this.repository.deleteAll();
-        this.userRepository.deleteAll();
     }
 
     @Test

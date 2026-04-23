@@ -3,7 +3,6 @@ package com.blog.writeapi.integration.userReportType;
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
 import com.blog.writeapi.modules.reportType.dto.ReportTypeDTO;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
 import com.blog.writeapi.modules.userReport.repository.UserReportRepository;
 import com.blog.writeapi.modules.userReportType.dto.CreateUserReportTypeDTO;
@@ -37,7 +36,6 @@ public class UserReportTypeControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @Autowired private UserReportRepository repository;
-    @Autowired private UserRepository userRepository;
 
     @Autowired
     private HelperTest helper;

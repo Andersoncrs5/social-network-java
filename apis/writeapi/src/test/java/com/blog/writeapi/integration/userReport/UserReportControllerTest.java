@@ -2,7 +2,6 @@ package com.blog.writeapi.integration.userReport;
 
 import com.blog.writeapi.configs.HelperTest;
 import com.blog.writeapi.configs.TestContainerConfig;
-import com.blog.writeapi.modules.user.repository.UserRepository;
 import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UserReportDTO;
 import com.blog.writeapi.utils.enums.report.ReportReason;
@@ -10,7 +9,6 @@ import com.blog.writeapi.utils.res.ResponseHttp;
 import com.blog.writeapi.utils.res.ResponseUserTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,15 +38,7 @@ public class UserReportControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private HelperTest helper;
-
-    @BeforeEach
-    void setup() {
-        this.userRepository.deleteAll();
-    }
 
     @Test
     void shouldCreateReport() throws Exception {

@@ -34,22 +34,9 @@ public class AuthControllerTest {
 
     private final String URL = "/v1/auth/";
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private HelperTest helper;
-
-    @BeforeEach
-    void setup() {
-        this.userRepository.deleteAll();
-    }
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private HelperTest helper;
 
     @Test
     void shouldCreateNewUser() throws Exception {

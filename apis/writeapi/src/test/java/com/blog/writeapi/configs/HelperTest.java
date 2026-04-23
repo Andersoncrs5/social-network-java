@@ -637,15 +637,17 @@ public class HelperTest {
             ResponseUserTest master,
             ResponseUserTest userTest
     ) {
-        try {
-            ToggleRoleAdmDTO dto = new ToggleRoleAdmDTO(
-                    userTest.userDTO().id()
-            );
+        var traceId = java.util.UUID.randomUUID().toString();
+        ToggleRoleAdmDTO dto = new ToggleRoleAdmDTO(
+                userTest.userDTO().id()
+        );
 
+        try {
             MvcResult result = mockMvc.perform(patch("/v1/adm/toggle/role/adm")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto))
                     .header("Authorization", "Bearer " + master.tokens().token())
+                    .header("X-Idempotency-Key", traceId)
             ).andExpect(status().isCreated()).andReturn();
 
             String json = result.getResponse().getContentAsString();
@@ -669,6 +671,7 @@ public class HelperTest {
             ResponseUserTest userTest2,
             String role
     ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
 
         ToggleRoleDTO dto = new ToggleRoleDTO(
                 role,
@@ -678,8 +681,9 @@ public class HelperTest {
         MvcResult result = mockMvc.perform(post("/v1/adm/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -690,7 +694,7 @@ public class HelperTest {
                 objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
 
         assertThat(response.data()).isNull();

@@ -13,18 +13,22 @@ import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsMode
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PostReportMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -90,7 +94,18 @@ public class PostReportService implements IPostReportService {
             throw new RuntimeException(e);
         }
 
-        return repository.save(report);
+        try {
+            return repository.save(report);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("");
+
+            if (message.toLowerCase().contains("uk_post_report"))
+                throw new UniqueConstraintViolationException("You have already reported on this post.");
+
+            throw new InternalServerErrorException("Error the create report to post");
+        }
     }
 
     @Override
@@ -100,7 +115,18 @@ public class PostReportService implements IPostReportService {
     ) {
         this.mapper.merge(dto, report);
 
-        return repository.save(report);
+        try {
+            return repository.save(report);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("");
+
+            if (message.toLowerCase().contains("uk_post_report"))
+                throw new UniqueConstraintViolationException("You have already reported on this post.");
+
+            throw new InternalServerErrorException("Error the create report to post");
+        }
     }
 
     @Override

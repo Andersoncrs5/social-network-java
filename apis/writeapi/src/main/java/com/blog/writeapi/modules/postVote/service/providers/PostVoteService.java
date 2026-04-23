@@ -89,6 +89,8 @@ public class PostVoteService implements IPostVoteService {
         return this.repository.save(vote);
     }
 
+    @Override @Transactional
+    @Retry(name = "toggle-retry")
     public ResultToggle<PostVoteModel> toggle(
             @IsModelInitialized UserModel user,
             @IsModelInitialized PostModel post,

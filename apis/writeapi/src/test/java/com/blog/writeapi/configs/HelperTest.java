@@ -820,10 +820,12 @@ public class HelperTest {
             ResponseUserTest userData,
             TagDTO tag
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         MvcResult result = this.mockMvc.perform(post("/v1/user-tag-preference/" + tag.id() + "/toggle")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + userData.tokens().token()
-                )).andExpect(status().isCreated()).andReturn();
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<UserTagPreferenceDTO>> typeRef = new TypeReference<>() {};
@@ -831,6 +833,7 @@ public class HelperTest {
         ResponseHttp<UserTagPreferenceDTO> response =
                 objectMapper.readValue(json, typeRef);
 
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.message()).isNotBlank();
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data().id()).isNotZero().isPositive().isNotNull();
@@ -844,10 +847,12 @@ public class HelperTest {
             ResponseUserTest userData,
             CategoryDTO category
     ) throws Exception {
+        var traceId = UUID.randomUUID().toString();
         MvcResult result = this.mockMvc.perform(post("/v1/user-category-preference/" + category.id() + "/toggle")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + userData.tokens().token()
-                )).andExpect(status().isCreated()).andReturn();
+                .header("Authorization", "Bearer " + userData.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<UserCategoryPreferenceDTO>> typeRef = new TypeReference<>() {};
@@ -856,7 +861,7 @@ public class HelperTest {
                 objectMapper.readValue(json, typeRef);
 
         assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
+        assertThat(response.traceId()).isNotBlank().isEqualTo(traceId);
         assertThat(response.status()).isEqualTo(true);
         assertThat(response.data().id()).isNotZero().isPositive().isNotNull();
         assertThat(response.data().category().id()).isEqualTo(category.id());

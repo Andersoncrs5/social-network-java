@@ -91,7 +91,7 @@ public class FollowersController implements FollowersControllerDocs {
     ) {
         Long userID = principal.getId();
 
-        if (!Objects.equals(id, userID)) {
+        if (Objects.equals(id, userID)) {
             throw new ResourceOwnerMismatchException("You cannot to do this action");
         }
 

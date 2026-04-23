@@ -1,31 +1,25 @@
 package com.blog.writeapi.modules.userTagPreference.controller.providers;
 
+import com.blog.writeapi.configs.api.idempotent.Idempotent;
 import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.userTagPreference.controller.docs.UserTagPreferenceControllerDocs;
-import com.blog.writeapi.modules.userTagPreference.dtos.UserTagPreferenceDTO;
-import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
-import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.modules.tag.service.docs.ITagService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
 import com.blog.writeapi.modules.userTagPreference.service.docs.IUserTagPreferenceService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
+import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.global.ToggleEnum;
 import com.blog.writeapi.utils.mappers.UserTagPreferenceMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import software.amazon.awssdk.http.HttpStatusCode;
-
-import java.time.OffsetDateTime;
-import java.util.Optional;
-import java.util.UUID;
 
 @Validated
 @RestController
@@ -34,44 +28,30 @@ import java.util.UUID;
 public class UserTagPreferenceController implements UserTagPreferenceControllerDocs {
 
     private final IUserTagPreferenceService service;
-    private final ITagService categoryService;
     private final UserTagPreferenceMapper mapper;
 
     @Override
+    @Idempotent
     public ResponseEntity<?> toggle(
             @PathVariable @IsId Long tagID,
             HttpServletRequest request,
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
-        UserModel user = principal.getUser();
-        TagModel category = this.categoryService.getByIdSimple(tagID);
+        ResultToggle<UserTagPreferenceModel> toggle = this.service.toggle(principal.getId(), tagID);
 
-        Optional<UserTagPreferenceModel> optional = this.service.getByUserAndTag(user, category);
+        String message = toggle.result() == ToggleEnum.ADDED
+                ? "Tag added" : "Tag removed";
 
-        if (optional.isPresent()) {
-            this.service.delete(optional.get());
+        HttpStatus status = toggle.result() == ToggleEnum.ADDED
+                ? HttpStatus.CREATED : HttpStatus.OK;
 
-            return ResponseEntity.status(HttpStatusCode.OK).body(new ResponseHttp<>(
-                    null,
-                    "Tag removed with successfully",
-                    UUID.randomUUID().toString(),
-                    1,
-                    true,
-                    OffsetDateTime.now()
-            ));
-        }
+        var dto = this.mapper.toDTO(toggle.body().orElse(null));
 
-        UserTagPreferenceModel model = this.service.create(user, category);
-
-        UserTagPreferenceDTO dto = this.mapper.toDTO(model);
-
-        return ResponseEntity.status(HttpStatusCode.CREATED).body(new ResponseHttp<>(
+        return ResponseEntity.status(status).body(ResponseHttp.success(
                 dto,
-                "Tag added with successfully",
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
+                message,
+                idempotencyKey
         ));
     }
 

@@ -3,6 +3,7 @@ package com.blog.writeapi.modules.userTagPreference.repository;
 import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,10 @@ public interface UserTagPreferenceRepository extends JpaRepository<UserTagPrefer
     Optional<UserTagPreferenceModel> findByUserAndTag(
             @IsModelInitialized UserModel user,
             @IsModelInitialized TagModel tag
+    );
+
+    Optional<UserTagPreferenceModel> findByUserIdAndTagId(
+            @IsId Long userId,
+            @IsId Long tagId
     );
 }

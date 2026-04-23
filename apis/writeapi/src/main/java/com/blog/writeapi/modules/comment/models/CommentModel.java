@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.comment.models;
 
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
+import com.blog.writeapi.modules.commentView.model.CommentViewModel;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.modules.commentAttachment.models.CommentAttachmentModel;
 import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
@@ -94,5 +95,11 @@ public class CommentModel extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReportModel> reports = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentViewModel> views = new ArrayList<>();
+
 
 }

@@ -9,10 +9,15 @@ import com.blog.writeapi.modules.userSettings.repository.UserSettingsRepository;
 import com.blog.writeapi.modules.userSettings.service.interfaces.IUserSettingsService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.UserSettingsMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +45,22 @@ public class UserSettingsService implements IUserSettingsService {
                 .user(user)
                 .build();
 
-        return repository.save(settings);
+        try {
+            return repository.save(settings);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("")
+                    .toLowerCase();
+
+            if (message.contains("idx_user_id_user_settings")) {
+                throw new UniqueConstraintViolationException("Settings already exist for this user.");
+            }
+
+            throw new InternalServerErrorException("Data integrity violation while creating user settings.");
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error while creating user settings", e);
+        }
     }
 
     @Override

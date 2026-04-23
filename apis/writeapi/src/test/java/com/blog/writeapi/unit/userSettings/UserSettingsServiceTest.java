@@ -12,13 +12,16 @@ import com.blog.writeapi.modules.userSettings.model.enums.ThemeEnum;
 import com.blog.writeapi.modules.userSettings.repository.UserSettingsRepository;
 import com.blog.writeapi.modules.userSettings.service.provider.UserSettingsService;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.UserSettingsMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -146,6 +149,36 @@ public class UserSettingsServiceTest {
         order.verify(repository).save(settings);
 
         verifyNoMoreInteractions(mapper, repository);
+    }
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when settings already exist")
+    void shouldThrowExceptionWhenSettingsAlreadyExist() {
+        when(gateway.findUserById(user.getId())).thenReturn(user);
+        when(generator.nextId()).thenReturn(settings.getId());
+
+        DataIntegrityViolationException ex = new DataIntegrityViolationException(
+                "Conflict", new Throwable("idx_user_id_user_settings")
+        );
+        when(repository.save(any(UserSettingsModel.class))).thenThrow(ex);
+
+        assertThatThrownBy(() -> service.create(user.getId()))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessage("Settings already exist for this user.");
+
+        verify(repository).save(any(UserSettingsModel.class));
+    }
+
+    @Test
+    @DisplayName("Should throw RuntimeException when unexpected error occurs during create")
+    void shouldThrowRuntimeExceptionWhenUnexpectedError() {
+        when(gateway.findUserById(user.getId())).thenReturn(user);
+        when(generator.nextId()).thenReturn(settings.getId());
+        when(repository.save(any(UserSettingsModel.class))).thenThrow(new RuntimeException("DB Connection failed"));
+
+        assertThatThrownBy(() -> service.create(user.getId()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Unexpected error");
     }
 
 }

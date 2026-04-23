@@ -33,12 +33,20 @@ public class Result<T> {
         return ok(value);
     }
 
+    public static <T> Result<T> success() {
+        return ok(null);
+    }
+
     public static <T> Result<T> failure(HttpStatus status, String code, String message) {
         return new Result<>(false, null, new Error(code, message, status.value()), status);
     }
 
     public static <T> Result<T> failure(Error error) {
         HttpStatus resolvedStatus = HttpStatus.resolve(error.status());
+        return new Result<>(false, null, error, resolvedStatus != null ? resolvedStatus : HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public static <T> Result<T> failure(HttpStatus resolvedStatus ,Error error) {
         return new Result<>(false, null, error, resolvedStatus != null ? resolvedStatus : HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

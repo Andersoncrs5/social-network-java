@@ -7,4 +7,5 @@ import jakarta.validation.constraints.NotBlank;
 public interface IApiKeyService {
     String create(@NotBlank String serviceName);
     ApiKeyModel findByIdSimple(@IsId Long id);
+    void deleteAndCount(@IsId Long id);
 }

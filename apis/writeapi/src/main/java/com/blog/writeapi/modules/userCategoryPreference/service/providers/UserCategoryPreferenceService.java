@@ -2,11 +2,14 @@ package com.blog.writeapi.modules.userCategoryPreference.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.category.models.CategoryModel;
+import com.blog.writeapi.modules.userCategoryPreference.gateway.UserCategoryPreferenceModuleGateway;
 import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPreferenceModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.userCategoryPreference.repository.UserCategoryPreferenceRepository;
 import com.blog.writeapi.modules.userCategoryPreference.service.docs.IUserCategoryPreferenceService;
+import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.classes.ResultToggle;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -21,6 +24,7 @@ import java.util.Optional;
 public class UserCategoryPreferenceService implements IUserCategoryPreferenceService {
 
     private final UserCategoryPreferenceRepository repository;
+    private final UserCategoryPreferenceModuleGateway gateway;
     private final Snowflake snowflake;
 
     @Override
@@ -66,6 +70,21 @@ public class UserCategoryPreferenceService implements IUserCategoryPreferenceSer
         }
     }
 
+    public ResultToggle<UserCategoryPreferenceModel> toggle(
+            @IsId Long categoryId,
+            @IsId Long userId
+    ) {
+        Optional<UserCategoryPreferenceModel> optional = repository.findByUserIdAndCategoryId(userId, categoryId);
 
+        if (optional.isPresent()) {
+            this.delete(optional.get());
+            return ResultToggle.removed();
+        }
+
+        CategoryModel category = this.gateway.findByCategoryById(categoryId);
+        UserModel user = this.gateway.findByUserId(userId);
+
+        return ResultToggle.added(this.create(user, category));
+    }
 
 }

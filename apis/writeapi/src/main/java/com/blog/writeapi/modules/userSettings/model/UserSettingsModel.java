@@ -13,9 +13,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(
-        name = "user_settings", indexes = {
-        @Index(name = "idx_user_id_user_settings", columnList = "user_id")
-})
+        name = "user_settings",
+        indexes = {
+            @Index(name = "idx_user_id_user_settings", columnList = "user_id", unique = true)
+        }
+)
 @EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter
@@ -66,6 +68,6 @@ public class UserSettingsModel extends BaseEntity {
     private String timezone = "UTC";
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, updatable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private UserModel user;
 }

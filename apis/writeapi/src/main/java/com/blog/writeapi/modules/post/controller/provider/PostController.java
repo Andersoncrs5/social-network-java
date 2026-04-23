@@ -7,16 +7,14 @@ import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.PostDTO;
 import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
-import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
-import com.blog.writeapi.utils.services.interfaces.ITokenService;
-import com.blog.writeapi.modules.user.service.docs.IUserService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.post.isPostAuthor.IsPostAuthor;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import com.blog.writeapi.utils.res.ResponseHttp;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -45,19 +42,16 @@ public class PostController implements PostControllerDocs {
             @Valid @RequestBody CreatePostDTO dto,
             HttpServletRequest request,
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey
     ) {
         PostModel model = this.service.create(dto, principal.getUser());
 
         PostDTO postMapped = this.mapper.toDTO(model);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseHttp<>(
+        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseHttp.success(
                 postMapped,
                 "Post created with successfully",
-                idempotencyKey,
-                1,
-                true,
-                OffsetDateTime.now()
+                idempotencyKey
         ));
     }
 
@@ -82,31 +76,15 @@ public class PostController implements PostControllerDocs {
     @Idempotent
     public ResponseEntity<?> del(
             @PathVariable @IsId Long id, HttpServletRequest request,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        Optional<PostModel> post = this.service.getById(id);
+        this.service.deleteAndCount(id);
 
-        if (post.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseHttp<>(
-                            null,
-                            "Post not found",
-                            idempotencyKey,
-                            1,
-                            false,
-                            OffsetDateTime.now()
-                    ));
-        }
-
-        this.service.delete(post.get());
-
-        ResponseHttp<Object> res = new ResponseHttp<>(
+        ResponseHttp<Object> res = ResponseHttp.success(
                 null,
                 "Post deleted with successfully",
-                idempotencyKey,
-                1,
-                true,
-                OffsetDateTime.now()
+                idempotencyKey
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -119,7 +97,8 @@ public class PostController implements PostControllerDocs {
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostDTO dto,
             HttpServletRequest request,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey,
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
         PostModel post = this.service.getByIdSimple(id);
 

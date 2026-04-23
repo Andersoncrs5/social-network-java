@@ -1,3 +1,7 @@
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
+
 server:
   port: 8889
 
@@ -11,6 +15,13 @@ resilience4j:
     enabled: false
 
 spring:
+  datasource:
+    hikari:
+      pool-name: WriteApiTestPool
+      minimum-idle: 10
+      maximum-pool-size: 30
+      connection-timeout: 30000
+
   sql:
     init:
       mode: always

@@ -44,16 +44,12 @@ public class ApiKeyController implements ApiKeyControllerDocs {
     public ResponseHttp<Void> delete(
             @PathVariable @IsId Long id
     ) {
-        ApiKeyModel model = this.service.findByIdSimple(id);
-        this.service.delete(model);
+        this.service.deleteAndCount(id);
 
-        return new ResponseHttp<>(
+        return ResponseHttp.success(
                 null,
                 "Api Hash deleted!",
-                UUID.randomUUID().toString(),
-                1,
-                true,
-                OffsetDateTime.now()
+                UUID.randomUUID().toString()
         );
     }
 

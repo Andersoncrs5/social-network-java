@@ -1,5 +1,6 @@
 package com.blog.writeapi.modules.adm.controller.docs;
 
+import com.blog.writeapi.configs.security.UserPrincipal;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleAdmDTO;
 import com.blog.writeapi.modules.adm.dto.ToggleRoleDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,9 +8,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 public interface AdmControllerDocs {
 
@@ -18,7 +21,9 @@ public interface AdmControllerDocs {
     @PreAuthorize("hasAnyAuthority('SUPER_ADM_ROLE', 'ADM_ROLE')")
     ResponseEntity<?> addRoleToUser(
             @RequestBody @Valid ToggleRoleDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @Operation(summary = "Remove a standard role from a user")
@@ -26,7 +31,9 @@ public interface AdmControllerDocs {
     @PreAuthorize("hasAnyAuthority('SUPER_ADM_ROLE', 'ADM_ROLE')")
     ResponseEntity<?> removeRoleToUser(
             @RequestBody @Valid ToggleRoleDTO dto,
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
 
     @Operation(summary = "Toggle Administrative role", description = "Only accessible by SUPER_ADM. Adds or removes ADM_ROLE")
@@ -34,6 +41,8 @@ public interface AdmControllerDocs {
     @PreAuthorize("hasAnyAuthority('SUPER_ADM_ROLE')")
     ResponseEntity<?> toggleRoleAdmInUser(
             @RequestBody @Valid ToggleRoleAdmDTO dto,
-            HttpServletRequest request
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey
     );
+
 }

@@ -11,8 +11,10 @@ import com.blog.writeapi.modules.postTag.repository.PostTagRepository;
 import com.blog.writeapi.modules.postTag.service.providers.PostTagService;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PostTagMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -81,6 +84,32 @@ public class PostTagServiceTest {
             .createdAt(OffsetDateTime.now())
             .updatedAt(OffsetDateTime.now())
             .build();
+
+    @Test
+    @DisplayName("Should delete post tag successfully when ID exists")
+    public void shouldDeletePostTagSuccessfully() {
+        Long id = postTag.getId();
+        when(repository.deleteAndCount(id)).thenReturn(1);
+
+        service.deleteByID(id);
+
+        verify(repository, times(1)).deleteAndCount(id);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("Should throw ModelNotFoundException when ID does not exist")
+    public void shouldThrowExceptionWhenIdDoesNotExist() {
+        Long nonExistentId = 999L;
+        when(repository.deleteAndCount(nonExistentId)).thenReturn(0);
+
+        assertThatThrownBy(() -> service.deleteByID(nonExistentId))
+                .isInstanceOf(ModelNotFoundException.class)
+                .hasMessage("Post tag not found");
+
+        verify(repository, times(1)).deleteAndCount(nonExistentId);
+        verifyNoMoreInteractions(repository);
+    }
 
     // METHOD: existsByPostAndTag
     @Test

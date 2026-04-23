@@ -5,6 +5,7 @@ import com.blog.writeapi.modules.reaction.dtos.CreateReactionDTO;
 import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.reaction.repository.ReactionRepository;
 import com.blog.writeapi.modules.reaction.service.providers.ReactionService;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.ReactionMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,13 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -144,6 +147,7 @@ public class ReactionServiceTest {
         verifyNoMoreInteractions(repository);
     }
 
+    // Create
     @Test
     @DisplayName("Should create new reaction when exec METHOD: create")
     public void shouldCreateReaction() {
@@ -180,6 +184,60 @@ public class ReactionServiceTest {
         inOrder.verify(this.repository).save(any(ReactionModel.class));
 
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when name already exists")
+    public void shouldThrowExceptionWhenNameExists() {
+        CreateReactionDTO dto = new CreateReactionDTO(
+                reaction.getName(), reaction.getEmojiUrl(), reaction.getEmojiUnicode(),
+                reaction.getDisplayOrder(), reaction.isActive(), reaction.isVisible(), reaction.getType()
+        );
+
+        when(mapper.toModel(dto)).thenReturn(reaction);
+        when(generator.nextId()).thenReturn(reaction.getId());
+
+        DataIntegrityViolationException ex = new DataIntegrityViolationException(
+                "Conflict", new Throwable("idx_reactions_name"));
+
+        when(repository.save(any(ReactionModel.class))).thenThrow(ex);
+
+        assertThatThrownBy(() -> this.service.create(dto))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessageContaining("Reaction name already exists");
+
+        verify(mapper, times(1)).toModel(dto);
+        verify(generator, times(1)).nextId();
+        verify(repository, times(1)).save(any(ReactionModel.class));
+
+        verifyNoMoreInteractions(repository, generator, mapper);
+    }
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when emoji URL already exists")
+    public void shouldThrowExceptionWhenEmojiUrlExists() {
+        CreateReactionDTO dto = new CreateReactionDTO(
+                reaction.getName(), reaction.getEmojiUrl(), reaction.getEmojiUnicode(),
+                reaction.getDisplayOrder(), reaction.isActive(), reaction.isVisible(), reaction.getType()
+        );
+
+        when(mapper.toModel(dto)).thenReturn(reaction);
+        when(generator.nextId()).thenReturn(reaction.getId());
+
+        DataIntegrityViolationException ex = new DataIntegrityViolationException(
+                "Conflict", new Throwable("idx_reactions_emoji_url"));
+
+        when(repository.save(any(ReactionModel.class))).thenThrow(ex);
+
+        assertThatThrownBy(() -> this.service.create(dto))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessageContaining("Reaction emoji URL already exists");
+
+        verify(mapper, times(1)).toModel(dto);
+        verify(generator, times(1)).nextId();
+        verify(repository, times(1)).save(any(ReactionModel.class));
+
+        verifyNoMoreInteractions(repository, generator, mapper);
     }
 
 }

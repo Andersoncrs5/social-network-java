@@ -9,6 +9,7 @@ import com.blog.writeapi.modules.reportPost.services.provider.PostReportService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.report.ReportReason;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PostReportMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,10 +19,12 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -121,6 +124,38 @@ public class PostReportServiceTest {
         order.verify(objectMapper).writeValueAsString(post);
         order.verify(repository).save(any(PostReportModel.class));
 
+    }
+
+    @Test
+    void shouldThrowUniqueConstraintViolationException_WhenReportAlreadyExists() throws JsonProcessingException {
+        CreatePostReportDTO dto = new CreatePostReportDTO("desc", ReportReason.HATE_SPEECH, post.getId());
+
+        when(mapper.toModel(any(CreatePostReportDTO.class))).thenReturn(this.report);
+        when(generator.nextId()).thenReturn(this.report.getId());
+        when(objectMapper.writeValueAsString(post)).thenReturn("postJson");
+
+        Throwable cause = new Throwable("uk_post_report");
+        DataIntegrityViolationException ex = new DataIntegrityViolationException("Conflict", cause);
+
+        when(repository.save(any(PostReportModel.class))).thenThrow(ex);
+
+        assertThatThrownBy(() -> this.service.create(dto, post, user))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessage("You have already reported on this post.");
+    }
+
+    @Test
+    void shouldThrowRuntimeException_WhenJsonProcessingFails() throws JsonProcessingException {
+        CreatePostReportDTO dto = new CreatePostReportDTO("desc", ReportReason.HATE_SPEECH, post.getId());
+
+        when(mapper.toModel(any(CreatePostReportDTO.class))).thenReturn(this.report);
+
+        when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
+
+        assertThatThrownBy(() -> this.service.create(dto, post, user))
+                .isInstanceOf(RuntimeException.class);
+
+        verify(repository, never()).save(any());
     }
 
 }

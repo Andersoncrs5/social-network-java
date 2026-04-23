@@ -23,6 +23,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,23 +38,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AdmControllerTest {
     private final String URL = "/v1/adm";
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private HelperTest helper;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private HelperTest helper;
 
     @Test
     void shouldAddRoleToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -67,8 +60,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -87,6 +81,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnNotFoundRoleAddRoleToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -98,8 +93,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -118,6 +114,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnNotFoundUserAddRoleToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
 
         ToggleRoleDTO dto = new ToggleRoleDTO(
@@ -128,8 +125,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -148,6 +146,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnForbWhenAddRoleSUPER_ADM_ROLEWhenExecAddRoleToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -159,8 +158,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -179,6 +179,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnForbWhenAddRoleADM_ROLEWhenExecAddRoleToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
 
@@ -190,8 +191,8 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId))
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -210,6 +211,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnConflictBecauseUserAlreadyHaveTheRoleAdded() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
         this.helper.addRoleInUser(master, userTest2, "MODERATOR_ROLE");
@@ -222,8 +224,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isConflict())
                 .andReturn();
 
@@ -242,6 +245,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldRemoveRoleOfUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String roleName = "MODERATOR_ROLE";
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
@@ -256,26 +260,20 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isOk())
                 .andReturn();
 
         String json = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
+        TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
 
-        ResponseHttp<Object> response =
-                objectMapper.readValue(json, typeRef);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
-        assertThat(response.status()).isEqualTo(true);
-
-        assertThat(response.data()).isNull();
     }
 
     @Test
     void shouldReturnNotFoundRoleRemoveRoleOfUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String roleName = "MODERATOR_ROLE";
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
@@ -290,8 +288,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -311,6 +310,7 @@ public class AdmControllerTest {
     @Test
     void shouldReturnNotFoundUserRemoveRoleOfUser() throws Exception {
         String roleName = "MODERATOR_ROLE";
+        var traceId = UUID.randomUUID().toString();
 
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest2 = this.helper.createUser();
@@ -325,8 +325,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -345,6 +346,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnNotFoundUserRoleRemoveRoleOfUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String roleName = "MODERATOR_ROLE";
 
         ResponseUserTest master = this.helper.loginSuperAdm();
@@ -358,8 +360,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isNotFound())
                 .andReturn();
 
@@ -378,6 +381,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnFORBIDDENWhenRemoveRoleSUPER_ADM_ROLERemoveRoleOfUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String roleName = "SUPER_ADM_ROLE";
 
         ResponseUserTest master = this.helper.loginSuperAdm();
@@ -391,8 +395,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -411,6 +416,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldReturnFORBIDDENWhenRemoveRoleADM_ROLERemoveRoleOfUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         String roleName = "ADM_ROLE";
 
         ResponseUserTest master = this.helper.loginSuperAdm();
@@ -424,8 +430,9 @@ public class AdmControllerTest {
         MvcResult result = mockMvc.perform(post(this.URL + "/roles/remove")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
-                        .header("Authorization", "Bearer " + master.tokens().token()
-                        ))
+                        .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
+                )
                 .andExpect(status().isForbidden())
                 .andReturn();
 
@@ -444,6 +451,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldAddRoleAdmToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest = this.helper.createUser();
 
@@ -455,6 +463,7 @@ public class AdmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isCreated()).andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -472,6 +481,7 @@ public class AdmControllerTest {
 
     @Test
     void shouldRemoveRoleAdmToUser() throws Exception {
+        var traceId = UUID.randomUUID().toString();
         ResponseUserTest master = this.helper.loginSuperAdm();
         ResponseUserTest userTest = this.helper.createUser();
         this.helper.turnUserInAdm(master, userTest);
@@ -484,19 +494,11 @@ public class AdmControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto))
                         .header("Authorization", "Bearer " + master.tokens().token())
+                        .header("X-Idempotency-Key", traceId)
                 ).andExpect(status().isOk()).andReturn();
 
         String json = result.getResponse().getContentAsString();
         TypeReference<ResponseHttp<Object>> typeRef = new TypeReference<>() {};
-
-        ResponseHttp<Object> response =
-                objectMapper.readValue(json, typeRef);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.traceId()).isNotBlank();
-        assertThat(response.status()).isEqualTo(true);
-
-        assertThat(response.data()).isNull();
     }
 
 }

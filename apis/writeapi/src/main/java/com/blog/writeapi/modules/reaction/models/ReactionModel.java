@@ -19,8 +19,9 @@ import java.util.List;
 @Table(
         name = "reactions",
         indexes = {
-                @Index(name = "idx_reactions_name", columnList = "name"),
+                @Index(name = "idx_reactions_name", columnList = "name", unique = true),
                 @Index(name = "idx_reactions_emoji_unicode", columnList = "emoji_unicode"),
+                @Index(name = "idx_reactions_emoji_url", columnList = "emoji_url", unique = true),
                 @Index(name = "idx_reactions_active", columnList = "is_active")
         }
 )
@@ -31,14 +32,14 @@ import java.util.List;
 @AllArgsConstructor
 public class ReactionModel extends BaseEntity {
 
-    @Column(length = 200, unique = true, nullable = false)
+    @Column(length = 200, nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ReactionTypeEnum type;
 
-    @Column(unique = true, columnDefinition = "TEXT")
+    @Column(length = 800, name = "emoji_url")
     private String emojiUrl;
 
     @Column(length = 20, name = "emoji_unicode")

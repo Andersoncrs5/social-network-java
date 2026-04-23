@@ -13,13 +13,11 @@ import java.util.Set;
 
 @Entity
 @Table(name = "profiles", indexes = {
-        @Index(name = "idx_user_id_profiles", columnList = "user_id"),
+        @Index(name = "idx_user_id_profiles", columnList = "user_id", unique = true),
         @Index(name = "idx_visibility_profiles", columnList = "visibility"),
 })
 @EntityListeners(AuditingEntityListener.class)
-@Setter
-@Getter
-@ToString
+@Setter @Getter @ToString
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor

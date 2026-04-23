@@ -20,7 +20,7 @@ public abstract class BaseEntity {
 
     @Id
     @Column(name = "id", columnDefinition = "BIGINT UNSIGNED")
-    private Long id;
+    protected Long id;
 
     @Version
     private Long version;

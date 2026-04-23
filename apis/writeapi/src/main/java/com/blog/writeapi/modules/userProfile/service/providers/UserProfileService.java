@@ -7,11 +7,14 @@ import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import com.blog.writeapi.modules.userProfile.repository.UserProfileRepository;
 import com.blog.writeapi.modules.userProfile.service.docs.IUserProfileService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.UserProfileMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -51,8 +54,7 @@ public class UserProfileService implements IUserProfileService {
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized UserProfileModel profile) { this.repository.delete(profile); }
 
-    @Override
-    @Transactional
+    @Override @Transactional
     @Retry(name = "create-retry")
     public UserProfileModel create(@IsModelInitialized UserModel user) {
         UserProfileModel profile = new UserProfileModel().toBuilder()
@@ -60,7 +62,22 @@ public class UserProfileService implements IUserProfileService {
                 .user(user)
                 .build();
 
-        return this.repository.save(profile);
+        try {
+            return this.repository.save(profile);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("")
+                    .toLowerCase();
+
+            if (message.contains("idx_user_id_profiles")) {
+                throw new UniqueConstraintViolationException("Profile already exists for this user.");
+            }
+
+            throw new InternalServerErrorException("Data integrity violation while creating user profile.");
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error while creating user profile", e);
+        }
     }
 
     @Override

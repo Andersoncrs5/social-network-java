@@ -20,4 +20,5 @@ public interface IPostService {
     PostModel create(@NotNull CreatePostDTO dto, @IsModelInitialized UserModel user);
     void delete(@IsModelInitialized PostModel post);
     PostModel update(@NotNull UpdatePostDTO dto, @IsModelInitialized PostModel post);
+    void deleteAndCount(@IsId Long id);
 }

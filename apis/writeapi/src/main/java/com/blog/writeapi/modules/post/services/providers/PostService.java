@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -64,6 +65,16 @@ public class PostService implements IPostService {
     @Transactional
     public void delete(@IsModelInitialized PostModel post) {
         this.repository.delete(post);
+    }
+
+    @Override @Transactional
+    @Retry(name = "delete-retry")
+    public void deleteAndCount(@IsId Long id) {
+        int result = repository.deleteAndCount(id);
+
+        if (Objects.equals(result, 0)) {
+            throw new ModelNotFoundException("Post tag not found");
+        }
     }
 
     @Override

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public interface PostControllerDocs {
             @Valid @RequestBody CreatePostDTO dto,
             HttpServletRequest request,
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @RequestHeader("X-Idempotency-Key") @NotBlank String idempotencyKey
     );
 
     @GetMapping("/{id}")
@@ -79,9 +80,9 @@ public interface PostControllerDocs {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ResponseHttp.class)))
     ResponseEntity<?> del(
-            @PathVariable @IsId Long id,
-            HttpServletRequest request,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @PathVariable @IsId Long id, HttpServletRequest request,
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
     @PatchMapping("/{id}")
@@ -110,7 +111,8 @@ public interface PostControllerDocs {
             @PathVariable @IsId Long id,
             @Valid @RequestBody UpdatePostDTO dto,
             HttpServletRequest request,
-            @RequestHeader("X-Idempotency-Key") String idempotencyKey
+            @RequestHeader("X-Idempotency-Key") String idempotencyKey,
+            @AuthenticationPrincipal UserPrincipal principal
     );
 
 }

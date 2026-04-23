@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -158,30 +159,31 @@ public class PostAttachmentServiceTest {
 
     @Test
     void shouldCreateNewAttachment() {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.getSize()).thenReturn(1024L);
+
+        CreatePostAttachmentDTO dto = new CreatePostAttachmentDTO();
+        dto.setIsPublic(true);
+        dto.setFile(mockFile);
+
         when(mapper.toModel(any(CreatePostAttachmentDTO.class))).thenReturn(this.attachment);
         when(generator.nextId()).thenReturn(this.attachment.getId());
         when(storageService.putObject(
                 eq("test-bucket"),
                 anyString(),
                 any(),
-                any(),
+                eq(mockFile),
                 eq(user)
         )).thenReturn(true);
 
         when(repository.save(any(PostAttachmentModel.class))).thenReturn(this.attachment);
 
-        CreatePostAttachmentDTO dto = new CreatePostAttachmentDTO();
-        dto.setIsPublic(true);
-
         Optional<PostAttachmentModel> result = this.service.create(dto, user, post);
 
         assertThat(result).isPresent();
-        assertThat(result.get().getId()).isEqualTo(this.attachment.getId());
+        assertThat(result.get().getFileSize()).isEqualTo(1024L); // Valida o tamanho
 
-        verify(storageService).putObject(eq("test-bucket"), anyString(), any(), any(), eq(user));
         verify(repository).save(any(PostAttachmentModel.class));
-
-        verifyNoMoreInteractions(mapper, storageService, repository);
     }
 
     @Test

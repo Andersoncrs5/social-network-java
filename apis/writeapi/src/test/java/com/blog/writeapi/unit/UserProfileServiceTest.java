@@ -6,18 +6,22 @@ import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import com.blog.writeapi.utils.enums.profile.ProfileVisibilityEnum;
 import com.blog.writeapi.modules.userProfile.repository.UserProfileRepository;
 import com.blog.writeapi.modules.userProfile.service.providers.UserProfileService;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +52,20 @@ public class UserProfileServiceTest {
             .visibility(ProfileVisibilityEnum.PUBLIC)
             .user(this.user)
             .build();
+
+    @Test
+    @DisplayName("Should throw UniqueConstraintViolationException when profile for user already exists")
+    void shouldThrowUniqueConstraintViolationWhenProfileExists() {
+        DataIntegrityViolationException ex = new DataIntegrityViolationException(
+                "Duplicate entry", new Throwable("idx_user_id_profiles")
+        );
+
+        when(repository.save(any(UserProfileModel.class))).thenThrow(ex);
+
+        assertThatThrownBy(() -> service.create(user))
+                .isInstanceOf(UniqueConstraintViolationException.class)
+                .hasMessage("Profile already exists for this user.");
+    }
 
     @Test
     void shouldReturnTrueWhenExistsByUser() {

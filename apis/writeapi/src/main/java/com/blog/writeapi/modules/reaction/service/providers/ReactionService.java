@@ -8,7 +8,9 @@ import com.blog.writeapi.modules.reaction.repository.ReactionRepository;
 import com.blog.writeapi.modules.reaction.service.docs.IReactionService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
+import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.ReactionMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.validation.constraints.NotBlank;
@@ -17,9 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -73,7 +78,26 @@ public class ReactionService implements IReactionService {
 
         model.setId(this.generator.nextId());
 
-        return this.repository.save(model);
+        try {
+            return this.repository.save(model);
+        } catch (DataIntegrityViolationException e) {
+            String message = Optional.of(e.getMostSpecificCause())
+                    .map(Throwable::getMessage)
+                    .orElse("")
+                    .toLowerCase();
+
+            if (message.toLowerCase().contains("idx_reactions_name")) {
+                throw new UniqueConstraintViolationException("Reaction name already exists: " + dto.name());
+            }
+
+            if (message.toLowerCase().contains("idx_reactions_emoji_url")) {
+                throw new UniqueConstraintViolationException("Reaction emoji URL already exists: " + dto.emojiUrl());
+            }
+
+            throw new InternalServerErrorException("Error creating reaction: " + e.getMessage());
+        } catch (Exception e) {
+            throw new InternalServerErrorException("An unexpected error occurred while saving the reaction.");
+        }
     }
 
     @Override

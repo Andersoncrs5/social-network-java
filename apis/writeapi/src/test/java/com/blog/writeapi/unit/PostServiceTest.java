@@ -7,7 +7,9 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.modules.post.services.providers.PostService;
+import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +62,32 @@ public class PostServiceTest {
             .author(user)
             .parent(postParent)
             .build();
+
+    @Test
+    @DisplayName("Should delete post successfully when ID exists")
+    void shouldDeletePostSuccessfully() {
+        Long id = post.getId();
+        when(repository.deleteAndCount(id)).thenReturn(1);
+
+        service.deleteAndCount(id);
+
+        verify(repository, times(1)).deleteAndCount(id);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("Should throw ModelNotFoundException when ID does not exist")
+    void shouldThrowExceptionWhenPostNotFound() {
+        Long nonExistentId = 999L;
+        when(repository.deleteAndCount(nonExistentId)).thenReturn(0);
+
+        assertThatThrownBy(() -> service.deleteAndCount(nonExistentId))
+                .isInstanceOf(ModelNotFoundException.class)
+                .hasMessage("Post tag not found");
+
+        verify(repository, times(1)).deleteAndCount(nonExistentId);
+        verifyNoMoreInteractions(repository);
+    }
 
     @Test
     void shouldReturnPostWhenGetById() {

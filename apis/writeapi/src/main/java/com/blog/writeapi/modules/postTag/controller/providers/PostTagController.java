@@ -49,7 +49,7 @@ public class PostTagController implements PostTagControllerDocs {
             @Valid @RequestBody CreatePostTagDTO dto,
             HttpServletRequest request,
             @AuthenticationPrincipal UserPrincipal principal
-            ) {
+    ) {
         Long userId = principal.getId();
 
         PostModel post = this.postService.getByIdSimple(dto.postId());
@@ -77,9 +77,7 @@ public class PostTagController implements PostTagControllerDocs {
             @PathVariable @IsId Long id,
             HttpServletRequest request
     ) {
-        PostTagModel model = this.service.getByIdSimple(id);
-
-        this.service.delete(model);
+        this.service.deleteByID(id);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseHttp<>(
                 null,

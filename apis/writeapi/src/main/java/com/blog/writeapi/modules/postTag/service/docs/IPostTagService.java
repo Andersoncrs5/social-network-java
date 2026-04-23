@@ -29,4 +29,5 @@ public interface IPostTagService {
             @IsId Long postId,
             @IsId Long tagId
     );
+    void deleteByID(@IsId Long id);
 }

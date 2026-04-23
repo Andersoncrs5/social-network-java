@@ -1,13 +1,13 @@
 package com.blog.writeapi.modules.postTag.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postTag.dtos.CreatePostTagDTO;
 import com.blog.writeapi.modules.postTag.dtos.UpdatePostTagDTO;
-import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postTag.models.PostTagModel;
-import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.modules.postTag.repository.PostTagRepository;
 import com.blog.writeapi.modules.postTag.service.docs.IPostTagService;
+import com.blog.writeapi.modules.tag.models.TagModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -56,15 +57,23 @@ public class PostTagService implements IPostTagService {
         return this.repository.findById(id);
     }
 
-    @Override
-    @Transactional
+    @Override @Transactional
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized PostTagModel model) {
         this.repository.delete(model);
     }
 
-    @Override
-    @Transactional
+    @Override @Transactional
+    @Retry(name = "delete-retry")
+    public void deleteByID(@IsId Long id) {
+        int result = repository.deleteAndCount(id);
+
+        if (Objects.equals(result, 0)) {
+            throw new ModelNotFoundException("Post tag not found");
+        }
+    }
+
+    @Override @Transactional
     @Retry(name = "create-retry")
     public PostTagModel create(
             @NotNull CreatePostTagDTO dto,
@@ -103,7 +112,13 @@ public class PostTagService implements IPostTagService {
     ) {
         this.mapper.merge(dto, model);
 
-        return this.repository.save(model);
+        try {
+            return this.repository.save(model);
+        } catch (DataIntegrityViolationException e) {
+            throw new UniqueConstraintViolationException("This tag has already been added to this post.");
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Error processing your request.");
+        }
     }
 
 

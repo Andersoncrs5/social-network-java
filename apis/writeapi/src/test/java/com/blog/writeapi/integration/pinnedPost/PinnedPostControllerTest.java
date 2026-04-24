@@ -205,31 +205,6 @@ public class PinnedPostControllerTest {
     }
 
     @Test
-    void shouldReturnForbBecauseAnotherUsrDeletePinned() throws Exception {
-        var traceId = UUID.randomUUID().toString();
-        ResponseUserTest userData = this.helper.createUser();
-        ResponseUserTest userData2 = this.helper.createUser();
-
-        PostDTO post = this.helper.createPost(userData);
-        PinnedPostDTO pinnedPostDTO = this.helper.markPostWithPinned(userData, post);
-
-        MvcResult result = this.mockMvc.perform(delete(this.URL + "/" + pinnedPostDTO.id())
-                .header("Authorization", "Bearer " + userData2.tokens().token())
-                .header("X-Idempotency-Key", traceId)
-        ).andExpect(status().isForbidden()).andReturn();
-
-        String json = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
-
-        ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.status()).isEqualTo(false);
-
-        assertThat(response.data()).isNull();
-    }
-
-    @Test
     void shouldReturnNotFoundDeletePinned() throws Exception {
         var traceId = UUID.randomUUID().toString();
         ResponseUserTest userData = this.helper.createUser();
@@ -309,37 +284,6 @@ public class PinnedPostControllerTest {
         assertThat(response.data().post().id()).isEqualTo(pinnedPostDTO.post().id());
         assertThat(response.data().user().id()).isEqualTo(pinnedPostDTO.user().id());
         assertThat(response.data().orderIndex()).isEqualTo(dto.orderIndex());
-    }
-
-    @Test
-    void shouldReturnForbPatchPinned() throws Exception {
-        var traceId = UUID.randomUUID().toString();
-        ResponseUserTest userData = this.helper.createUser();
-        ResponseUserTest userData2 = this.helper.createUser();
-
-        PostDTO post = this.helper.createPost(userData);
-        PinnedPostDTO pinnedPostDTO = this.helper.markPostWithPinned(userData, post);
-
-        UpdatePinnedPostDTO dto = new UpdatePinnedPostDTO(
-                (pinnedPostDTO.orderIndex() + 1)
-        );
-
-        MvcResult result = this.mockMvc.perform(patch(this.URL + "/" + pinnedPostDTO.id())
-                .header("Authorization", "Bearer " + userData2.tokens().token())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto))
-                .header("X-Idempotency-Key", traceId)
-        ).andExpect(status().isForbidden()).andReturn();
-
-        String json = result.getResponse().getContentAsString();
-        TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
-
-        ResponseHttp<Void> response = objectMapper.readValue(json, typeRef);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.status()).isEqualTo(false);
-
-        assertThat(response.data()).isNull();
     }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -147,14 +148,44 @@ public class StorageServiceTest {
                 service.putObject(BUCKET, "key", ObjectCannedACL.PRIVATE, file, user)
         );
     }
+    @Test
+    void shouldDeleteSpecificObjectVersion() {
+        // Arrange
+        String key = "document.pdf";
+        String versionId = "v1-alpha";
+
+        // 1. Mock do SdkHttpResponse
+        SdkHttpResponse httpResponse = mock(SdkHttpResponse.class);
+        when(httpResponse.isSuccessful()).thenReturn(true); // Simula sucesso
+
+        // 2. Mock do DeleteObjectResponse
+        DeleteObjectResponse mockResponse = mock(DeleteObjectResponse.class);
+        when(mockResponse.sdkHttpResponse()).thenReturn(httpResponse);
+
+        when(client.deleteObject(any(DeleteObjectRequest.class))).thenReturn(mockResponse);
+
+        // Act
+        Boolean result = service.deleteObject(BUCKET, key, versionId);
+
+        // Assert
+        assertThat(result).isTrue(); // Corrigido para true (já que isSuccessful retornou true)
+        verify(client).deleteObject(argThat((DeleteObjectRequest req) ->
+                req.versionId().equals(versionId)
+        ));
+    }
 
     @Test
     void shouldDeleteObjectWithoutVersionId() {
         // Arrange
         String key = "photo.jpg";
-        DeleteObjectResponse mockResponse = DeleteObjectResponse.builder()
-                .deleteMarker(true)
-                .build();
+
+        // 1. Mock do SdkHttpResponse
+        SdkHttpResponse httpResponse = mock(SdkHttpResponse.class);
+        when(httpResponse.isSuccessful()).thenReturn(true);
+
+        // 2. Mock do DeleteObjectResponse
+        DeleteObjectResponse mockResponse = mock(DeleteObjectResponse.class);
+        when(mockResponse.sdkHttpResponse()).thenReturn(httpResponse);
 
         when(client.deleteObject(any(DeleteObjectRequest.class))).thenReturn(mockResponse);
 
@@ -167,27 +198,6 @@ public class StorageServiceTest {
                 req.bucket().equals(BUCKET) &&
                         req.key().equals(key) &&
                         req.versionId() == null
-        ));
-    }
-
-    @Test
-    void shouldDeleteSpecificObjectVersion() {
-        // Arrange
-        String key = "document.pdf";
-        String versionId = "v1-alpha";
-        DeleteObjectResponse mockResponse = DeleteObjectResponse.builder()
-                .deleteMarker(false)
-                .build();
-
-        when(client.deleteObject(any(DeleteObjectRequest.class))).thenReturn(mockResponse);
-
-        // Act
-        Boolean result = service.deleteObject(BUCKET, key, versionId);
-
-        // Assert
-        assertThat(result).isFalse();
-        verify(client).deleteObject(argThat((DeleteObjectRequest req) ->
-                req.versionId().equals(versionId)
         ));
     }
 

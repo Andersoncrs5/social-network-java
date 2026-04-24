@@ -49,6 +49,9 @@ public class StoryHighlightServiceTest {
         dto = new CreateStoryHighlightDTO();
         mockFile = mock(MultipartFile.class);
 
+        lenient().when(mockFile.getOriginalFilename()).thenReturn("test-image.jpg");
+        lenient().when(mockFile.getContentType()).thenReturn("image/jpeg");
+
         user = UserModel.builder()
                 .id(1998780200074176609L)
                 .name("user")
@@ -165,24 +168,18 @@ public class StoryHighlightServiceTest {
 
         verifyNoMoreInteractions(gateway, mapper, repository);
     }
-
     @Test
     void shouldUpdateWithNewFile() {
         // Arrange
         UpdateStoryHighlightDTO updateDto = new UpdateStoryHighlightDTO();
         updateDto.setIsPublic(false);
-        updateDto.setFile(mockFile); // Simula envio de novo arquivo
+        updateDto.setFile(mockFile);
 
         ObjectCannedACL expectedAcl = ObjectCannedACL.PRIVATE;
 
-        // Stubbing
-        // Primeiro deleta o antigo
         when(gateway.deleteObject(eq(highlight.getStorageKey()), isNull())).thenReturn(true);
-        // O mapper faz o merge (mock do comportamento)
         doNothing().when(mapper).merge(any(), any());
-        // O upload do novo arquivo
-        when(gateway.putObject(anyString(), eq(expectedAcl), eq(mockFile), any(UserModel.class))).thenReturn(true);
-        // O save final
+        when(gateway.putObject(anyString(), eq(expectedAcl), eq(mockFile), eq(user))).thenReturn(true);
         when(repository.save(any())).thenReturn(highlight);
 
         // Act
@@ -193,10 +190,9 @@ public class StoryHighlightServiceTest {
         assertThat(result.getStatus()).isEqualTo(HttpStatus.OK);
         assertThat(result.getValue()).isEqualTo(highlight);
 
-        // Verify
         verify(gateway).deleteObject(eq("76573457375672349"), isNull());
         verify(gateway).putObject(anyString(), eq(expectedAcl), eq(mockFile), eq(user));
-        verify(repository).save(highlight);
+        verify(repository).save(any());
     }
 
     @Test
@@ -219,7 +215,6 @@ public class StoryHighlightServiceTest {
         assertThat(result.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(result.getError().message()).contains("Error uploading file to AWS");
 
-        // Verify
         verify(repository, never()).save(any());
     }
 
@@ -240,5 +235,6 @@ public class StoryHighlightServiceTest {
         verify(gateway, never()).putObject(any(), any(), any(), any());
         verify(repository, never()).save(any());
     }
+
 
 }

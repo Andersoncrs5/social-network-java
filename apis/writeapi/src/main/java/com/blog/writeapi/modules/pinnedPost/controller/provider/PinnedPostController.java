@@ -40,9 +40,9 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
 
-        if (!Objects.equals(id, principal.getId())) {
-            throw new ResourceOwnerMismatchException("This post is not your!");
-        }
+//        if (Objects.equals(id, principal.getId())) {
+//            throw new ResourceOwnerMismatchException("This post is not your!");
+//        }
 
         PinnedPostModel pinned = service.findByIdSimple(id);
         this.service.delete(pinned);
@@ -91,9 +91,9 @@ public class PinnedPostController implements IPinnedPostControllerDocs {
             @RequestHeader("X-Idempotency-Key") String idempotencyKey
     ) {
 
-        if (!Objects.equals(id, principal.getId())) {
-            throw new ResourceOwnerMismatchException("This post is not your!");
-        }
+//        if (Objects.equals(id, principal.getId())) {
+//            throw new ResourceOwnerMismatchException("This post is not your!");
+//        }
 
         PinnedPostModel pinned = this.service.findByIdSimple(id);
 

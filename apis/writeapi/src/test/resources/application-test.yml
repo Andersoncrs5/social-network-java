@@ -43,14 +43,14 @@ spring:
     virtual:
       enabled: true
 
-  # LocalStack / S3 Mocks para testes
-  cloud:
-    aws:
-      s3:
-        endpoint: http://localhost:4566
-      credentials:
-        access-key: test
-        secret-key: test
+#  # LocalStack / S3 Mocks para testes
+#  cloud:
+#    aws:
+#      s3:
+#        endpoint: http://localhost:4566
+#      credentials:
+#        access-key: test
+#        secret-key: test
 
 # Mantemos as configs de Argon2 iguais para garantir que o login funcione nos testes
 argon:

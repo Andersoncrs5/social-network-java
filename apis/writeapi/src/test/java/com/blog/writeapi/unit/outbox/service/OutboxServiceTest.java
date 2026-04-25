@@ -1,4 +1,4 @@
-package com.blog.writeapi.unit.outbox;
+package com.blog.writeapi.unit.outbox.service;
 
 import com.blog.writeapi.modules.outbox.dto.CreateOutboxDTO;
 import com.blog.writeapi.modules.outbox.gateway.OutboxModuleGateway;

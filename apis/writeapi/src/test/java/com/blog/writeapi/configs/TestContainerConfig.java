@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
@@ -26,6 +27,13 @@ public class TestContainerConfig {
         return new RedisContainer(
                 DockerImageName.parse("redis:7.2")
         ).withReuse(true);
+    }
+
+    @Bean
+    @ServiceConnection
+    public KafkaContainer kafkaContainer() {
+        return new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"))
+                .withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true");
     }
 
 }

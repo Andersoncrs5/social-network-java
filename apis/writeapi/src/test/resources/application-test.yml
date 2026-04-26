@@ -1,6 +1,7 @@
 logging:
   level:
     com.zaxxer.hikari: DEBUG
+    com.blog.writeapi.modules.metric.service.provider: INFO
 
 server:
   port: 8889
@@ -15,6 +16,21 @@ resilience4j:
     enabled: false
 
 spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: write-api-group-id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.blog.writeapi.*"
+
   datasource:
     hikari:
       pool-name: WriteApiTestPool
@@ -42,15 +58,6 @@ spring:
   threads:
     virtual:
       enabled: true
-
-#  # LocalStack / S3 Mocks para testes
-#  cloud:
-#    aws:
-#      s3:
-#        endpoint: http://localhost:4566
-#      credentials:
-#        access-key: test
-#        secret-key: test
 
 # Mantemos as configs de Argon2 iguais para garantir que o login funcione nos testes
 argon:

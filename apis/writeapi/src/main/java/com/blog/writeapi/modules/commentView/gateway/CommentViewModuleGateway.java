@@ -2,6 +2,8 @@ package com.blog.writeapi.modules.commentView.gateway;
 
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.comment.service.docs.ICommentService;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
+import com.blog.writeapi.modules.metric.service.interfaces.IMetricService;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
 import com.blog.writeapi.modules.user.models.UserModel;
@@ -17,6 +19,11 @@ public class CommentViewModuleGateway {
     private final IUserService userService;
     private final IPostService postService;
     private final ICommentService commentService;
+    private final IMetricService service;
+
+    public void handleMetricComment(CommentMetricEventDTO dto) {
+        service.handleEventComment(dto);
+    }
 
     public CommentModel getCommentById(@IsId Long id) {
         return this.commentService.getByIdSimple(id);

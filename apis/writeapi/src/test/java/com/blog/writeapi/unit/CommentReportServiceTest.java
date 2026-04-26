@@ -3,6 +3,7 @@ package com.blog.writeapi.unit;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentReport.dto.CreateCommentReportDTO;
+import com.blog.writeapi.modules.commentReport.gateway.CommentReportModuleGateway;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.commentReport.repository.CommentReportRepository;
 import com.blog.writeapi.modules.commentReport.service.provider.CommentReportService;
@@ -10,6 +11,8 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.enums.report.ReportReason;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentReportMapper;
@@ -34,6 +37,7 @@ public class CommentReportServiceTest {
 
     @Mock private CommentReportRepository repository;
     @Mock private Snowflake generator;
+    @Mock private CommentReportModuleGateway gateway;
 
     @InjectMocks private CommentReportService service;
     @Mock private ObjectMapper objectMapper;
@@ -144,7 +148,12 @@ public class CommentReportServiceTest {
         this.service.delete(report);
 
         verify(repository, times(1)).delete(report);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+            i.metric().equals(CommentMetricEnum.REPORT) &&
+                    i.action().equals(ActionEnum.RED) &&
+                            i.commentId().equals(comment.getId())
+        ));
+        verifyNoMoreInteractions(repository, gateway);
     }
 
     @Test
@@ -192,21 +201,27 @@ public class CommentReportServiceTest {
                 .thenReturn(report.getCommentContentSnapshot());
         when(repository.save(any(CommentReportModel.class)))
                 .thenReturn(report);
+        doNothing().when(gateway).handleMetricComment(any());
 
         CommentReportModel model = this.service.create(dto, comment, user);
 
         assertThat(model.getId()).isEqualTo(report.getId());
 
-        verifyNoMoreInteractions(repository);
-        verifyNoMoreInteractions(generator);
-        verifyNoMoreInteractions(mapper);
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+                i.metric().equals(CommentMetricEnum.REPORT) &&
+                        i.action().equals(ActionEnum.SUM) &&
+                        i.commentId().equals(comment.getId())
+        ));
 
-        InOrder order = inOrder(repository, generator, mapper, objectMapper);
+        verifyNoMoreInteractions(repository, generator, mapper);
+
+        InOrder order = inOrder(repository, generator, mapper, objectMapper, gateway);
 
         order.verify(mapper).toModel(eq(dto));
         order.verify(generator).nextId();
         order.verify(objectMapper).writeValueAsString(comment);
         order.verify(repository).save(any(CommentReportModel.class));
+        order.verify(gateway).handleMetricComment(any());
     }
 
 

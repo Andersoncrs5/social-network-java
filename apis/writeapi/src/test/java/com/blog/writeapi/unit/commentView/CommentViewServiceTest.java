@@ -11,6 +11,8 @@ import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -101,7 +103,12 @@ public class CommentViewServiceTest {
         this.service.delete(view);
 
         verify(repository, times(1)).delete(view);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+                i.commentId().equals(comment.getId()) &&
+                        i.metric().equals(CommentMetricEnum.VIEW) &&
+                        i.action().equals(ActionEnum.RED)
+        ));
+        verifyNoMoreInteractions(repository, gateway);
     }
 
     @Test
@@ -192,10 +199,13 @@ public class CommentViewServiceTest {
                 .getCommentById(comment.getId());
         verify(gateway, times(1))
                 .getUserById(user.getId());
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+                i.commentId().equals(comment.getId()) &&
+                        i.metric().equals(CommentMetricEnum.VIEW) &&
+                        i.action().equals(ActionEnum.SUM)
+        ));
 
-        verifyNoMoreInteractions(gateway);
-        verifyNoMoreInteractions(generator);
-        verifyNoMoreInteractions(repository);
+        verifyNoMoreInteractions(gateway, repository, generator);
 
         InOrder order = inOrder(gateway, repository, generator);
 
@@ -203,6 +213,7 @@ public class CommentViewServiceTest {
         order.verify(gateway).getUserById(user.getId());
         order.verify(generator).nextId();
         order.verify(repository).save(any());
+        order.verify(gateway).handleMetricComment(any());
     }
 
 }

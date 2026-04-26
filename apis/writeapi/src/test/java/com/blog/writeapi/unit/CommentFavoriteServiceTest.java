@@ -10,6 +10,8 @@ import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.modules.commentFavorite.repository.CommentFavoriteRepository;
 import com.blog.writeapi.modules.commentFavorite.service.providers.CommentFavoriteService;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -93,15 +95,20 @@ public class CommentFavoriteServiceTest {
     public void shouldCreateCommentFavorite() {
         when(this.generator.nextId()).thenReturn(this.favorite.getId());
         when(this.repository.save(this.favorite)).thenReturn(this.favorite);
+        doNothing().when(gateway).handleMetricComment(any());
 
         CommentFavoriteModel model = this.service.add(this.user, this.comment);
         assertThat(model).isEqualTo(this.favorite);
 
         verify(this.generator, times(1)).nextId();
         verify(this.repository, times(1)).save(this.favorite);
+        verify(gateway, times(1)).handleMetricComment(argThat(i  ->
+                    i.commentId().equals(comment.getId()) &&
+                    i.metric().equals(CommentMetricEnum.FAVORITE) &&
+                            i.action().equals(ActionEnum.SUM)
+        ));
 
-        verifyNoMoreInteractions(repository);
-        verifyNoMoreInteractions(generator);
+        verifyNoMoreInteractions(repository, generator, gateway);
     }
 
     @Test
@@ -168,7 +175,12 @@ public class CommentFavoriteServiceTest {
         this.service.remove(this.favorite);
 
         verify(repository, times(1)).delete(this.favorite);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetricComment(argThat(i  ->
+                i.commentId().equals(comment.getId()) &&
+                        i.metric().equals(CommentMetricEnum.FAVORITE) &&
+                        i.action().equals(ActionEnum.RED)
+        ));
+        verifyNoMoreInteractions(repository, gateway);
     }
 
 }

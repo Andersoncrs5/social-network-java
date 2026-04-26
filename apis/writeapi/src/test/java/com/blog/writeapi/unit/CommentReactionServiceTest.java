@@ -11,6 +11,8 @@ import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.commentReaction.repository.CommentReactionRepository;
 import com.blog.writeapi.modules.commentReaction.service.providers.CommentReactionService;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -161,6 +163,9 @@ public class CommentReactionServiceTest {
 
         verify(generator, times(1)).nextId();
         verify(repository, times(1)).save(any(CommentReactionModel.class));
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+            i.commentId().equals(comment.getId()) && i.action().equals(ActionEnum.SUM) && i.metric().equals(CommentMetricEnum.REACTION)
+        ));
 
         verifyNoMoreInteractions(generator, repository);
     }
@@ -192,11 +197,18 @@ public class CommentReactionServiceTest {
     @Test
     void shouldDeleteCommentReaction() {
         doNothing().when(repository).delete(this.commentReaction);
+        doNothing().when(gateway).handleMetricComment(any());
 
         this.service.delete(this.commentReaction);
 
         verify(repository, times(1)).delete(this.commentReaction);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetricComment(argThat(i ->
+                i.commentId().equals(comment.getId()) &&
+                        i.action().equals(ActionEnum.RED) &&
+                        i.metric().equals(CommentMetricEnum.REACTION)
+        ));
+
+        verifyNoMoreInteractions(repository, gateway);
     }
 
 }

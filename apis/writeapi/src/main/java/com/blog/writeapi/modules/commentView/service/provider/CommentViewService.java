@@ -7,11 +7,14 @@ import com.blog.writeapi.modules.commentView.gateway.CommentViewModuleGateway;
 import com.blog.writeapi.modules.commentView.model.CommentViewModel;
 import com.blog.writeapi.modules.commentView.repository.CommentViewRepository;
 import com.blog.writeapi.modules.commentView.service.interfaces.ICommentViewService;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -34,6 +37,11 @@ public class CommentViewService implements ICommentViewService {
     @Override
     public void delete(@IsModelInitialized CommentViewModel view) {
         repository.delete(view);
+        gateway.handleMetricComment(CommentMetricEventDTO.create(
+                view.getComment().getId(),
+                CommentMetricEnum.VIEW,
+                ActionEnum.RED
+        ));
     }
 
     @Override
@@ -70,7 +78,13 @@ public class CommentViewService implements ICommentViewService {
                 .build();
 
         try {
-            return this.repository.save(view);
+            CommentViewModel save = this.repository.save(view);
+            gateway.handleMetricComment(CommentMetricEventDTO.create(
+                    comment.getId(),
+                    CommentMetricEnum.VIEW,
+                    ActionEnum.SUM
+            ));
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
 

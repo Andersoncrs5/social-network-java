@@ -4,12 +4,15 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentReaction.gateway.CommentReactionModuleGateway;
 import com.blog.writeapi.modules.commentReaction.models.CommentReactionModel;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.reaction.models.ReactionModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.commentReaction.repository.CommentReactionRepository;
 import com.blog.writeapi.modules.commentReaction.service.docs.ICommentReactionService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -85,7 +88,13 @@ public class CommentReactionService implements ICommentReactionService {
                 .build();
 
         try {
-            return this.repository.save(model);
+            CommentReactionModel save = this.repository.save(model);
+
+            this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                    comment.getId(), CommentMetricEnum.REACTION, ActionEnum.SUM
+            ));
+
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)
@@ -103,10 +112,13 @@ public class CommentReactionService implements ICommentReactionService {
     }
 
     @Override
-    @Transactional
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized CommentReactionModel model) {
         this.repository.delete(model);
+
+        this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                model.getComment().getId(), CommentMetricEnum.REACTION, ActionEnum.RED
+        ));
     }
 
     @Override

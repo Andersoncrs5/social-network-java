@@ -4,12 +4,15 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.commentFavorite.gateway.CommentFavoriteModuleGateway;
 import com.blog.writeapi.modules.commentFavorite.models.CommentFavoriteModel;
 import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.commentFavorite.repository.CommentFavoriteRepository;
 import com.blog.writeapi.modules.commentFavorite.service.docs.ICommentFavoriteService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
@@ -80,7 +83,11 @@ public class CommentFavoriteService implements ICommentFavoriteService {
                 .build();
 
         try {
-            return this.repository.save(favor);
+            CommentFavoriteModel save = this.repository.save(favor);
+            this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                    comment.getId(), CommentMetricEnum.FAVORITE, ActionEnum.SUM
+            ));
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)
@@ -101,6 +108,9 @@ public class CommentFavoriteService implements ICommentFavoriteService {
     @Retry(name = "delete-retry")
     public void remove(@IsModelInitialized CommentFavoriteModel model) {
         this.repository.delete(model);
+        this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                model.getComment().getId(), CommentMetricEnum.FAVORITE, ActionEnum.RED
+        ));
     }
 
     @Override

@@ -5,10 +5,14 @@ import com.blog.writeapi.modules.commentVote.dtos.ToggleCommentVoteDTO;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentVote.gateway.CommentVoteModuleGateway;
 import com.blog.writeapi.modules.commentVote.models.CommentVoteModel;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.commentVote.repository.CommentVoteRepository;
 import com.blog.writeapi.modules.commentVote.service.docs.ICommentVoteService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
+import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -45,6 +49,21 @@ public class CommentVoteService implements ICommentVoteService {
             @IsModelInitialized CommentVoteModel vote
     ) {
         repository.delete(vote);
+        if (vote.getType().equals(VoteTypeEnum.UPVOTE)) {
+            gateway.handleMetricComment(CommentMetricEventDTO.create(
+                    vote.getComment().getId(),
+                    CommentMetricEnum.UPVOTE,
+                    ActionEnum.RED
+            ));
+        }
+
+        if (vote.getType().equals(VoteTypeEnum.DOWNVOTE)) {
+            gateway.handleMetricComment(CommentMetricEventDTO.create(
+                    vote.getComment().getId(),
+                    CommentMetricEnum.DOWNVOTE,
+                    ActionEnum.RED
+            ));
+        }
     }
 
     @Override
@@ -68,7 +87,25 @@ public class CommentVoteService implements ICommentVoteService {
                 .build();
 
         try {
-            return this.repository.save(vote);
+            CommentVoteModel saved = this.repository.save(vote);
+
+            if (saved.getType().equals(VoteTypeEnum.UPVOTE)) {
+                gateway.handleMetricComment(CommentMetricEventDTO.create(
+                        saved.getComment().getId(),
+                        CommentMetricEnum.UPVOTE,
+                        ActionEnum.SUM
+                ));
+            }
+
+            if (saved.getType().equals(VoteTypeEnum.DOWNVOTE)) {
+                gateway.handleMetricComment(CommentMetricEventDTO.create(
+                        saved.getComment().getId(),
+                        CommentMetricEnum.DOWNVOTE,
+                        ActionEnum.SUM
+                ));
+            }
+
+            return saved;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)

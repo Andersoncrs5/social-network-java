@@ -4,13 +4,17 @@ import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.commentReport.dto.CreateCommentReportDTO;
 import com.blog.writeapi.modules.commentReport.dto.UpdateCommentReportDTO;
+import com.blog.writeapi.modules.commentReport.gateway.CommentReportModuleGateway;
 import com.blog.writeapi.modules.commentReport.model.CommentReportModel;
 import com.blog.writeapi.modules.commentReport.repository.CommentReportRepository;
 import com.blog.writeapi.modules.commentReport.service.interfaces.ICommentReportService;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
@@ -30,8 +34,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Slf4j
-@Service
-@Validated
+@Service @Validated
 @RequiredArgsConstructor
 public class CommentReportService implements ICommentReportService {
 
@@ -39,6 +42,7 @@ public class CommentReportService implements ICommentReportService {
     private final CommentReportMapper mapper;
     private final Snowflake snowflake;
     private final ObjectMapper objectMapper;
+    private final CommentReportModuleGateway gateway;
 
     @Override
     public CommentReportModel findByIdSimple(@IsId Long id) {
@@ -68,6 +72,10 @@ public class CommentReportService implements ICommentReportService {
         }
 
         this.repository.delete(model);
+
+        this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                model.getComment().getId(), CommentMetricEnum.REPORT, ActionEnum.RED
+        ));
     }
 
     @Override
@@ -99,7 +107,13 @@ public class CommentReportService implements ICommentReportService {
             throw new RuntimeException(e);
         }
 
-        return repository.save(report);
+        CommentReportModel save = repository.save(report);
+
+        this.gateway.handleMetricComment(CommentMetricEventDTO.create(
+                comment.getId(), CommentMetricEnum.REPORT, ActionEnum.SUM
+        ));
+
+        return save;
     }
 
     @Override

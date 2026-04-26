@@ -126,6 +126,7 @@ public class PostReactionServiceTest {
     void shouldCreateNewReaction() {
         when(generator.nextId()).thenReturn(postReaction.getId());
         when(repository.save(any(PostReactionModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(gateway).handleMetric(any());
 
         PostReactionModel model = service.create(post, reaction, user);
 
@@ -135,10 +136,12 @@ public class PostReactionServiceTest {
 
         verify(repository, times(1)).save(any(PostReactionModel.class));
         verify(generator, times(1)).nextId();
+        verify(gateway, times(1)).handleMetric(any());
 
-        InOrder inOrder = inOrder(generator, repository);
+        InOrder inOrder = inOrder(generator, repository, gateway);
         inOrder.verify(generator).nextId();
         inOrder.verify(repository).save(any(PostReactionModel.class));
+        inOrder.verify(gateway).handleMetric(any());
 
         verifyNoMoreInteractions(repository, generator, gateway);
     }
@@ -170,9 +173,11 @@ public class PostReactionServiceTest {
     @Test
     void shouldDeletePostReaction() {
         doNothing().when(repository).delete(this.postReaction);
+        doNothing().when(gateway).handleMetric(any());
 
         this.service.delete(this.postReaction);
 
+        verify(gateway, times(1)).handleMetric(any());
         verify(repository, times(1)).delete(this.postReaction);
         verifyNoMoreInteractions(repository);
     }

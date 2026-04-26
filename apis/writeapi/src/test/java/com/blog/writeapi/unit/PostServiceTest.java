@@ -2,11 +2,14 @@ package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
+import com.blog.writeapi.modules.post.gateway.PostModuleGateway;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.modules.post.services.providers.PostService;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +31,7 @@ public class PostServiceTest {
     @Mock private PostRepository repository;
     @Mock private Snowflake generator;
     @Mock private PostMapper mapper;
+    @Mock private PostModuleGateway gateway;
 
     @InjectMocks private PostService service;
 
@@ -68,6 +72,7 @@ public class PostServiceTest {
     void shouldDeletePostSuccessfully() {
         Long id = post.getId();
         when(repository.deleteAndCount(id)).thenReturn(1);
+        when(repository.findById(anyLong())).thenReturn(Optional.of(post));
 
         service.deleteAndCount(id);
 
@@ -223,6 +228,45 @@ public class PostServiceTest {
 
         verify(generator, times(1)).nextId();
         verifyNoMoreInteractions(this.generator);
+    }
+
+    @Test
+    @DisplayName("Should delete post and handle RED metric when parent exists")
+    void shouldDeletePostAndHandleMetric() {
+        Long id = post.getId();
+
+        when(repository.deleteAndCount(id)).thenReturn(1);
+        when(repository.findById(id)).thenReturn(Optional.of(post));
+
+        service.deleteAndCount(id);
+
+        verify(repository).deleteAndCount(id);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(postParent.getId()) &&
+                        metric.metric() == PostMetricEnum.PARENT &&
+                        metric.action() == ActionEnum.RED
+        ));
+    }
+
+    @Test
+    @DisplayName("Should create post with parent and handle SUM metric")
+    void shouldCreatePostWithParentAndHandleMetric() {
+        CreatePostDTO dto = new CreatePostDTO(
+                "title", "slug", "content", 5, postParent.getId()
+        );
+
+        when(mapper.toModel(dto)).thenReturn(post);
+        when(repository.findById(postParent.getId())).thenReturn(Optional.of(postParent));
+        when(repository.save(any())).thenReturn(post);
+        when(generator.nextId()).thenReturn(post.getId());
+
+        service.create(dto, user);
+
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(postParent.getId()) &&
+                        metric.metric() == PostMetricEnum.PARENT &&
+                        metric.action() == ActionEnum.SUM
+        ));
     }
 
 }

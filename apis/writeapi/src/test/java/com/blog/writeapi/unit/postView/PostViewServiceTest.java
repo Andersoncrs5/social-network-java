@@ -100,6 +100,7 @@ public class PostViewServiceTest {
                 .thenReturn(view.getId());
         when(repository.save(any()))
                 .thenReturn(view);
+        doNothing().when(gateway).handleMetric(any());
 
         PostViewModel model = this.service.create(user, post, metadataDTO, view.getViewedAtDate());
 
@@ -107,11 +108,13 @@ public class PostViewServiceTest {
 
         verify(repository, times(1)).save(any());
         verify(generator, times(1)).nextId();
+        verify(gateway, times(1)).handleMetric(any());
 
-        InOrder order = inOrder(repository, generator);
+        InOrder order = inOrder(repository, generator, gateway);
 
         order.verify(generator).nextId();
         order.verify(repository).save(any());
+        order.verify(gateway).handleMetric(any());
     }
 
     @Test
@@ -208,11 +211,14 @@ public class PostViewServiceTest {
         doNothing()
                 .when(repository)
                 .delete(view);
+        doNothing().when(gateway).handleMetric(any());
 
         this.service.delete(view);
 
         verify(repository, times(1)).delete(view);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetric(any());
+
+        verifyNoMoreInteractions(repository, gateway);
     }
 
 }

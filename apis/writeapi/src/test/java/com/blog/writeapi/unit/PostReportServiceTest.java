@@ -3,12 +3,16 @@ package com.blog.writeapi.unit;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
+import com.blog.writeapi.modules.reportPost.gateway.PostReportModuleGateway;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.reportPost.repository.PostReportRepository;
 import com.blog.writeapi.modules.reportPost.services.provider.PostReportService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.enums.report.ReportReason;
+import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import com.blog.writeapi.utils.mappers.PostReportMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,6 +29,7 @@ import java.time.OffsetDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +39,7 @@ public class PostReportServiceTest {
     @Mock private Snowflake generator;
     @Mock private ObjectMapper objectMapper;
     @Mock private PostReportMapper mapper;
+    @Mock private PostReportModuleGateway gateway;
 
     @InjectMocks private PostReportService service;
 
@@ -70,25 +76,30 @@ public class PostReportServiceTest {
             .build();
 
     @Test
-    void shouldReturnTrueWhenExistsByPostAndUser() {
-        when(repository.existsByPostAndUser(post, user))
-                .thenReturn(true);
-        Boolean exists = this.service.existsByPostAndUser(post, user);
+    void shouldThrowBusinessRuleExceptionWhenDeletingAfter24Hours() {
+        PostReportModel oldReport = report.toBuilder()
+                .createdAt(OffsetDateTime.now().minusHours(25))
+                .build();
 
-        assertThat(exists).isTrue();
-
-        verify(repository, times(1)).existsByPostAndUser(post, user);
-        verifyNoMoreInteractions(repository);
+        assertThrows(BusinessRuleException.class, () -> service.delete(oldReport, user.getId()));
+        verifyNoInteractions(repository);
     }
 
     @Test
-    void shouldDeletePostReport() {
-        doNothing().when(repository).delete(report);
+    void shouldThrowBusinessRuleExceptionWhenUserDoesNotMatch() {
+        assertThrows(BusinessRuleException.class, () -> service.delete(report, 999L));
+        verifyNoInteractions(repository);
+    }
 
+    @Test
+    void shouldDeleteReportAndHandleMetric() {
         this.service.delete(report, user.getId());
 
-        verify(repository, times(1)).delete(report);
-        verifyNoMoreInteractions(repository);
+        verify(repository).delete(report);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.metric() == PostMetricEnum.REPORT &&
+                        metric.action() == ActionEnum.RED
+        ));
     }
 
     @Test
@@ -116,14 +127,43 @@ public class PostReportServiceTest {
         verify(generator, times(1)).nextId();
         verify(objectMapper, times(1)).writeValueAsString(post);
         verify(repository, times(1)).save(any(PostReportModel.class));
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.metric() == PostMetricEnum.REPORT &&
+                        metric.action() == ActionEnum.SUM
+        ));
 
-        InOrder order = inOrder(mapper, generator, objectMapper, repository);
+        InOrder order = inOrder(mapper, generator, objectMapper, repository, gateway);
 
         order.verify(mapper).toModel(any(CreatePostReportDTO.class));
         order.verify(generator).nextId();
         order.verify(objectMapper).writeValueAsString(post);
         order.verify(repository).save(any(PostReportModel.class));
+        order.verify(gateway).handleMetric(any());
+    }
 
+    @Test
+    void shouldThrowUniqueConstraintViolationExceptionWhenReportAlreadyExists() throws JsonProcessingException {
+        CreatePostReportDTO dto = new CreatePostReportDTO("desc", ReportReason.HATE_SPEECH, post.getId());
+
+        when(mapper.toModel(any(CreatePostReportDTO.class))).thenReturn(report);
+        var rootCause = new RuntimeException("uk_post_report");
+        var dataIntegrityException = new DataIntegrityViolationException("Conflict", rootCause);
+
+        when(repository.save(any())).thenThrow(dataIntegrityException);
+
+        assertThrows(UniqueConstraintViolationException.class, () -> service.create(dto, post, user));
+    }
+
+    @Test
+    void shouldReturnTrueWhenExistsByPostAndUser() {
+        when(repository.existsByPostAndUser(post, user))
+                .thenReturn(true);
+        Boolean exists = this.service.existsByPostAndUser(post, user);
+
+        assertThat(exists).isTrue();
+
+        verify(repository, times(1)).existsByPostAndUser(post, user);
+        verifyNoMoreInteractions(repository);
     }
 
     @Test

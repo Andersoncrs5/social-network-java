@@ -7,6 +7,8 @@ import com.blog.writeapi.modules.postVote.gateway.PostVoteGatewayModule;
 import com.blog.writeapi.modules.postVote.models.PostVoteModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.modules.postVote.repository.PostVoteRepository;
 import com.blog.writeapi.modules.postVote.service.providers.PostVoteService;
@@ -23,6 +25,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -126,34 +129,81 @@ public class PostVoteServiceTest {
     }
 
     @Test
-    void shouldVoteByVote() {
-        doNothing().when(repository).delete(this.vote);
+    void shouldDeleteVoteAndHandleUpvoteDecrementMetric() {
+        PostVoteModel upvote = this.vote.toBuilder().type(VoteTypeEnum.UPVOTE).build();
 
-        this.service.delete(this.vote);
+        this.service.delete(upvote);
 
-        verify(repository, times(1)).delete(this.vote);
-        verifyNoMoreInteractions(repository);
+        verify(repository).delete(upvote);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(upvote.getPost().getId()) &&
+                        metric.metric() == PostMetricEnum.UPVOTE &&
+                        metric.action() == ActionEnum.RED
+        ));
     }
 
     @Test
-    void shouldCreateNewVote() {
-        TogglePostVoteDTO dto = new TogglePostVoteDTO(
-                this.post.getId(),
-                this.vote.getType()
-        );
+    void shouldDeleteVoteAndHandleDownvoteDecrementMetric() {
+        PostVoteModel downvote = this.vote.toBuilder().type(VoteTypeEnum.DOWNVOTE).build();
 
-        when(generator.nextId()).thenReturn(this.vote.getId());
-        when(repository.save(any())).thenReturn(this.vote);
+        this.service.delete(downvote);
 
-        PostVoteModel voteModel = this.service.create(dto, user, post);
+        verify(repository).delete(downvote);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(downvote.getPost().getId()) &&
+                        metric.metric() == PostMetricEnum.DOWNVOTE &&
+                        metric.action() == ActionEnum.RED
+        ));
+    }
 
-        assertThat(voteModel).isEqualTo(vote);
+    @Test
+    void shouldCreateNewVoteAndHandleUpvoteMetric() {
+        TogglePostVoteDTO dto = new TogglePostVoteDTO(this.post.getId(), VoteTypeEnum.UPVOTE);
+        PostVoteModel voteUpvote = this.vote.toBuilder().type(VoteTypeEnum.UPVOTE).build();
 
-        verify(repository, times(1)).save(any());
-        verify(generator, times(1)).nextId();
+        when(generator.nextId()).thenReturn(voteUpvote.getId());
+        when(repository.save(any())).thenReturn(voteUpvote);
 
-        verifyNoMoreInteractions(repository);
-        verifyNoMoreInteractions(generator);
+        this.service.create(dto, user, post);
+
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(post.getId()) &&
+                        metric.metric() == PostMetricEnum.UPVOTE &&
+                        metric.action() == ActionEnum.SUM
+        ));
+    }
+
+    @Test
+    void shouldCreateNewVoteAndHandleDownvoteMetric() {
+        TogglePostVoteDTO dto = new TogglePostVoteDTO(this.post.getId(), VoteTypeEnum.DOWNVOTE);
+        PostVoteModel voteDownvote = this.vote.toBuilder().type(VoteTypeEnum.DOWNVOTE).build();
+
+        when(generator.nextId()).thenReturn(voteDownvote.getId());
+        when(repository.save(any())).thenReturn(voteDownvote);
+
+        this.service.create(dto, user, post);
+
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(post.getId()) &&
+                        metric.metric() == PostMetricEnum.DOWNVOTE &&
+                        metric.action() == ActionEnum.SUM
+        ));
+    }
+
+    @Test
+    void shouldAllowVotingWhenUserIsNotBlocked() {
+        TogglePostVoteDTO dto = new TogglePostVoteDTO(post.getId(), VoteTypeEnum.UPVOTE);
+        UserModel author = new UserModel().toBuilder().id(888L).build();
+        PostModel postWithAuthor = post.toBuilder().author(author).build();
+
+        when(gateway.isBlocked(user.getId(), author.getId())).thenReturn(false);
+        when(generator.nextId()).thenReturn(vote.getId());
+        when(repository.save(any())).thenReturn(vote);
+
+        assertDoesNotThrow(() -> service.create(dto, user, postWithAuthor));
+
+        verify(repository).save(any());
+        verify(gateway).handleMetric(any());
     }
 
 }

@@ -2,6 +2,7 @@ package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
+import com.blog.writeapi.modules.comment.gateway.CommentModuleGateway;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
@@ -9,6 +10,9 @@ import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
 import com.blog.writeapi.modules.comment.repository.CommentRepository;
 import com.blog.writeapi.modules.comment.service.providers.CommentService;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import com.blog.writeapi.utils.result.Result;
@@ -30,6 +34,7 @@ public class CommentServiceTest {
 
     @Mock private CommentRepository repository;
     @Mock private Snowflake generator;
+    @Mock private CommentModuleGateway gateway;
 
     @InjectMocks private CommentService service;
     @Mock private CommentMapper mapper;
@@ -53,13 +58,25 @@ public class CommentServiceTest {
             .author(user)
             .build();
 
+    CommentModel commentParent = new CommentModel().toBuilder()
+            .id(1998780211111176609L)
+            .content("content")
+            .status(CommentStatusEnum.APPROVED)
+            .post(this.post)
+            .author(this.user)
+            .parent(null)
+            .edited(true)
+            .pinned(true)
+            .ipAddress("ip-45743567346")
+            .build();
+
     CommentModel comment = new CommentModel().toBuilder()
             .id(1998780200074176609L)
             .content("content")
             .status(CommentStatusEnum.APPROVED)
             .post(this.post)
             .author(this.user)
-            .parent(null)
+            .parent(commentParent)
             .edited(true)
             .pinned(true)
             .ipAddress("ip-45743567346")
@@ -92,25 +109,40 @@ public class CommentServiceTest {
 
     // METHOD: delete
     @Test
-    void shouldDeleteComment() {
+    void shouldDeleteCommentAndHandleMetric() {
         doNothing().when(repository).delete(this.comment);
 
         this.service.delete(this.comment);
 
-        verifyNoMoreInteractions(repository);
-        verify(this.repository, times(1)).delete(this.comment);
+        verify(repository).delete(this.comment);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(post.getId()) &&
+                        metric.metric() == PostMetricEnum.COMMENT &&
+                        metric.action() == ActionEnum.RED
+        ));
     }
 
     // DELETE: deleteByID
     @Test
-    void shouldDeleteByIdComment() {
-        when(repository.deleteByID(anyLong())).thenReturn(1);
+    void shouldDeleteByIdCommentAndHandleMetric() {
+        when(repository.deleteByID(comment.getId())).thenReturn(1);
+        when(repository.findById(comment.getId())).thenReturn(Optional.of(comment));
 
         Result<Void> result = this.service.deleteByID(comment.getId());
+
         assertThat(result.isSuccess()).isTrue();
 
-        verify(repository, times(1)).deleteByID(anyLong());
-        verifyNoMoreInteractions(repository);
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.postId().equals(post.getId()) &&
+                        metric.metric() == PostMetricEnum.COMMENT &&
+                        metric.action() == ActionEnum.RED
+        ));
+
+        verify(gateway).handleMetricComment(argThat(metric ->
+                metric.commentId().equals(comment.getParent().getId()) &&
+                        metric.metric() == CommentMetricEnum.PARENT &&
+                        metric.action() == ActionEnum.RED
+        ));
     }
 
     @Test
@@ -159,7 +191,6 @@ public class CommentServiceTest {
 
         when(mapper.toModel(dto)).thenReturn(mapped);
         when(this.generator.nextId()).thenReturn(this.comment.getId());
-
         when(repository.save(any(CommentModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CommentModel result = this.service.create(dto, this.post, this.user);
@@ -175,6 +206,26 @@ public class CommentServiceTest {
         verify(repository, times(1)).save(any(CommentModel.class));
     }
 
+    @Test
+    @DisplayName("Should create a comment reply and handle metric")
+    void shouldCreateCommentReplyAndHandleMetric() {
+        CreateCommentDTO dto = new CreateCommentDTO("Reply content", post.getId(), comment.getId());
 
+        when(mapper.toModel(dto)).thenReturn(new CommentModel());
+        when(generator.nextId()).thenReturn(123L);
+        when(repository.save(any(CommentModel.class))).thenAnswer(i -> i.getArgument(0));
 
+        this.service.create(dto, post, user, comment);
+
+        verify(gateway).handleMetric(argThat(metric ->
+                metric.metric() == PostMetricEnum.COMMENT &&
+                        metric.action() == ActionEnum.SUM
+        ));
+
+        verify(gateway).handleMetricComment(argThat(metric ->
+                metric.commentId().equals(comment.getId()) &&
+                        metric.metric() == CommentMetricEnum.PARENT &&
+                        metric.action() == ActionEnum.SUM
+        ));
+    }
 }

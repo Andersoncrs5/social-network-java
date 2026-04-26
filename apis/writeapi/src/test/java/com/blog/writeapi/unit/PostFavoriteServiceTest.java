@@ -1,6 +1,7 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.postFavorite.gateway.PostFavoriteModuleGateway;
 import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
 import com.blog.writeapi.modules.post.models.PostModel;
@@ -8,6 +9,8 @@ import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.postFavorite.repository.PostFavoriteRepository;
 import com.blog.writeapi.modules.postFavorite.service.providers.PostFavoriteService;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -23,8 +26,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,20 +72,26 @@ public class PostFavoriteServiceTest {
             .updatedAt(OffsetDateTime.now())
             .build();
 
-
     @Test
     @DisplayName("Should create post favorite successfully")
     void shouldCreatePostFavorite() {
+        PostMetricEventDTO dto = new PostMetricEventDTO(
+                post.getId(),
+                PostMetricEnum.FAVORITE,
+                ActionEnum.SUM
+        );
         when(generator.nextId()).thenReturn(this.favorite.getId());
         when(repository.save(any(PostFavoriteModel.class))).thenReturn(this.favorite);
+        doNothing().when(gateway).handleMetric(dto);
 
         PostFavoriteModel model = this.service.create(post, user);
 
         assertThat(model.getId()).isEqualTo(this.favorite.getId());
 
-        InOrder inOrder = inOrder(generator, repository);
+        InOrder inOrder = inOrder(generator, repository, gateway);
         inOrder.verify(generator).nextId();
         inOrder.verify(repository).save(any(PostFavoriteModel.class));
+        inOrder.verify(gateway).handleMetric(dto);
 
         verifyNoMoreInteractions(generator, repository, gateway);
     }
@@ -145,12 +153,21 @@ public class PostFavoriteServiceTest {
     // DELETE
     @Test
     void shouldDeletePostFavorite() {
+        PostMetricEventDTO dto = new PostMetricEventDTO(
+                post.getId(),
+                PostMetricEnum.FAVORITE,
+                ActionEnum.RED
+        );
+
         doNothing().when(repository).delete(this.favorite);
+        doNothing().when(gateway).handleMetric(dto);
 
         this.service.delete(this.favorite);
 
         verify(repository, times(1)).delete(this.favorite);
-        verifyNoMoreInteractions(repository);
+        verify(gateway, times(1)).handleMetric(dto);
+
+        verifyNoMoreInteractions(repository, gateway);
     }
 
     // ExistsByPostAndUser

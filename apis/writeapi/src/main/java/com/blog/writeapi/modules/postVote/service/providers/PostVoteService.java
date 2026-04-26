@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postVote.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.postVote.dtos.TogglePostVoteDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postVote.gateway.PostVoteGatewayModule;
@@ -10,6 +11,9 @@ import com.blog.writeapi.modules.postVote.repository.PostVoteRepository;
 import com.blog.writeapi.modules.postVote.service.docs.IPostVoteService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
+import com.blog.writeapi.utils.enums.votes.VoteTypeEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -18,12 +22,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -43,10 +46,22 @@ public class PostVoteService implements IPostVoteService {
     }
 
     @Override
-    @Transactional
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized PostVoteModel vote) {
         this.repository.delete(vote);
+
+        if (Objects.equals(vote.getType(), VoteTypeEnum.UPVOTE)) {
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(vote.getPost().getId(), PostMetricEnum.UPVOTE, ActionEnum.RED)
+            );
+        }
+
+        if (Objects.equals(vote.getType(), VoteTypeEnum.DOWNVOTE)) {
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(vote.getPost().getId(), PostMetricEnum.DOWNVOTE, ActionEnum.RED)
+            );
+        }
+
     }
 
     @Override
@@ -66,6 +81,18 @@ public class PostVoteService implements IPostVoteService {
                 .user(user)
                 .build();
 
+        if (Objects.equals(vote.getType(), VoteTypeEnum.UPVOTE)) {
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(post.getId(), PostMetricEnum.UPVOTE, ActionEnum.SUM)
+            );
+        }
+
+        if (Objects.equals(vote.getType(), VoteTypeEnum.DOWNVOTE)) {
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(post.getId(), PostMetricEnum.DOWNVOTE, ActionEnum.SUM)
+            );
+        }
+
         try {
             return this.repository.save(vote);
         } catch (DataIntegrityViolationException e) {
@@ -83,7 +110,6 @@ public class PostVoteService implements IPostVoteService {
     }
 
     @Override
-    @Transactional
     @Retry(name = "update-retry")
     public PostVoteModel updateSimple(@IsModelInitialized PostVoteModel vote) {
         return this.repository.save(vote);

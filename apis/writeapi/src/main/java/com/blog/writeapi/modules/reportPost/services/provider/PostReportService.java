@@ -1,15 +1,19 @@
 package com.blog.writeapi.modules.reportPost.services.provider;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.reportPost.dto.CreatePostReportDTO;
 import com.blog.writeapi.modules.reportPost.dto.UpdatePostReportDTO;
+import com.blog.writeapi.modules.reportPost.gateway.PostReportModuleGateway;
 import com.blog.writeapi.modules.reportPost.model.PostReportModel;
 import com.blog.writeapi.modules.reportPost.repository.PostReportRepository;
 import com.blog.writeapi.modules.reportPost.services.interfaces.IPostReportService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
@@ -40,6 +44,7 @@ public class PostReportService implements IPostReportService {
     private final Snowflake snowflake;
     private final PostReportMapper mapper;
     private final ObjectMapper objectMapper;
+    private final PostReportModuleGateway gateway;
 
     @Override
     public PostReportModel findByIdSimple(@IsId Long id) {
@@ -71,6 +76,10 @@ public class PostReportService implements IPostReportService {
         }
 
         this.repository.delete(report);
+
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(report.getPost().getId(), PostMetricEnum.REPORT, ActionEnum.RED)
+        );
     }
 
     @Override
@@ -95,7 +104,11 @@ public class PostReportService implements IPostReportService {
         }
 
         try {
-            return repository.save(report);
+            PostReportModel save = repository.save(report);
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(report.getPost().getId(), PostMetricEnum.REPORT, ActionEnum.SUM)
+            );
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)

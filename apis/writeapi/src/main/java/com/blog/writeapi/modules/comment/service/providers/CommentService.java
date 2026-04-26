@@ -3,7 +3,10 @@ package com.blog.writeapi.modules.comment.service.providers;
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.comment.dtos.CreateCommentDTO;
 import com.blog.writeapi.modules.comment.dtos.UpdateCommentDTO;
+import com.blog.writeapi.modules.comment.gateway.CommentModuleGateway;
 import com.blog.writeapi.modules.comment.models.CommentModel;
+import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
@@ -11,6 +14,9 @@ import com.blog.writeapi.modules.comment.repository.CommentRepository;
 import com.blog.writeapi.modules.comment.service.docs.ICommentService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import com.blog.writeapi.utils.result.Result;
@@ -32,6 +38,7 @@ public class CommentService implements ICommentService {
     private final CommentRepository repository;
     private final CommentMapper mapper;
     private final Snowflake generator;
+    private final CommentModuleGateway gateway;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,6 +59,10 @@ public class CommentService implements ICommentService {
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized CommentModel comment) {
         this.repository.delete(comment);
+
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(comment.getPost().getId(), PostMetricEnum.COMMENT, ActionEnum.RED)
+        );
     }
 
     @Override
@@ -63,7 +74,22 @@ public class CommentService implements ICommentService {
         if (result == 0)
             return Result.notFound("Comment not found");
 
-        return Result.success(null);
+        var comment = this.getByIdSimple(id);
+
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(comment.getPost().getId(), PostMetricEnum.COMMENT, ActionEnum.RED)
+        );
+
+        if (comment.getParent() != null)
+            this.gateway.handleMetricComment(
+                CommentMetricEventDTO.create(
+                    comment.getParent().getId(),
+                    CommentMetricEnum.PARENT,
+                    ActionEnum.RED
+                )
+            );
+
+        return Result.success();
     }
 
     @Override
@@ -101,7 +127,17 @@ public class CommentService implements ICommentService {
 
         model.setId(this.generator.nextId());
 
-        return repository.save(model);
+        CommentModel save = repository.save(model);
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(post.getId(), PostMetricEnum.COMMENT, ActionEnum.SUM)
+        );
+
+        if (model.getParent() != null)
+            this.gateway.handleMetricComment(
+                    CommentMetricEventDTO.create(save.getParent().getId(), CommentMetricEnum.PARENT, ActionEnum.SUM)
+            );
+
+        return save;
     }
 
     @Override

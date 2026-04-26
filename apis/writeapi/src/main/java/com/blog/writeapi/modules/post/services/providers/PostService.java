@@ -1,16 +1,20 @@
 package com.blog.writeapi.modules.post.services.providers;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
+import com.blog.writeapi.modules.post.gateway.PostModuleGateway;
 import com.blog.writeapi.modules.post.models.PostModel;
-import com.blog.writeapi.modules.user.models.UserModel;
-import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.modules.post.services.interfaces.IPostService;
+import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.global.slugConstraint.SlugConstraint;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -31,6 +35,7 @@ public class PostService implements IPostService {
     private final PostRepository repository;
     private final Snowflake generator;
     private final PostMapper mapper;
+    private final PostModuleGateway gateway;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,6 +70,11 @@ public class PostService implements IPostService {
     @Transactional
     public void delete(@IsModelInitialized PostModel post) {
         this.repository.delete(post);
+
+        if (post.getParent() != null)
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(post.getParent().getId(), PostMetricEnum.PARENT, ActionEnum.RED)
+            );
     }
 
     @Override @Transactional
@@ -75,6 +85,13 @@ public class PostService implements IPostService {
         if (Objects.equals(result, 0)) {
             throw new ModelNotFoundException("Post tag not found");
         }
+
+        PostModel post = this.getByIdSimple(id);
+
+        if (post.getParent() != null)
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(post.getParent().getId(), PostMetricEnum.PARENT, ActionEnum.RED)
+            );
     }
 
     @Override
@@ -92,9 +109,12 @@ public class PostService implements IPostService {
                     .orElseThrow(() -> new ModelNotFoundException("Parent post not found"));
 
             post.setParent(parent);
+
         }
 
-        return this.repository.save(post);
+        PostModel postSaved = this.repository.save(post);
+        this.gateway.handleMetric(PostMetricEventDTO.create(dto.parentId(), PostMetricEnum.PARENT, ActionEnum.SUM));
+        return postSaved;
     }
 
     @Override

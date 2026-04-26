@@ -2,6 +2,7 @@ package com.blog.writeapi.modules.postView.service.provider;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.configs.api.metadata.ClientMetadataDTO;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postView.gateway.PostViewModuleGateway;
 import com.blog.writeapi.modules.postView.model.PostViewModel;
@@ -9,6 +10,8 @@ import com.blog.writeapi.modules.postView.repository.PostViewRepository;
 import com.blog.writeapi.modules.postView.service.interfaces.IPostViewService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -37,7 +40,12 @@ public class PostViewService implements IPostViewService {
         return this.repository.existsByUserAndPost(user, post);
     }
 
-    public PostViewModel create(UserModel user, PostModel post, ClientMetadataDTO metadata, LocalDate today) {
+    public PostViewModel create(
+            UserModel user,
+            PostModel post,
+            ClientMetadataDTO metadata,
+            LocalDate today
+    ) {
         if (!user.getId().equals(post.getAuthor().getId()) && this.gateway.isBlocked(user.getId(), post.getAuthor().getId())) {
             throw new BusinessRuleException("You cannot react to a story from a blocked user.");
         }
@@ -54,7 +62,11 @@ public class PostViewService implements IPostViewService {
                 .build();
 
         try {
-            return this.repository.save(view);
+            PostViewModel save = this.repository.save(view);
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(save.getPost().getId(), PostMetricEnum.VIEW, ActionEnum.SUM)
+            );
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)
@@ -73,6 +85,9 @@ public class PostViewService implements IPostViewService {
     @Override
     public void delete(@IsModelInitialized PostViewModel view) {
         repository.delete(view);
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(view.getPost().getId(), PostMetricEnum.VIEW, ActionEnum.RED)
+        );
     }
 
     @Override

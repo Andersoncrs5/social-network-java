@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postReaction.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postReaction.gateway.PostReactionModuleGateway;
 import com.blog.writeapi.modules.postReaction.models.PostReactionModel;
@@ -10,6 +11,8 @@ import com.blog.writeapi.modules.postReaction.repository.PostReactionRepository;
 import com.blog.writeapi.modules.postReaction.service.docs.IPostReactionService;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
@@ -55,7 +58,11 @@ public class PostReactionService implements IPostReactionService {
                 .build();
 
         try {
-            return this.repository.save(postReaction);
+            PostReactionModel save = this.repository.save(postReaction);
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(save.getPost().getId(), PostMetricEnum.REACTION, ActionEnum.SUM)
+            );
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
 
@@ -92,6 +99,9 @@ public class PostReactionService implements IPostReactionService {
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized PostReactionModel model) {
         this.repository.delete(model);
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(model.getPost().getId(), PostMetricEnum.REACTION, ActionEnum.RED)
+        );
     }
 
     @Override

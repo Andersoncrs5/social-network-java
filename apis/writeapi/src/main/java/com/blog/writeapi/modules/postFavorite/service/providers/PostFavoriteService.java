@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postFavorite.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.postFavorite.gateway.PostFavoriteModuleGateway;
 import com.blog.writeapi.modules.postFavorite.models.PostFavoriteModel;
 import com.blog.writeapi.modules.post.models.PostModel;
@@ -10,6 +11,8 @@ import com.blog.writeapi.modules.postFavorite.service.docs.IPostFavoriteService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
 import com.blog.writeapi.utils.classes.ResultToggle;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
@@ -58,6 +61,9 @@ public class PostFavoriteService implements IPostFavoriteService {
     @Retry(name = "delete-retry")
     public void delete(@IsModelInitialized PostFavoriteModel model) {
         this.repository.delete(model);
+        this.gateway.handleMetric(
+                PostMetricEventDTO.create(model.getPost().getId(), PostMetricEnum.FAVORITE, ActionEnum.RED)
+        );
     }
 
     @Override
@@ -79,7 +85,11 @@ public class PostFavoriteService implements IPostFavoriteService {
                 .build();
 
         try {
-            return this.repository.save(favor);
+            PostFavoriteModel save = this.repository.save(favor);
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(post.getId(), PostMetricEnum.FAVORITE, ActionEnum.SUM)
+            );
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)

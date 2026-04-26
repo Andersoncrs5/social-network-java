@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.postShare.service.provider;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.postShare.gateway.PostShareModuleGateway;
 import com.blog.writeapi.modules.postShare.model.PostShareModel;
@@ -8,6 +9,8 @@ import com.blog.writeapi.modules.postShare.repository.PostShareRepository;
 import com.blog.writeapi.modules.postShare.service.interfaces.IPostShareService;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
 import com.blog.writeapi.utils.enums.postShare.SharePlatformEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
@@ -79,7 +82,11 @@ public class PostShareService implements IPostShareService {
                 .build();
 
         try {
-            return this.repository.save(model);
+            PostShareModel save = this.repository.save(model);
+            this.gateway.handleMetric(
+                    PostMetricEventDTO.create(save.getPost().getId(), PostMetricEnum.SHARE, ActionEnum.SUM)
+            );
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
 

@@ -13,6 +13,7 @@ import com.blog.writeapi.modules.comment.service.providers.CommentService;
 import com.blog.writeapi.utils.enums.metric.ActionEnum;
 import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import com.blog.writeapi.utils.result.Result;
@@ -120,6 +121,11 @@ public class CommentServiceTest {
                         metric.metric() == PostMetricEnum.COMMENT &&
                         metric.action() == ActionEnum.RED
         ));
+        verify(gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(user.getId()) &&
+                        metric.metric() == UserMetricEnum.COMMENT &&
+                        metric.action() == ActionEnum.RED
+        ));
     }
 
     // DELETE: deleteByID
@@ -141,6 +147,12 @@ public class CommentServiceTest {
         verify(gateway).handleMetricComment(argThat(metric ->
                 metric.commentId().equals(comment.getParent().getId()) &&
                         metric.metric() == CommentMetricEnum.PARENT &&
+                        metric.action() == ActionEnum.RED
+        ));
+
+        verify(gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(user.getId()) &&
+                        metric.metric() == UserMetricEnum.COMMENT &&
                         metric.action() == ActionEnum.RED
         ));
     }
@@ -226,6 +238,12 @@ public class CommentServiceTest {
                 metric.commentId().equals(comment.getId()) &&
                         metric.metric() == CommentMetricEnum.PARENT &&
                         metric.action() == ActionEnum.SUM
+        ));
+
+        verify(gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(user.getId()) &&
+                        metric.metric().equals(UserMetricEnum.COMMENT) &&
+                        metric.action().equals(ActionEnum.SUM)
         ));
     }
 }

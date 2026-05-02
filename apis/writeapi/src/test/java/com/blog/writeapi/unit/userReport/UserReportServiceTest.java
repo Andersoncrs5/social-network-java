@@ -8,6 +8,8 @@ import com.blog.writeapi.modules.userReport.gateway.UserReportModuleGateway;
 import com.blog.writeapi.modules.userReport.model.UserReportModel;
 import com.blog.writeapi.modules.userReport.repository.UserReportRepository;
 import com.blog.writeapi.modules.userReport.service.provider.UserReportService;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportReason;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
@@ -130,6 +132,11 @@ public class UserReportServiceTest {
         this.service.delete(report, report.getReporter().getId());
 
         verify(repository, times(1)).delete(report);
+        verify(gateway, times(1)).handleMetricUser(argThat(i ->
+                i.userId().equals(report.getReportedUser().getId()) &&
+                    i.metric().equals(UserMetricEnum.REPORT_RECEIVED) &&
+                        i.action().equals(ActionEnum.RED)
+                ));
     }
 
     @Test
@@ -172,6 +179,7 @@ public class UserReportServiceTest {
                 .thenReturn(report.getUserProfileSnapshot());
         when(repository.save(any(UserReportModel.class)))
                 .thenReturn(report);
+        doNothing().when(gateway).handleMetricUser(any());
 
         UserReportModel model = service.create(dto, reportedUser.getId(), reporter.getId());
 
@@ -183,6 +191,11 @@ public class UserReportServiceTest {
         verify(snowflake, times(1)).nextId();
         verify(objectMapper, times(1)).writeValueAsString(reportedUser);
         verify(repository, times(1)).save(any());
+        verify(gateway, times(1)).handleMetricUser(argThat(i ->
+                i.userId().equals(report.getReportedUser().getId()) &&
+                        i.metric().equals(UserMetricEnum.REPORT_RECEIVED) &&
+                        i.action().equals(ActionEnum.SUM)
+        ));
 
         InOrder order = inOrder(gateway, mapper, snowflake, objectMapper, repository);
 
@@ -192,6 +205,7 @@ public class UserReportServiceTest {
         order.verify(snowflake).nextId();
         order.verify(objectMapper).writeValueAsString(reportedUser);
         order.verify(repository).save(any());
+        order.verify(gateway).handleMetricUser(any());
 
     }
 

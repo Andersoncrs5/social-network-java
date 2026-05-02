@@ -1,10 +1,13 @@
 package com.blog.writeapi.unit;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.followers.gateway.FollowModuleGateway;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.followers.repository.FollowersRepository;
 import com.blog.writeapi.modules.followers.service.providers.FollowersService;
 import com.blog.writeapi.modules.user.models.UserModel;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.UniqueConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +28,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class FollowersServiceTest {
+
+    @Mock
+    private FollowModuleGateway gateway;
 
     @Mock
     private Snowflake generator;
@@ -156,16 +162,25 @@ public class FollowersServiceTest {
         verifyNoMoreInteractions(repository);
 
     }
-
     @Test
-    void shouldDeleteFollow() {
-        doNothing().when(repository).delete(model);
-
+    void shouldDeleteFollowAndHandleMetrics() {
         this.service.delete(model);
 
         verify(this.repository, times(1)).delete(model);
-        verifyNoMoreInteractions(repository);
 
+        verify(this.gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(model.getFollower().getId()) &&
+                        metric.metric() == UserMetricEnum.FOLLOWING &&
+                        metric.action() == ActionEnum.RED
+        ));
+
+        verify(this.gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(model.getFollowing().getId()) &&
+                        metric.metric() == UserMetricEnum.FOLLOW &&
+                        metric.action() == ActionEnum.RED
+        ));
+
+        verifyNoMoreInteractions(repository, gateway);
     }
 
     @Test
@@ -180,6 +195,19 @@ public class FollowersServiceTest {
 
         verify(repository, times(1)).save(any(FollowersModel.class));
         verify(generator, times(1)).nextId();
+
+        verify(this.gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(model.getFollower().getId()) &&
+                        metric.metric() == UserMetricEnum.FOLLOWING &&
+                        metric.action() == ActionEnum.SUM
+        ));
+
+        verify(this.gateway).handleMetricUser(argThat(metric ->
+                metric.userId().equals(model.getFollowing().getId()) &&
+                        metric.metric() == UserMetricEnum.FOLLOW &&
+                        metric.action() == ActionEnum.SUM
+        ));
+
 
         InOrder order = inOrder(repository, generator);
 

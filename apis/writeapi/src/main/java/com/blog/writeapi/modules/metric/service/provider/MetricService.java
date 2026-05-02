@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.metric.service.provider;
 
 import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.outbox.dto.CreateOutboxDTO;
 import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
 import com.blog.writeapi.modules.metric.gateway.PostMetricModuleGateway;
@@ -44,6 +45,19 @@ public class MetricService implements IMetricService {
         CreateOutboxDTO outboxDTO = new CreateOutboxDTO(
                 AggregateTypeEnum.COMMENT,
                 TopicEnum.COMMENT_METRIC,
+                EventTypeEnum.METRIC,
+                payload
+        );
+
+        gateway.addEvent(outboxDTO);
+    }
+
+    public void handleEventUser(UserMetricEventDTO dto) {
+        String payload = serialize(dto);
+
+        CreateOutboxDTO outboxDTO = new CreateOutboxDTO(
+                AggregateTypeEnum.USER,
+                TopicEnum.USER_METRIC,
                 EventTypeEnum.METRIC,
                 payload
         );

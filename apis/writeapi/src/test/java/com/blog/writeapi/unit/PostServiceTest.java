@@ -10,6 +10,7 @@ import com.blog.writeapi.modules.post.repository.PostRepository;
 import com.blog.writeapi.modules.post.services.providers.PostService;
 import com.blog.writeapi.utils.enums.metric.ActionEnum;
 import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -78,6 +79,11 @@ public class PostServiceTest {
 
         verify(repository, times(1)).deleteAndCount(id);
         verifyNoMoreInteractions(repository);
+        verify(gateway).handleMetricUser(argThat(i ->
+                i.action().equals(ActionEnum.RED) &&
+                        i.metric().equals(UserMetricEnum.POST) &&
+                        i.userId().equals(user.getId())
+        ));
     }
 
     @Test
@@ -195,11 +201,16 @@ public class PostServiceTest {
     @Test
     void shouldDeletePost() {
         doNothing().when(repository).delete(this.post);
+        doNothing().when(gateway).handleMetricUser(any());
 
         this.service.delete(this.post);
 
         verify(repository, times(1)).delete(this.post);
-        verifyNoMoreInteractions(repository);
+        verify(gateway).handleMetricUser(argThat(i ->
+                i.action().equals(ActionEnum.RED) &&
+                        i.metric().equals(UserMetricEnum.POST) &&
+                        i.userId().equals(user.getId())
+        ));
     }
 
     @Test
@@ -246,6 +257,11 @@ public class PostServiceTest {
                         metric.metric() == PostMetricEnum.PARENT &&
                         metric.action() == ActionEnum.RED
         ));
+        verify(gateway).handleMetricUser(argThat(i ->
+                i.action().equals(ActionEnum.RED) &&
+                        i.metric().equals(UserMetricEnum.POST) &&
+                        i.userId().equals(user.getId())
+        ));
     }
 
     @Test
@@ -266,6 +282,11 @@ public class PostServiceTest {
                 metric.postId().equals(postParent.getId()) &&
                         metric.metric() == PostMetricEnum.PARENT &&
                         metric.action() == ActionEnum.SUM
+        ));
+        verify(gateway).handleMetricUser(argThat(i ->
+                i.action().equals(ActionEnum.SUM) &&
+                        i.metric().equals(UserMetricEnum.POST) &&
+                            i.userId().equals(user.getId())
         ));
     }
 

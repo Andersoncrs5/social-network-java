@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.post.gateway;
 
 import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.metric.service.interfaces.IMetricService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,5 +15,7 @@ public class PostModuleGateway {
     public void handleMetric(PostMetricEventDTO dto) {
         service.handleEventPost(dto);
     }
+
+    public void handleMetricUser(UserMetricEventDTO dto) { service.handleEventUser(dto); }
 
 }

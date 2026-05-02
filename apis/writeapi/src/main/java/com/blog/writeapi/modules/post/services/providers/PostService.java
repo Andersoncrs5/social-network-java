@@ -2,6 +2,7 @@ package com.blog.writeapi.modules.post.services.providers;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.post.dtos.CreatePostDTO;
 import com.blog.writeapi.modules.post.dtos.UpdatePostDTO;
 import com.blog.writeapi.modules.post.gateway.PostModuleGateway;
@@ -15,6 +16,7 @@ import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsMode
 import com.blog.writeapi.utils.enums.Post.PostStatusEnum;
 import com.blog.writeapi.utils.enums.metric.ActionEnum;
 import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.PostMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -75,6 +77,10 @@ public class PostService implements IPostService {
             this.gateway.handleMetric(
                     PostMetricEventDTO.create(post.getParent().getId(), PostMetricEnum.PARENT, ActionEnum.RED)
             );
+
+        this.gateway.handleMetricUser(
+                UserMetricEventDTO.create(post.getAuthor().getId(), UserMetricEnum.POST, ActionEnum.RED)
+        );
     }
 
     @Override @Transactional
@@ -92,6 +98,8 @@ public class PostService implements IPostService {
             this.gateway.handleMetric(
                     PostMetricEventDTO.create(post.getParent().getId(), PostMetricEnum.PARENT, ActionEnum.RED)
             );
+
+        this.gateway.handleMetricUser(UserMetricEventDTO.create(post.getAuthor().getId(), UserMetricEnum.POST, ActionEnum.RED));
     }
 
     @Override
@@ -109,11 +117,11 @@ public class PostService implements IPostService {
                     .orElseThrow(() -> new ModelNotFoundException("Parent post not found"));
 
             post.setParent(parent);
-
         }
 
         PostModel postSaved = this.repository.save(post);
         this.gateway.handleMetric(PostMetricEventDTO.create(dto.parentId(), PostMetricEnum.PARENT, ActionEnum.SUM));
+        this.gateway.handleMetricUser(UserMetricEventDTO.create(user.getId(), UserMetricEnum.POST, ActionEnum.SUM));
         return postSaved;
     }
 

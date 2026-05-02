@@ -7,6 +7,7 @@ import com.blog.writeapi.modules.comment.gateway.CommentModuleGateway;
 import com.blog.writeapi.modules.comment.models.CommentModel;
 import com.blog.writeapi.modules.metric.dto.CommentMetricEventDTO;
 import com.blog.writeapi.modules.metric.dto.PostMetricEventDTO;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.post.models.PostModel;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.enums.comment.CommentStatusEnum;
@@ -17,6 +18,7 @@ import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsMode
 import com.blog.writeapi.utils.enums.metric.ActionEnum;
 import com.blog.writeapi.utils.enums.metric.CommentMetricEnum;
 import com.blog.writeapi.utils.enums.metric.PostMetricEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
 import com.blog.writeapi.utils.mappers.CommentMapper;
 import com.blog.writeapi.utils.result.Result;
@@ -63,6 +65,10 @@ public class CommentService implements ICommentService {
         this.gateway.handleMetric(
                 PostMetricEventDTO.create(comment.getPost().getId(), PostMetricEnum.COMMENT, ActionEnum.RED)
         );
+
+        this.gateway.handleMetricUser(
+                UserMetricEventDTO.create(comment.getAuthor().getId(), UserMetricEnum.COMMENT, ActionEnum.RED)
+        );
     }
 
     @Override
@@ -88,6 +94,10 @@ public class CommentService implements ICommentService {
                     ActionEnum.RED
                 )
             );
+
+        this.gateway.handleMetricUser(
+                UserMetricEventDTO.create(comment.getAuthor().getId(), UserMetricEnum.COMMENT, ActionEnum.RED)
+        );
 
         return Result.success();
     }
@@ -136,6 +146,10 @@ public class CommentService implements ICommentService {
             this.gateway.handleMetricComment(
                     CommentMetricEventDTO.create(save.getParent().getId(), CommentMetricEnum.PARENT, ActionEnum.SUM)
             );
+
+        this.gateway.handleMetricUser(
+                UserMetricEventDTO.create(user.getId(), UserMetricEnum.COMMENT, ActionEnum.SUM)
+        );
 
         return save;
     }

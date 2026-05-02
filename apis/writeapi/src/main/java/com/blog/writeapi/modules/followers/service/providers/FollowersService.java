@@ -2,12 +2,16 @@ package com.blog.writeapi.modules.followers.service.providers;
 
 import cn.hutool.core.lang.Snowflake;
 import com.blog.writeapi.modules.followers.dtos.UpdateFollowersDTO;
+import com.blog.writeapi.modules.followers.gateway.FollowModuleGateway;
 import com.blog.writeapi.modules.followers.models.FollowersModel;
 import com.blog.writeapi.modules.followers.repository.FollowersRepository;
 import com.blog.writeapi.modules.followers.service.interfaces.IFollowersService;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
 import com.blog.writeapi.utils.exceptions.InternalServerErrorException;
 import com.blog.writeapi.utils.exceptions.ModelNotFoundException;
@@ -26,6 +30,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FollowersService implements IFollowersService {
 
+    private final FollowModuleGateway gateway;
     private final FollowersRepository repository;
     private final Snowflake generator;
     private final FollowersMapper mapper;
@@ -50,6 +55,18 @@ public class FollowersService implements IFollowersService {
     @Override
     public void delete(@IsModelInitialized FollowersModel follow) {
         this.repository.delete(follow);
+
+        gateway.handleMetricUser(UserMetricEventDTO.create(
+                follow.getFollower().getId(),
+                UserMetricEnum.FOLLOWING,
+                ActionEnum.RED
+        ));
+
+        gateway.handleMetricUser(UserMetricEventDTO.create(
+                follow.getFollowing().getId(),
+                UserMetricEnum.FOLLOW,
+                ActionEnum.RED
+        ));
     }
 
     @Override
@@ -58,7 +75,7 @@ public class FollowersService implements IFollowersService {
             @IsId Long followingId
     ) {
         Optional<FollowersModel> exists = repository.findByFollowerIdAndFollowingId(followerId, followingId);
-        exists.ifPresent(this.repository::delete);
+        exists.ifPresent(this::delete);
         return exists.isPresent();
     }
 
@@ -87,7 +104,21 @@ public class FollowersService implements IFollowersService {
                 .build();
 
         try {
-            return this.repository.save(follow);
+            FollowersModel save = this.repository.save(follow);
+
+            gateway.handleMetricUser(UserMetricEventDTO.create(
+                    follow.getFollower().getId(),
+                    UserMetricEnum.FOLLOWING,
+                    ActionEnum.SUM
+            ));
+
+            gateway.handleMetricUser(UserMetricEventDTO.create(
+                    follow.getFollowing().getId(),
+                    UserMetricEnum.FOLLOW,
+                    ActionEnum.SUM
+            ));
+
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = Optional.of(e.getMostSpecificCause())
                     .map(Throwable::getMessage)

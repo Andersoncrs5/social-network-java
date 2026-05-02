@@ -1,6 +1,7 @@
 package com.blog.writeapi.modules.userReport.service.provider;
 
 import cn.hutool.core.lang.Snowflake;
+import com.blog.writeapi.modules.metric.dto.UserMetricEventDTO;
 import com.blog.writeapi.modules.user.models.UserModel;
 import com.blog.writeapi.modules.userReport.dto.CreateUserReportDTO;
 import com.blog.writeapi.modules.userReport.dto.UpdateUserReportDTO;
@@ -10,6 +11,8 @@ import com.blog.writeapi.modules.userReport.repository.UserReportRepository;
 import com.blog.writeapi.modules.userReport.service.docs.IUserReportService;
 import com.blog.writeapi.utils.annotations.validations.global.isId.IsId;
 import com.blog.writeapi.utils.annotations.validations.isModelInitialized.IsModelInitialized;
+import com.blog.writeapi.utils.enums.metric.ActionEnum;
+import com.blog.writeapi.utils.enums.metric.UserMetricEnum;
 import com.blog.writeapi.utils.enums.report.ModerationActionType;
 import com.blog.writeapi.utils.enums.report.ReportStatus;
 import com.blog.writeapi.utils.exceptions.BusinessRuleException;
@@ -59,6 +62,12 @@ public class UserReportService implements IUserReportService {
         }
 
         this.repository.delete(report);
+
+        gateway.handleMetricUser(UserMetricEventDTO.create(
+                report.getReportedUser().getId(),
+                UserMetricEnum.REPORT_RECEIVED,
+                ActionEnum.RED
+        ));
     }
 
     public boolean existsByReportedUserIdAndReporterId(
@@ -94,7 +103,15 @@ public class UserReportService implements IUserReportService {
         }
 
         try {
-            return repository.save(report);
+            UserReportModel save = repository.save(report);
+
+            gateway.handleMetricUser(UserMetricEventDTO.create(
+                    save.getReportedUser().getId(),
+                    UserMetricEnum.REPORT_RECEIVED,
+                    ActionEnum.SUM
+            ));
+
+            return save;
         } catch (DataIntegrityViolationException e) {
             String message = e.getMostSpecificCause().getMessage();
 

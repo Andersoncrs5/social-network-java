@@ -88,6 +88,28 @@ public class HelperTest {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
 
+    public void createUserView(
+            ResponseUserTest userViewer,
+            ResponseUserTest userViewed
+    ) throws Exception {
+        var traceId = java.util.UUID.randomUUID().toString();
+
+        MvcResult result = mockMvc.perform(post("/v1/user-view/" + userViewed.userDTO().id())
+                .header("Authorization", "Bearer " + userViewer.tokens().token())
+                .header("X-Idempotency-Key", traceId)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String json = result.getResponse().getContentAsString();
+        TypeReference<ResponseHttp<Void>> typeRef = new TypeReference<>() {};
+
+        ResponseHttp<Void> response =
+                objectMapper.readValue(json, typeRef);
+
+        assertThat(response.traceId()).isEqualTo(traceId);
+        assertThat(response.message()).isNotBlank();
+        assertThat(response.status()).isTrue();
+    }
+
     public void createStoryHighlightItem(
             StoryHighlightDTO storyHighlightDTO,
             StoryDTO storyDTO,

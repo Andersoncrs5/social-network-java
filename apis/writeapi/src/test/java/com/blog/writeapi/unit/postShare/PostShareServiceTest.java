@@ -125,10 +125,12 @@ public class PostShareServiceTest {
 
         // Verify Order
         InOrder inOrder = inOrder(gateway, generator, repository);
+
         inOrder.verify(gateway).findUserById(userId);
         inOrder.verify(gateway).findPostById(postId);
         inOrder.verify(generator).nextId();
         inOrder.verify(repository).save(any(PostShareModel.class));
+        inOrder.verify(gateway).handleMetric(any());
 
         verifyNoMoreInteractions(gateway, generator, repository);
     }

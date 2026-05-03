@@ -26,6 +26,7 @@ import com.blog.writeapi.modules.userCategoryPreference.models.UserCategoryPrefe
 import com.blog.writeapi.modules.userProfile.models.UserProfileModel;
 import com.blog.writeapi.modules.userSettings.model.UserSettingsModel;
 import com.blog.writeapi.modules.userTagPreference.models.UserTagPreferenceModel;
+import com.blog.writeapi.modules.userView.model.UserViewModel;
 import com.blog.writeapi.utils.bases.models.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -241,5 +242,11 @@ public class UserModel extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<StoryHighlightItemModel> items;
+
+    @OneToMany(mappedBy = "viewer", fetch = FetchType.LAZY)
+    private List<UserViewModel> profilesViewed;
+
+    @OneToMany(mappedBy = "viewed", fetch = FetchType.LAZY)
+    private List<UserViewModel> profileVisitors;
 
 }

@@ -243,9 +243,11 @@ public class UserModel extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<StoryHighlightItemModel> items;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "viewer", fetch = FetchType.LAZY)
     private List<UserViewModel> profilesViewed;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "viewed", fetch = FetchType.LAZY)
     private List<UserViewModel> profileVisitors;
 

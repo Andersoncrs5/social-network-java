@@ -14,6 +14,10 @@ public class Result<T> {
     private final Error error;
     private final HttpStatus status;
 
+    public String getMessage() {
+        return this.getError().message();
+    }
+
     private Result(boolean isSuccess, T value, Error error, HttpStatus status) {
         this.isSuccess = isSuccess;
         this.value = value;
